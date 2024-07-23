@@ -1,0 +1,9 @@
+CREATE TABLE Hall (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    users_capacity INT NOT NULL,
+    type_id INT NOT NULL,
+    gym_id INT NOT NULL,
+    FOREIGN KEY (type_id) REFERENCES HallType(id) ON DELETE CASCADE,
+    FOREIGN KEY (gym_id) REFERENCES Gym(id) ON DELETE CASCADE
+);
