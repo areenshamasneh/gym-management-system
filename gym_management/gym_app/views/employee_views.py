@@ -9,8 +9,9 @@ from gym_app.components.employee_component import (
     get_employee_by_id,
     create_employee,
     update_employee,
-    delete_employee
+    delete_employee,
 )
+
 
 class EmployeeListView(View):
     def get(self, request):
@@ -42,7 +43,9 @@ class EmployeeDetailView(View):
     def delete(self, request, pk):
         try:
             delete_employee(pk)
-            return JsonResponse({"message": "Employee deleted successfully"}, status=204)
+            return JsonResponse(
+                {"message": "Employee deleted successfully"}, status=204
+            )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
@@ -60,7 +63,9 @@ class EmployeeCreateView(View):
         except ValueError as e:
             return JsonResponse({"error": str(e)}, status=400)
         except Exception as e:
-            return JsonResponse({"error": "Creation failed", "details": str(e)}, status=500)
+            return JsonResponse(
+                {"error": "Creation failed", "details": str(e)}, status=500
+            )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -84,6 +89,8 @@ class EmployeeDeleteView(View):
     def delete(self, request, pk):
         try:
             delete_employee(pk)
-            return JsonResponse({"message": "Employee deleted successfully"}, status=204)
+            return JsonResponse(
+                {"message": "Employee deleted successfully"}, status=204
+            )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)

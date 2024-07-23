@@ -9,8 +9,9 @@ from gym_app.components.member_component import (
     get_member_by_id,
     create_member,
     update_member,
-    delete_member
+    delete_member,
 )
+
 
 class MemberListView(View):
     def get(self, request):
@@ -58,7 +59,9 @@ class MemberCreateView(View):
         except ValueError as e:
             return JsonResponse({"error": str(e)}, status=400)
         except Exception as e:
-            return JsonResponse({"error": "Creation failed", "details": str(e)}, status=500)
+            return JsonResponse(
+                {"error": "Creation failed", "details": str(e)}, status=500
+            )
 
 
 @method_decorator(csrf_exempt, name="dispatch")

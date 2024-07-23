@@ -9,8 +9,9 @@ from gym_app.components.hallmachine_component import (
     get_hall_machine_by_id,
     create_hall_machine,
     update_hall_machine,
-    delete_hall_machine
+    delete_hall_machine,
 )
+
 
 class HallMachineListView(View):
     def get(self, request):
@@ -63,6 +64,8 @@ class HallMachineDeleteView(View):
     def delete(self, request, pk):
         try:
             delete_hall_machine(pk)
-            return JsonResponse({"message": "HallMachine deleted successfully"}, status=204)
+            return JsonResponse(
+                {"message": "HallMachine deleted successfully"}, status=204
+            )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)

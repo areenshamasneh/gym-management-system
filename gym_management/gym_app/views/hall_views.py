@@ -13,6 +13,7 @@ from gym_app.components.hall_component import (
 )
 from gym_app.models.system_models import HallType, Gym
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class HallListView(View):
     def get(self, request):

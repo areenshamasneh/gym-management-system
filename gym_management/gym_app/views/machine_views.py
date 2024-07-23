@@ -12,6 +12,7 @@ from gym_app.components.machine_component import (
     delete_machine,
 )
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class MachineListView(View):
     def get(self, request):

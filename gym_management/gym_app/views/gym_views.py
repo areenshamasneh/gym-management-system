@@ -11,6 +11,7 @@ from gym_app.components.gym_component import (
     delete_gym,
 )
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class GymListView(View):
     def get(self, request):
