@@ -1,16 +1,22 @@
-from django.http import JsonResponse, HttpResponseNotAllowed
-from django.shortcuts import get_object_or_404
+import json
+from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from ..models import HallType
 from django.forms.models import model_to_dict
-import json
+from gym_app.components.halltype_component import (
+    get_all_hall_types,
+    get_hall_type_by_id,
+    create_hall_type,
+    update_hall_type,
+    delete_hall_type,
+)
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class HallTypeListView(View):
     def get(self, request):
-        hall_types = HallType.objects.all()
+        hall_types = get_all_hall_types()
         data = [model_to_dict(hall_type) for hall_type in hall_types]
         return JsonResponse(data, safe=False)
 
@@ -18,42 +24,28 @@ class HallTypeListView(View):
 @method_decorator(csrf_exempt, name="dispatch")
 class HallTypeDetailView(View):
     def get(self, request, pk):
-        hall_type = get_object_or_404(HallType, pk=pk)
+        hall_type = get_hall_type_by_id(pk)
         data = model_to_dict(hall_type)
         return JsonResponse(data)
 
     def put(self, request, pk):
-        hall_type = get_object_or_404(HallType, pk=pk)
         try:
             data = json.loads(request.body)
-            for attr, value in data.items():
-                setattr(hall_type, attr, value)
-            hall_type.save()
-            return JsonResponse(model_to_dict(hall_type))
+            hall_type = update_hall_type(pk, data)
+            response_data = model_to_dict(hall_type)
+            return JsonResponse(response_data)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
         except ValueError as e:
             return JsonResponse({"error": str(e)}, status=400)
         except Exception as e:
             return JsonResponse({"error": "Update failed"}, status=500)
 
     def delete(self, request, pk):
-        hall_type = get_object_or_404(HallType, pk=pk)
-        hall_type.delete()
-        return JsonResponse({"message": "Deleted successfully"}, status=204)
-
-
-@method_decorator(csrf_exempt, name="dispatch")
-class HallTypeUpdateView(View):
-    def put(self, request, pk):
         try:
-            data = json.loads(request.body)
-            hall_type = get_object_or_404(HallType, pk=pk)
-            for attr, value in data.items():
-                setattr(hall_type, attr, value)
-            hall_type.save()
-            return JsonResponse(model_to_dict(hall_type))
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
-        except ValueError as e:
+            delete_hall_type(pk)
+            return JsonResponse({"message": "Deleted successfully"}, status=204)
+        except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
 
@@ -62,8 +54,11 @@ class HallTypeCreateView(View):
     def post(self, request):
         try:
             data = json.loads(request.body)
-            hall_type = HallType.objects.create(**data)
-            return JsonResponse(model_to_dict(hall_type), status=201)
+            hall_type = create_hall_type(data)
+            response_data = model_to_dict(hall_type)
+            return JsonResponse(response_data, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
         except ValueError as e:
             return JsonResponse({"error": str(e)}, status=400)
         except Exception as e:
@@ -71,11 +66,26 @@ class HallTypeCreateView(View):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
+class HallTypeUpdateView(View):
+    def put(self, request, pk):
+        try:
+            data = json.loads(request.body)
+            hall_type = update_hall_type(pk, data)
+            response_data = model_to_dict(hall_type)
+            return JsonResponse(response_data)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except ValueError as e:
+            return JsonResponse({"error": str(e)}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": "Update failed"}, status=500)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
 class HallTypeDeleteView(View):
     def delete(self, request, pk):
         try:
-            hall_type = get_object_or_404(HallType, pk=pk)
-            hall_type.delete()
+            delete_hall_type(pk)
             return JsonResponse(
                 {"message": "HallType deleted successfully"}, status=204
             )

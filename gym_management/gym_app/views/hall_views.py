@@ -1,86 +1,68 @@
 import json
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.views import View
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.forms.models import model_to_dict
-from ..models import Hall, HallType, Gym
+from gym_app.components.hall_component import (
+    get_all_halls,
+    get_hall_by_id,
+    create_hall,
+    update_hall,
+    delete_hall,
+)
+from gym_app.models.system_models import HallType, Gym
 
-
+@method_decorator(csrf_exempt, name="dispatch")
 class HallListView(View):
     def get(self, request):
-        halls = Hall.objects.all()
+        halls = get_all_halls()
         data = [model_to_dict(hall) for hall in halls]
         return JsonResponse(data, safe=False)
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class HallDetailView(View):
     def get(self, request, pk):
-        hall = get_object_or_404(Hall, pk=pk)
+        hall = get_hall_by_id(pk)
         data = model_to_dict(hall)
         return JsonResponse(data)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class HallCreateView(CreateView):
-    model = Hall
-    fields = "__all__"
-    success_url = reverse_lazy("hall-list")
-
+class HallCreateView(View):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
-
-            form = self.get_form_class()(data)
-            if form.is_valid():
-                hall = form.save()
-                response_data = model_to_dict(hall)
-                return JsonResponse(response_data, status=201)
-            else:
-                return JsonResponse(form.errors, status=400)
+            hall = create_hall(data)
+            response_data = model_to_dict(hall)
+            return JsonResponse(response_data, status=201)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except HallType.DoesNotExist:
+            return JsonResponse({"error": "Invalid HallType ID"}, status=400)
+        except Gym.DoesNotExist:
+            return JsonResponse({"error": "Invalid Gym ID"}, status=400)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class HallUpdateView(UpdateView):
-    model = Hall
-    fields = "__all__"
-    success_url = reverse_lazy("hall-list")
-
+class HallUpdateView(View):
     def put(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            hall = get_object_or_404(Hall, pk=kwargs.get("pk"))
-
-            for attr, value in data.items():
-                if attr == "type":
-                    hall_type = get_object_or_404(HallType, pk=value)
-                    setattr(hall, attr, hall_type)
-                elif attr == "gym":
-                    gym_instance = get_object_or_404(Gym, pk=value)
-                    setattr(hall, attr, gym_instance)
-                else:
-                    setattr(hall, attr, value)
-
-            hall.save()
+            hall = update_hall(kwargs.get("pk"), data)
             response_data = model_to_dict(hall)
             return JsonResponse(response_data)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
-        except ValueError as e:
-            return JsonResponse({"error": str(e)}, status=400)
+        except HallType.DoesNotExist:
+            return JsonResponse({"error": "Invalid HallType ID"}, status=400)
+        except Gym.DoesNotExist:
+            return JsonResponse({"error": "Invalid Gym ID"}, status=400)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class HallDeleteView(DeleteView):
-    model = Hall
-    success_url = reverse_lazy("hall-list")
-
+class HallDeleteView(View):
     def delete(self, request, pk, *args, **kwargs):
-        hall = get_object_or_404(Hall, pk=pk)
-        hall.delete()
+        delete_hall(pk)
         return JsonResponse({"message": "Hall deleted"}, status=204)

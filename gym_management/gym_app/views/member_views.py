@@ -1,16 +1,20 @@
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.views import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from django.forms.models import model_to_dict
 import json
-from ..models import Member, Gym
-
+from django.http import JsonResponse
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.forms.models import model_to_dict
+from gym_app.components.member_component import (
+    get_all_members,
+    get_member_by_id,
+    create_member,
+    update_member,
+    delete_member
+)
 
 class MemberListView(View):
     def get(self, request):
-        members = Member.objects.all()
+        members = get_all_members()
         data = [model_to_dict(member) for member in members]
         return JsonResponse(data, safe=False)
 
@@ -18,19 +22,16 @@ class MemberListView(View):
 @method_decorator(csrf_exempt, name="dispatch")
 class MemberDetailView(View):
     def get(self, request, pk):
-        member = get_object_or_404(Member, pk=pk)
+        member = get_member_by_id(pk)
         data = model_to_dict(member)
         return JsonResponse(data)
 
     def put(self, request, pk):
         try:
             data = json.loads(request.body)
-            member = get_object_or_404(Member, pk=pk)
-            for attr, value in data.items():
-                if hasattr(member, attr):
-                    setattr(member, attr, value)
-            member.save()
-            return JsonResponse(model_to_dict(member))
+            member = update_member(pk, data)
+            response_data = model_to_dict(member)
+            return JsonResponse(response_data, status=200)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except ValueError as e:
@@ -40,8 +41,7 @@ class MemberDetailView(View):
 
     def delete(self, request, pk):
         try:
-            member = get_object_or_404(Member, pk=pk)
-            member.delete()
+            delete_member(pk)
             return JsonResponse({"message": "Deleted successfully"}, status=204)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
@@ -52,15 +52,13 @@ class MemberCreateView(View):
     def post(self, request):
         try:
             data = json.loads(request.body)
-            if "gym" in data:
-                gym_id = data.pop("gym")
-                data["gym"] = get_object_or_404(Gym, pk=gym_id)
-            member = Member.objects.create(**data)
-            return JsonResponse(model_to_dict(member), status=201)
+            member = create_member(data)
+            response_data = model_to_dict(member)
+            return JsonResponse(response_data, status=201)
         except ValueError as e:
             return JsonResponse({"error": str(e)}, status=400)
         except Exception as e:
-            return JsonResponse({"error": "Creation failed"}, status=500)
+            return JsonResponse({"error": "Creation failed", "details": str(e)}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -68,17 +66,9 @@ class MemberUpdateView(View):
     def put(self, request, pk):
         try:
             data = json.loads(request.body)
-            member = get_object_or_404(Member, pk=pk)
-
-            if "gym" in data:
-                gym_id = data.pop("gym")
-                data["gym"] = get_object_or_404(Gym, pk=gym_id)
-
-            for attr, value in data.items():
-                if hasattr(member, attr):
-                    setattr(member, attr, value)
-            member.save()
-            return JsonResponse(model_to_dict(member))
+            member = update_member(pk, data)
+            response_data = model_to_dict(member)
+            return JsonResponse(response_data, status=200)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except ValueError as e:
@@ -91,8 +81,7 @@ class MemberUpdateView(View):
 class MemberDeleteView(View):
     def delete(self, request, pk):
         try:
-            member = get_object_or_404(Member, pk=pk)
-            member.delete()
+            delete_member(pk)
             return JsonResponse({"message": "Deleted successfully"}, status=204)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)

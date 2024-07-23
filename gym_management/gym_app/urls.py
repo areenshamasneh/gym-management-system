@@ -1,13 +1,13 @@
 from django.urls import path
-from .views.gym_views import GymListView, GymDetailView, GymCreateView, GymUpdateView, GymDeleteView
-from .views.machine_views import MachineListView, MachineDetailView, MachineCreateView, MachineUpdateView, MachineDeleteView
-from .views.hall_views import HallListView, HallDetailView, HallCreateView, HallUpdateView, HallDeleteView
-from .views.halltype_views import HallTypeListView, HallTypeDetailView, HallTypeCreateView, HallTypeUpdateView, HallTypeDeleteView
-from .views.admin_views import AdminListView, AdminDetailView, AdminCreateView, AdminUpdateView, AdminDeleteView
-from .views.employee_views import EmployeeListView, EmployeeDetailView, EmployeeCreateView, EmployeeUpdateView, EmployeeDeleteView
-from .views.member_views import MemberListView, MemberDetailView, MemberCreateView, MemberUpdateView, MemberDeleteView
-from .views.hallmachine_views import HallMachineListView, HallMachineDetailView, HallMachineCreateView, HallMachineUpdateView, HallMachineDeleteView
-from .views import health_check
+from gym_app.views.gym_views import GymListView, GymDetailView, GymCreateView, GymUpdateView, GymDeleteView
+from gym_app.views.machine_views import MachineListView, MachineDetailView, MachineCreateView, MachineUpdateView, MachineDeleteView
+from gym_app.views.hall_views import HallListView, HallDetailView, HallCreateView, HallUpdateView, HallDeleteView
+from gym_app.views.halltype_views import HallTypeListView, HallTypeDetailView, HallTypeCreateView, HallTypeUpdateView, HallTypeDeleteView
+from gym_app.views.admin_views import AdminListView, AdminDetailView, AdminCreateView, AdminUpdateView, AdminDeleteView
+from gym_app.views.employee_views import EmployeeListView, EmployeeDetailView, EmployeeCreateView, EmployeeUpdateView, EmployeeDeleteView
+from gym_app.views.member_views import MemberListView, MemberDetailView, MemberCreateView, MemberUpdateView, MemberDeleteView
+from gym_app.views.hallmachine_views import HallMachineListView, HallMachineDetailView, HallMachineCreateView, HallMachineUpdateView, HallMachineDeleteView
+from gym_app.views import health_check
 
 urlpatterns = [
     path('health/', health_check, name='health_check'),
