@@ -1,27 +1,22 @@
-from gym_app.repositories import (
-    get_all_employees,
-    get_employee_by_id,
-    create_employee,
-    update_employee,
-    delete_employee,
-)
+from gym_app.repositories.employee_repository import EmployeeRepository
 
+class EmployeeComponent:
+    @staticmethod
+    def fetch_all_employees():
+        return EmployeeRepository.get_all_employees()
 
-def fetch_all_employees():
-    return get_all_employees()
+    @staticmethod
+    def fetch_employee_by_id(employee_id):
+        return EmployeeRepository.get_employee_by_id(employee_id)
 
+    @staticmethod
+    def add_employee(data):
+        return EmployeeRepository.create_employee(data)
 
-def fetch_employee_by_id(employee_id):
-    return get_employee_by_id(employee_id)
+    @staticmethod
+    def modify_employee(employee_id, data):
+        return EmployeeRepository.update_employee(employee_id, data)
 
-
-def add_employee(data):
-    return create_employee(data)
-
-
-def modify_employee(employee_id, data):
-    return update_employee(employee_id, data)
-
-
-def remove_employee(employee_id):
-    delete_employee(employee_id)
+    @staticmethod
+    def remove_employee(employee_id):
+        return EmployeeRepository.delete_employee(employee_id)

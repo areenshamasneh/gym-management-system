@@ -1,27 +1,22 @@
-from gym_app.repositories import (
-    get_all_gyms,
-    get_gym_by_id,
-    create_gym,
-    update_gym,
-    delete_gym,
-)
+from gym_app.repositories.gym_repository import GymRepository
 
+class GymComponent:
+    @staticmethod
+    def fetch_all_gyms():
+        return GymRepository.get_all_gyms()
 
-def fetch_all_gyms():
-    return get_all_gyms()
+    @staticmethod
+    def fetch_gym_by_id(pk):
+        return GymRepository.get_gym_by_id(pk)
 
+    @staticmethod
+    def add_gym(data):
+        return GymRepository.create_gym(data)
 
-def fetch_gym_by_id(pk):
-    return get_gym_by_id(pk)
+    @staticmethod
+    def modify_gym(pk, data):
+        return GymRepository.update_gym(pk, data)
 
-
-def add_gym(data):
-    return create_gym(data)
-
-
-def modify_gym(pk, data):
-    return update_gym(pk, data)
-
-
-def remove_gym(pk):
-    delete_gym(pk)
+    @staticmethod
+    def remove_gym(pk):
+        return GymRepository.delete_gym(pk)

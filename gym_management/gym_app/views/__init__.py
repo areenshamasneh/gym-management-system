@@ -1,1 +1,1 @@
-from gym_app.views.controller_health_check import health_check
+from gym_app.controllers import health_check

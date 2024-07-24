@@ -38,26 +38,8 @@ from gym_app.components.hall_component import (
     remove_hall,
 )
 
-from gym_app.components.gym_component import (
-    fetch_all_gyms,
-    fetch_gym_by_id,
-    add_gym,
-    modify_gym,
-    remove_gym,
-)
+from gym_app.components.gym_component import GymRepository
 
-from gym_app.components.employee_component import (
-    fetch_all_employees,
-    fetch_employee_by_id,
-    add_employee,
-    modify_employee,
-    remove_employee,
-)
+from gym_app.components.employee_component import EmployeeComponent
 
-from gym_app.components.admin_component import (
-    fetch_all_admins,
-    fetch_admin_by_id,
-    add_admin,
-    modify_admin,
-    remove_admin,
-)
+from gym_app.components.admin_component import AdminComponent

@@ -38,26 +38,8 @@ from gym_app.repositories.hall_repository import (
     delete_hall,
 )
 
-from gym_app.repositories.gym_repository import (
-    get_all_gyms,
-    get_gym_by_id,
-    create_gym,
-    update_gym,
-    delete_gym,
-)
+from gym_app.repositories.gym_repository import GymRepository
 
-from gym_app.repositories.employee_repository import (
-    get_all_employees,
-    get_employee_by_id,
-    create_employee,
-    update_employee,
-    delete_employee,
-)
+from gym_app.repositories.employee_repository import EmployeeRepository
 
-from gym_app.repositories.admin_repository import (
-    get_all_admins,
-    get_admin_by_id,
-    create_admin,
-    update_admin,
-    delete_admin,
-)
+from gym_app.repositories.admin_repository import AdminRepository
