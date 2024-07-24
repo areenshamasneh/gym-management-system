@@ -1,22 +1,27 @@
-from django.shortcuts import get_object_or_404
-from gym_app.models import HallType
+from gym_app.repositories.halltype_repository import (
+    get_all_hall_types,
+    get_hall_type_by_id,
+    create_hall_type,
+    update_hall_type,
+    delete_hall_type,
+)
 
-def get_all_hall_types():
-    return HallType.objects.all()
 
-def get_hall_type_by_id(hall_type_id):
-    return get_object_or_404(HallType, pk=hall_type_id)
+def fetch_all_hall_types():
+    return get_all_hall_types()
 
-def create_hall_type(data):
-    return HallType.objects.create(**data)
 
-def update_hall_type(hall_type_id, data):
-    hall_type = get_object_or_404(HallType, pk=hall_type_id)
-    for attr, value in data.items():
-        setattr(hall_type, attr, value)
-    hall_type.save()
-    return hall_type
+def fetch_hall_type_by_id(hall_type_id):
+    return get_hall_type_by_id(hall_type_id)
 
-def delete_hall_type(hall_type_id):
-    hall_type = get_object_or_404(HallType, pk=hall_type_id)
-    hall_type.delete()
+
+def add_hall_type(data):
+    return create_hall_type(data)
+
+
+def modify_hall_type(hall_type_id, data):
+    return update_hall_type(hall_type_id, data)
+
+
+def remove_hall_type(hall_type_id):
+    delete_hall_type(hall_type_id)

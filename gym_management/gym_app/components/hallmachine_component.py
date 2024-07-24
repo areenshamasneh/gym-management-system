@@ -1,44 +1,27 @@
-from django.shortcuts import get_object_or_404
-from ..models import HallMachine, Hall, Machine
+from gym_app.repositories.hallmachine_repository import (
+    get_all_hall_machines,
+    get_hall_machine_by_id,
+    create_hall_machine,
+    update_hall_machine,
+    delete_hall_machine,
+)
 
-def get_all_hall_machines():
-    return HallMachine.objects.all()
 
-def get_hall_machine_by_id(hall_machine_id):
-    return get_object_or_404(HallMachine, pk=hall_machine_id)
+def fetch_all_hall_machines():
+    return get_all_hall_machines()
 
-def create_hall_machine(data):
-    hall_instance = get_object_or_404(Hall, pk=data.get("hall"))
-    machine_instance = get_object_or_404(Machine, pk=data.get("machine"))
 
-    hall_machine = HallMachine.objects.create(
-        hall=hall_instance,
-        machine=machine_instance,
-        name=data.get("name"),
-        uid=data.get("uid"),
-    )
-    return hall_machine
+def fetch_hall_machine_by_id(hall_machine_id):
+    return get_hall_machine_by_id(hall_machine_id)
 
-def update_hall_machine(hall_machine_id, data):
-    hall_machine = get_object_or_404(HallMachine, pk=hall_machine_id)
 
-    if "hall" in data:
-        hall_instance = get_object_or_404(Hall, pk=data.get("hall"))
-        hall_machine.hall = hall_instance
+def add_hall_machine(data):
+    return create_hall_machine(data)
 
-    if "machine" in data:
-        machine_instance = get_object_or_404(Machine, pk=data.get("machine"))
-        hall_machine.machine = machine_instance
 
-    if "name" in data:
-        hall_machine.name = data.get("name")
+def modify_hall_machine(hall_machine_id, data):
+    return update_hall_machine(hall_machine_id, data)
 
-    if "uid" in data:
-        hall_machine.uid = data.get("uid")
 
-    hall_machine.save()
-    return hall_machine
-
-def delete_hall_machine(hall_machine_id):
-    hall_machine = get_object_or_404(HallMachine, pk=hall_machine_id)
-    hall_machine.delete()
+def remove_hall_machine(hall_machine_id):
+    delete_hall_machine(hall_machine_id)

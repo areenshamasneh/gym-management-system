@@ -1,36 +1,27 @@
-from django.shortcuts import get_object_or_404
-from gym_app.models import Hall, HallType, Gym
+from gym_app.repositories.hall_repository import (
+    get_all_halls,
+    get_hall_by_id,
+    create_hall,
+    update_hall,
+    delete_hall,
+)
 
-def get_all_halls():
-    return Hall.objects.all()
 
-def get_hall_by_id(hall_id):
-    return get_object_or_404(Hall, pk=hall_id)
+def fetch_all_halls():
+    return get_all_halls()
 
-def create_hall(data):
-    hall_type = get_object_or_404(HallType, pk=data.get("type"))
-    gym_instance = get_object_or_404(Gym, pk=data.get("gym"))
-    return Hall.objects.create(
-        name=data.get("name"),
-        users_capacity=data.get("users_capacity"),
-        type=hall_type,
-        gym=gym_instance
-    )
 
-def update_hall(hall_id, data):
-    hall = get_object_or_404(Hall, pk=hall_id)
-    for attr, value in data.items():
-        if attr == "type":
-            hall_type = get_object_or_404(HallType, pk=value)
-            setattr(hall, attr, hall_type)
-        elif attr == "gym":
-            gym_instance = get_object_or_404(Gym, pk=value)
-            setattr(hall, attr, gym_instance)
-        else:
-            setattr(hall, attr, value)
-    hall.save()
-    return hall
+def fetch_hall_by_id(hall_id):
+    return get_hall_by_id(hall_id)
 
-def delete_hall(hall_id):
-    hall = get_object_or_404(Hall, pk=hall_id)
-    hall.delete()
+
+def add_hall(data):
+    return create_hall(data)
+
+
+def modify_hall(hall_id, data):
+    return update_hall(hall_id, data)
+
+
+def remove_hall(hall_id):
+    delete_hall(hall_id)

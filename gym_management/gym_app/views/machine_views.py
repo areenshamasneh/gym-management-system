@@ -1,22 +1,21 @@
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 import json
 from gym_app.components.machine_component import (
-    get_all_machines,
-    get_machine_by_id,
-    create_machine,
-    update_machine,
-    delete_machine,
+    fetch_all_machines,
+    fetch_machine_by_id,
+    add_machine,
+    modify_machine,
+    remove_machine,
 )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class MachineListView(View):
     def get(self, request):
-        machines = get_all_machines()
+        machines = fetch_all_machines()
         data = [
             {
                 "serial_number": machine.serial_number,
@@ -34,7 +33,7 @@ class MachineListView(View):
 @method_decorator(csrf_exempt, name="dispatch")
 class MachineDetailView(View):
     def get(self, request, pk):
-        machine = get_machine_by_id(pk)
+        machine = fetch_machine_by_id(pk)
         machine_data = {
             "serial_number": machine.serial_number,
             "type": machine.type,
@@ -50,7 +49,7 @@ class MachineDetailView(View):
 class MachineCreateView(View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
-        machine = create_machine(data)
+        machine = add_machine(data)
         response_data = {
             "serial_number": machine.serial_number,
             "type": machine.type,
@@ -66,7 +65,7 @@ class MachineCreateView(View):
 class MachineUpdateView(View):
     def put(self, request, pk, *args, **kwargs):
         data = json.loads(request.body)
-        machine = update_machine(pk, data)
+        machine = modify_machine(pk, data)
         response_data = {
             "serial_number": machine.serial_number,
             "type": machine.type,
@@ -81,5 +80,5 @@ class MachineUpdateView(View):
 @method_decorator(csrf_exempt, name="dispatch")
 class MachineDeleteView(View):
     def delete(self, request, pk, *args, **kwargs):
-        delete_machine(pk)
+        remove_machine(pk)
         return JsonResponse({"message": "Machine deleted"}, status=204)

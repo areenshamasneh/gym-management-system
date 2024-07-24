@@ -1,31 +1,27 @@
-from gym_app.models import Machine
+from gym_app.repositories.machine_repository import (
+    get_all_machines,
+    get_machine_by_id,
+    create_machine,
+    update_machine,
+    delete_machine,
+)
 
-def get_all_machines():
-    return Machine.objects.all()
 
-def get_machine_by_id(pk):
-    return Machine.objects.get(pk=pk)
+def fetch_all_machines():
+    return get_all_machines()
 
-def create_machine(data):
-    return Machine.objects.create(
-        serial_number=data.get("serial_number"),
-        type=data.get("type"),
-        model=data.get("model"),
-        brand=data.get("brand"),
-        status=data.get("status"),
-        maintenance_date=data.get("maintenance_date"),
-    )
 
-def update_machine(pk, data):
-    machine = Machine.objects.get(pk=pk)
-    machine.serial_number = data.get("serial_number", machine.serial_number)
-    machine.type = data.get("type", machine.type)
-    machine.model = data.get("model", machine.model)
-    machine.brand = data.get("brand", machine.brand)
-    machine.status = data.get("status", machine.status)
-    machine.maintenance_date = data.get("maintenance_date", machine.maintenance_date)
-    machine.save()
-    return machine
+def fetch_machine_by_id(pk):
+    return get_machine_by_id(pk)
 
-def delete_machine(pk):
-    Machine.objects.get(pk=pk).delete()
+
+def add_machine(data):
+    return create_machine(data)
+
+
+def modify_machine(pk, data):
+    return update_machine(pk, data)
+
+
+def remove_machine(pk):
+    delete_machine(pk)

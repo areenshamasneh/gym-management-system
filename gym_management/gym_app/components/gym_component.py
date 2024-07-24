@@ -1,29 +1,27 @@
-from gym_app.models import Gym
+from gym_app.repositories.gym_repository import (
+    get_all_gyms,
+    get_gym_by_id,
+    create_gym,
+    update_gym,
+    delete_gym,
+)
 
-def get_all_gyms():
-    return Gym.objects.all()
 
-def get_gym_by_id(pk):
-    return Gym.objects.get(pk=pk)
+def fetch_all_gyms():
+    return get_all_gyms()
 
-def create_gym(data):
-    return Gym.objects.create(
-        name=data.get("name"),
-        type=data.get("type"),
-        description=data.get("description"),
-        address_city=data.get("address_city"),
-        address_street=data.get("address_street"),
-    )
 
-def update_gym(pk, data):
-    gym = Gym.objects.get(pk=pk)
-    gym.name = data.get("name", gym.name)
-    gym.type = data.get("type", gym.type)
-    gym.description = data.get("description", gym.description)
-    gym.address_city = data.get("address_city", gym.address_city)
-    gym.address_street = data.get("address_street", gym.address_street)
-    gym.save()
-    return gym
+def fetch_gym_by_id(pk):
+    return get_gym_by_id(pk)
 
-def delete_gym(pk):
-    Gym.objects.get(pk=pk).delete()
+
+def add_gym(data):
+    return create_gym(data)
+
+
+def modify_gym(pk, data):
+    return update_gym(pk, data)
+
+
+def remove_gym(pk):
+    delete_gym(pk)
