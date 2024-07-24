@@ -44,7 +44,9 @@ class AdminController(View):
 
     def delete(self, request, pk=None):
         if pk is None:
-            return JsonResponse({"error": "Primary key (pk) is required for deletion"}, status=400)
+            return JsonResponse(
+                {"error": "Primary key (pk) is required for deletion"}, status=400
+            )
 
         try:
             AdminComponent.remove_admin(pk)

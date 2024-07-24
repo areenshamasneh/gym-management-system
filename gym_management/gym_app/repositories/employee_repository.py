@@ -1,6 +1,7 @@
 from gym_app.models import Employee, Gym
 from django.shortcuts import get_object_or_404
 
+
 class EmployeeRepository:
     @staticmethod
     def get_all_employees():

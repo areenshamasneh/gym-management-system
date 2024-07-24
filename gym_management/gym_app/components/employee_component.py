@@ -1,5 +1,6 @@
 from gym_app.repositories.employee_repository import EmployeeRepository
 
+
 class EmployeeComponent:
     @staticmethod
     def fetch_all_employees():

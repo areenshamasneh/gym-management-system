@@ -1,5 +1,6 @@
 from gym_app.models import Gym
 
+
 class GymRepository:
     @staticmethod
     def get_all_gyms():

@@ -1,5 +1,6 @@
 from gym_app.repositories.gym_repository import GymRepository
 
+
 class GymComponent:
     @staticmethod
     def fetch_all_gyms():

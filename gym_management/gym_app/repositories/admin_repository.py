@@ -1,6 +1,7 @@
 from gym_app.models import Admin, Gym
 from django.shortcuts import get_object_or_404
 
+
 class AdminRepository:
     @staticmethod
     def get_all_admins():

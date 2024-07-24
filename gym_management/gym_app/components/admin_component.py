@@ -1,5 +1,6 @@
 from gym_app.repositories.admin_repository import AdminRepository
 
+
 class AdminComponent:
     @staticmethod
     def fetch_all_admins():

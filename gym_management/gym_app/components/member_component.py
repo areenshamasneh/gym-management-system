@@ -1,27 +1,23 @@
-from gym_app.repositories import (
-    get_all_members,
-    get_member_by_id,
-    create_member,
-    update_member,
-    delete_member,
-)
+from gym_app.repositories.member_repository import MemberRepository
 
 
-def fetch_all_members():
-    return get_all_members()
+class MemberComponent:
+    @staticmethod
+    def fetch_all_members():
+        return MemberRepository.get_all_members()
 
+    @staticmethod
+    def fetch_member_by_id(member_id):
+        return MemberRepository.get_member_by_id(member_id)
 
-def fetch_member_by_id(member_id):
-    return get_member_by_id(member_id)
+    @staticmethod
+    def add_member(data):
+        return MemberRepository.create_member(data)
 
+    @staticmethod
+    def modify_member(member_id, data):
+        return MemberRepository.update_member(member_id, data)
 
-def add_member(data):
-    return create_member(data)
-
-
-def modify_member(member_id, data):
-    return update_member(member_id, data)
-
-
-def remove_member(member_id):
-    delete_member(member_id)
+    @staticmethod
+    def remove_member(member_id):
+        MemberRepository.delete_member(member_id)

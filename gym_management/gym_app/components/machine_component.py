@@ -1,27 +1,23 @@
-from gym_app.repositories import (
-    get_all_machines,
-    get_machine_by_id,
-    create_machine,
-    update_machine,
-    delete_machine,
-)
+from gym_app.repositories.machine_repository import MachineRepository
 
 
-def fetch_all_machines():
-    return get_all_machines()
+class MachineComponent:
+    @staticmethod
+    def fetch_all_machines():
+        return MachineRepository.get_all_machines()
 
+    @staticmethod
+    def fetch_machine_by_id(pk):
+        return MachineRepository.get_machine_by_id(pk)
 
-def fetch_machine_by_id(pk):
-    return get_machine_by_id(pk)
+    @staticmethod
+    def add_machine(data):
+        return MachineRepository.create_machine(data)
 
+    @staticmethod
+    def modify_machine(pk, data):
+        return MachineRepository.update_machine(pk, data)
 
-def add_machine(data):
-    return create_machine(data)
-
-
-def modify_machine(pk, data):
-    return update_machine(pk, data)
-
-
-def remove_machine(pk):
-    delete_machine(pk)
+    @staticmethod
+    def remove_machine(pk):
+        MachineRepository.delete_machine(pk)
