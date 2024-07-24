@@ -1,4 +1,4 @@
-from gym_app.repositories.hall_repository import (
+from gym_app.repositories import (
     get_all_halls,
     get_hall_by_id,
     create_hall,

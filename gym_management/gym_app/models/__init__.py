@@ -1,4 +1,4 @@
-from .system_models import (
+from gym_app.models.system_models import (
     Gym,
     Hall,
     Machine,

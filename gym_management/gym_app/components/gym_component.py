@@ -1,4 +1,4 @@
-from gym_app.repositories.gym_repository import (
+from gym_app.repositories import (
     get_all_gyms,
     get_gym_by_id,
     create_gym,

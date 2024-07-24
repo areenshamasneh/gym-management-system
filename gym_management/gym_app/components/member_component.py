@@ -1,4 +1,4 @@
-from gym_app.repositories.member_repository import (
+from gym_app.repositories import (
     get_all_members,
     get_member_by_id,
     create_member,

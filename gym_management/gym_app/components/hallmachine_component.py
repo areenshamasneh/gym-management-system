@@ -1,4 +1,4 @@
-from gym_app.repositories.hallmachine_repository import (
+from gym_app.repositories import (
     get_all_hall_machines,
     get_hall_machine_by_id,
     create_hall_machine,

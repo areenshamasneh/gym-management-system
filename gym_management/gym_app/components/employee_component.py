@@ -1,4 +1,4 @@
-from gym_app.repositories.employee_repository import (
+from gym_app.repositories import (
     get_all_employees,
     get_employee_by_id,
     create_employee,

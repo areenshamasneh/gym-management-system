@@ -1,5 +1,14 @@
 from django.contrib import admin
-from .models import Gym, Machine, Hall, HallMachine, Admin, Employee, Member, HallType
+from gym_app.models import (
+    Gym,
+    Machine,
+    Hall,
+    HallMachine,
+    Admin,
+    Employee,
+    Member,
+    HallType,
+)
 
 admin.site.register(Gym)
 admin.site.register(Machine)

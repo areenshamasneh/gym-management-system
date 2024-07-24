@@ -1,4 +1,4 @@
-from gym_app.repositories.admin_repository import (
+from gym_app.repositories import (
     get_all_admins,
     get_admin_by_id,
     create_admin,

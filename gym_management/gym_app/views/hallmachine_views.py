@@ -4,7 +4,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.forms.models import model_to_dict
-from gym_app.components.hallmachine_component import (
+from gym_app.components import (
     fetch_all_hall_machines,
     fetch_hall_machine_by_id,
     add_hall_machine,

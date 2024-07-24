@@ -3,7 +3,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 import json
-from gym_app.components.machine_component import (
+from gym_app.components import (
     fetch_all_machines,
     fetch_machine_by_id,
     add_machine,
