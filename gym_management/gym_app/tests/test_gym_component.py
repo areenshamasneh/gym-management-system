@@ -1,4 +1,4 @@
-import pytest
+import pytest # type: ignore
 from unittest.mock import patch, MagicMock
 from gym_app.components.gym_component import GymComponent
 
