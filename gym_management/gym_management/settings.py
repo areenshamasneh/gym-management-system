@@ -4,6 +4,10 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+log_dir = os.path.join(BASE_DIR, "logs")
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
 # Use the SECRET_KEY from the .env file
 SECRET_KEY = config("DJANGO_SECRET_KEY")
 
