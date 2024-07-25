@@ -13,12 +13,12 @@ class HallRepository:
 
     @staticmethod
     def create_hall(data):
-        hall_type = get_object_or_404(HallType, pk=data.get("type"))
-        gym_instance = get_object_or_404(Gym, pk=data.get("gym"))
+        hall_type = get_object_or_404(HallType, pk=data.get("hall_type_id"))
+        gym_instance = get_object_or_404(Gym, pk=data.get("gym_id"))
         return Hall.objects.create(
             name=data.get("name"),
             users_capacity=data.get("users_capacity"),
-            type=hall_type,
+            hall_type=hall_type,
             gym=gym_instance,
         )
 
@@ -26,12 +26,12 @@ class HallRepository:
     def update_hall(hall_id, data):
         hall = get_object_or_404(Hall, pk=hall_id)
         for attr, value in data.items():
-            if attr == "type":
+            if attr == "hall_type_id":
                 hall_type = get_object_or_404(HallType, pk=value)
-                setattr(hall, attr, hall_type)
-            elif attr == "gym":
+                setattr(hall, 'hall_type', hall_type)
+            elif attr == "gym_id":
                 gym_instance = get_object_or_404(Gym, pk=value)
-                setattr(hall, attr, gym_instance)
+                setattr(hall, 'gym', gym_instance)
             else:
                 setattr(hall, attr, value)
         hall.save()

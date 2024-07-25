@@ -13,7 +13,7 @@ class MemberRepository:
 
     @staticmethod
     def create_member(data):
-        gym_id = data.pop("gym", None)
+        gym_id = data.pop("gym_id", None)
         if gym_id:
             gym_instance = get_object_or_404(Gym, pk=gym_id)
             data["gym"] = gym_instance
@@ -25,7 +25,7 @@ class MemberRepository:
     @staticmethod
     def update_member(member_id, data):
         member = get_object_or_404(Member, pk=member_id)
-        gym_id = data.pop("gym", None)
+        gym_id = data.pop("gym_id", None)
 
         if gym_id:
             gym_instance = get_object_or_404(Gym, pk=gym_id)

@@ -13,7 +13,7 @@ class EmployeeRepository:
 
     @staticmethod
     def create_employee(data):
-        gym_id = data.get("gym")
+        gym_id = data.get("gym_id")
         if gym_id is not None:
             gym_instance = get_object_or_404(Gym, pk=gym_id)
             data["gym"] = gym_instance
@@ -25,7 +25,7 @@ class EmployeeRepository:
     @staticmethod
     def update_employee(employee_id, data):
         employee = get_object_or_404(Employee, pk=employee_id)
-        gym_id = data.get("gym")
+        gym_id = data.get("gym_id")
 
         if gym_id:
             gym_instance = get_object_or_404(Gym, pk=gym_id)
