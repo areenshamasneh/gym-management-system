@@ -55,7 +55,7 @@ class HallType(models.Model):
 
 class Hall(models.Model):
     name = models.CharField(max_length=255)
-    users_capacity = models.IntegerField()
+    users_capacity = models.PositiveIntegerField(default=10)
     type = models.ForeignKey(HallType, on_delete=models.CASCADE)
     gym = models.ForeignKey(Gym, on_delete=models.CASCADE)
 
@@ -112,6 +112,7 @@ class Member(models.Model):
     def __str__(self):
         return self.name
 
+
 class HallMachine(models.Model):
     hall = models.ForeignKey(Hall, on_delete=models.CASCADE)
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
@@ -131,10 +132,10 @@ class HallMachine(models.Model):
 
         # Generate the UID based on machine type and count
         if not self.uid:
-            count = HallMachine.objects.filter(
-                hall=self.hall,
-                machine=self.machine
-            ).count() + 1
+            count = (
+                HallMachine.objects.filter(hall=self.hall, machine=self.machine).count()
+                + 1
+            )
             self.uid = f"{self.machine.type}_{count}"
 
         super().save(*args, **kwargs)
