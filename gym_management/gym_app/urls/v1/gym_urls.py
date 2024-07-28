@@ -1,5 +1,5 @@
 from django.urls import path
-from gym_app.controllers import (
+from gym_app.views import (
     AdminController,
     EmployeeController,
     GymController,
@@ -24,11 +24,7 @@ urlpatterns = [
     path("machines/", MachineController.as_view(), name="machine-list"),
     path("machines/<int:pk>/", MachineController.as_view(), name="machine-detail"),
     path("hall_types/", HallTypeController.as_view(), name="hall_type-list"),
-    path(
-        "hall_types/<int:hall_type_id>/",
-        HallTypeController.as_view(),
-        name="hall_type-detail",
-    ),
+    path("hall_types/<int:hall_type_id>/",HallTypeController.as_view(), name="hall_type-detail"),
     path(
         "halls/<int:hall_id>/machines/",
         HallMachineController.as_view(),
@@ -38,15 +34,5 @@ urlpatterns = [
         "halls/<int:hall_id>/machines/<int:machine_id>/",
         HallMachineController.as_view(),
         name="hall-machine-detail",
-    ),
-    path(
-        "machines/<int:machine_id>/halls/",
-        HallMachineController.as_view(),
-        name="machine-hall-list",
-    ),
-    path(
-        "machines/<int:machine_id>/halls/<int:hall_id>/",
-        HallMachineController.as_view(),
-        name="machine-hall-detail",
     ),
 ]
