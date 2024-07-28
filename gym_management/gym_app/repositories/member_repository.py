@@ -4,37 +4,25 @@ from django.shortcuts import get_object_or_404
 
 class MemberRepository:
 
-    def get_all_members():
-        return Member.objects.all()
+    def get_all_members(gym_id):
+        return Member.objects.filter(gym_id=gym_id)
 
-    def get_member_by_id(member_id):
-        return get_object_or_404(Member, pk=member_id)
+    def get_member_by_id(gym_id, member_id):
+        return get_object_or_404(Member, pk=member_id, gym_id=gym_id)
 
-    def create_member(data):
-        gym_id = data.pop("gym_id", None)
-        if gym_id:
-            gym_instance = get_object_or_404(Gym, pk=gym_id)
-            data["gym"] = gym_instance
-        else:
-            raise ValueError("Gym field is required")
-
+    def create_member(gym_id, data):
+        gym_instance = get_object_or_404(Gym, pk=gym_id)
+        data["gym_id"] = gym_instance
         return Member.objects.create(**data)
 
-    def update_member(member_id, data):
-        member = get_object_or_404(Member, pk=member_id)
-        gym_id = data.pop("gym_id", None)
-
-        if gym_id:
-            gym_instance = get_object_or_404(Gym, pk=gym_id)
-            data["gym"] = gym_instance
-
+    def update_member(gym_id, member_id, data):
+        member = get_object_or_404(Member, pk=member_id, gym_id=gym_id)
         for attr, value in data.items():
             if hasattr(member, attr):
                 setattr(member, attr, value)
-
         member.save()
         return member
 
-    def delete_member(member_id):
-        member = get_object_or_404(Member, pk=member_id)
+    def delete_member(gym_id, member_id):
+        member = get_object_or_404(Member, pk=member_id, gym_id=gym_id)
         member.delete()

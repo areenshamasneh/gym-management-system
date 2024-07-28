@@ -7,6 +7,7 @@ from gym_app.models import Admin, Gym
 @pytest.mark.django_db
 @patch("gym_app.components.admin_component.AdminRepository")
 def test_fetch_all_admins(mock_repo):
+    mock_gym_id = 1
 
     mock_admin1 = MagicMock(spec=Admin)
     mock_admin1.name = "Admin 1"
@@ -24,7 +25,7 @@ def test_fetch_all_admins(mock_repo):
 
     mock_repo.get_all_admins.return_value = [mock_admin1, mock_admin2]
 
-    admins = AdminComponent.fetch_all_admins()
+    admins = AdminComponent.fetch_all_admins(mock_gym_id)
 
     assert len(admins) == 2
     assert admins[0].name == "Admin 1"
@@ -34,6 +35,8 @@ def test_fetch_all_admins(mock_repo):
 @pytest.mark.django_db
 @patch("gym_app.components.admin_component.AdminRepository")
 def test_fetch_admin_by_id(mock_repo):
+    mock_gym_id = 1
+    mock_admin_id = 1
 
     mock_admin = MagicMock(spec=Admin)
     mock_admin.name = "Admin 1"
@@ -44,7 +47,7 @@ def test_fetch_admin_by_id(mock_repo):
 
     mock_repo.get_admin_by_id.return_value = mock_admin
 
-    admin = AdminComponent.fetch_admin_by_id(1)
+    admin = AdminComponent.fetch_admin_by_id(mock_gym_id, mock_admin_id)
 
     assert admin.name == "Admin 1"
     assert admin.email == "admin1@example.com"
@@ -53,6 +56,7 @@ def test_fetch_admin_by_id(mock_repo):
 @pytest.mark.django_db
 @patch("gym_app.components.admin_component.AdminRepository")
 def test_add_admin(mock_repo):
+    mock_gym_id = 1
 
     mock_admin = MagicMock(spec=Admin)
     mock_admin.name = "Admin 1"
@@ -67,12 +71,11 @@ def test_add_admin(mock_repo):
         "name": "Admin 1",
         "phone_number": "1234567890",
         "email": "admin1@example.com",
-        "gym_id": 1,
         "address_city": "City 1",
         "address_street": "Street 1",
     }
 
-    admin = AdminComponent.add_admin(data)
+    admin = AdminComponent.add_admin(mock_gym_id, data)
 
     assert admin.name == "Admin 1"
     assert admin.email == "admin1@example.com"
@@ -81,6 +84,8 @@ def test_add_admin(mock_repo):
 @pytest.mark.django_db
 @patch("gym_app.components.admin_component.AdminRepository")
 def test_modify_admin(mock_repo):
+    mock_gym_id = 1
+    mock_admin_id = 1
 
     mock_admin = MagicMock(spec=Admin)
     mock_admin.name = "Admin Updated"
@@ -95,12 +100,11 @@ def test_modify_admin(mock_repo):
         "name": "Admin Updated",
         "phone_number": "1234567890",
         "email": "admin1@example.com",
-        "gym_id": 1,
         "address_city": "City 1",
         "address_street": "Street 1",
     }
 
-    admin = AdminComponent.modify_admin(1, data)
+    admin = AdminComponent.modify_admin(mock_gym_id, mock_admin_id, data)
 
     assert admin.name == "Admin Updated"
     assert admin.email == "admin1@example.com"
@@ -109,8 +113,10 @@ def test_modify_admin(mock_repo):
 @pytest.mark.django_db
 @patch("gym_app.components.admin_component.AdminRepository")
 def test_remove_admin(mock_repo):
+    mock_gym_id = 1
+    mock_admin_id = 1
 
-    AdminComponent.remove_admin(1)
+    AdminComponent.remove_admin(mock_gym_id, mock_admin_id)
 
     assert mock_repo.delete_admin.called
     assert mock_repo.delete_admin.call_count == 1
@@ -119,85 +125,92 @@ def test_remove_admin(mock_repo):
 @pytest.mark.django_db
 @patch("gym_app.components.admin_component.AdminRepository")
 def test_add_admin_with_missing_fields(mock_repo):
+    mock_gym_id = 1
     mock_repo.create_admin.side_effect = KeyError("Missing required field")
 
     data = {
         "name": "Admin 1",
         "phone_number": "1234567890",
-        # Missing email, gym_id, address_city, address_street
+        # Missing email, address_city, address_street
     }
 
     with pytest.raises(KeyError, match="Missing required field"):
-        AdminComponent.add_admin(data)
+        AdminComponent.add_admin(mock_gym_id, data)
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.admin_component.AdminRepository")
 def test_modify_admin_non_existent(mock_repo):
+    mock_gym_id = 1
+    mock_admin_id = 999
     mock_repo.update_admin.side_effect = Admin.DoesNotExist
 
     data = {
         "name": "Non Existent Admin",
         "phone_number": "0000000000",
         "email": "nonexistent@example.com",
-        "gym_id": 1,
         "address_city": "Nowhere",
         "address_street": "No Street",
     }
 
     with pytest.raises(Admin.DoesNotExist):
-        AdminComponent.modify_admin(999, data)
+        AdminComponent.modify_admin(mock_gym_id, mock_admin_id, data)
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.admin_component.AdminRepository")
 def test_remove_admin_non_existent(mock_repo):
+    mock_gym_id = 1
+    mock_admin_id = 999
     mock_repo.delete_admin.side_effect = Admin.DoesNotExist
 
     with pytest.raises(Admin.DoesNotExist):
-        AdminComponent.remove_admin(999)
+        AdminComponent.remove_admin(mock_gym_id, mock_admin_id)
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.admin_component.AdminRepository")
 def test_fetch_admin_by_id_non_existent(mock_repo):
+    mock_gym_id = 1
+    mock_admin_id = 999
     mock_repo.get_admin_by_id.side_effect = Admin.DoesNotExist
 
     with pytest.raises(Admin.DoesNotExist):
-        AdminComponent.fetch_admin_by_id(999)
+        AdminComponent.fetch_admin_by_id(mock_gym_id, mock_admin_id)
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.admin_component.AdminRepository")
 def test_add_admin_invalid_data(mock_repo):
+    mock_gym_id = 1
     mock_repo.create_admin.side_effect = ValueError("Invalid data")
 
     data = {
         "name": "Admin 1",
         "phone_number": "invalid_phone_number",
         "email": "admin1@example.com",
-        "gym_id": 1,
         "address_city": "City 1",
         "address_street": "Street 1",
     }
 
     with pytest.raises(ValueError, match="Invalid data"):
-        AdminComponent.add_admin(data)
+        AdminComponent.add_admin(mock_gym_id, data)
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.admin_component.AdminRepository")
 def test_modify_admin_invalid_data(mock_repo):
+    mock_gym_id = 1
+    mock_admin_id = 1
     mock_repo.update_admin.side_effect = ValueError("Invalid data")
 
     data = {
         "name": "Admin Updated",
         "phone_number": "invalid_phone_number",
         "email": "admin1@example.com",
-        "gym_id": 1,
         "address_city": "City 1",
         "address_street": "Street 1",
     }
 
     with pytest.raises(ValueError, match="Invalid data"):
-        AdminComponent.modify_admin(1, data)
+        AdminComponent.modify_admin(mock_gym_id, mock_admin_id, data)

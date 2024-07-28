@@ -25,7 +25,7 @@ def test_fetch_all_halls(mock_repo):
 
     mock_repo.get_all_halls.return_value = [mock_hall1, mock_hall2]
 
-    halls = HallComponent.fetch_all_halls()
+    halls = HallComponent.fetch_all_halls(1)
 
     assert len(halls) == 2
     assert halls[0].name == "Hall 1"
@@ -45,7 +45,7 @@ def test_fetch_hall_by_id(mock_repo):
 
     mock_repo.get_hall_by_id.return_value = mock_hall
 
-    hall = HallComponent.fetch_hall_by_id(1)
+    hall = HallComponent.fetch_hall_by_id(1, 1)
 
     assert hall.name == "Hall 1"
     assert hall.users_capacity == 20
@@ -65,7 +65,7 @@ def test_add_hall(mock_repo):
     mock_repo.create_hall.return_value = mock_hall
 
     data = {"name": "Hall 1", "users_capacity": 20, "hall_type_id": 1, "gym_id": 1}
-    hall = HallComponent.add_hall(data)
+    hall = HallComponent.add_hall(1, data)
     assert hall.name == "Hall 1"
     assert hall.users_capacity == 20
 
@@ -89,7 +89,7 @@ def test_modify_hall(mock_repo):
         "hall_type_id": 1,
         "gym_id": 1,
     }
-    hall = HallComponent.modify_hall(1, data)
+    hall = HallComponent.modify_hall(1, 1, data)
 
     assert hall.name == "Hall Updated"
     assert hall.users_capacity == 25
@@ -98,7 +98,7 @@ def test_modify_hall(mock_repo):
 @pytest.mark.django_db
 @patch("gym_app.components.hall_component.HallRepository")
 def test_remove_hall(mock_repo):
-    HallComponent.remove_hall(1)
+    HallComponent.remove_hall(1, 1)
 
     assert mock_repo.delete_hall.called
     assert mock_repo.delete_hall.call_count == 1
@@ -115,7 +115,7 @@ def test_add_hall_with_missing_fields(mock_repo):
     }
 
     with pytest.raises(KeyError, match="Missing required field"):
-        HallComponent.add_hall(data)
+        HallComponent.add_hall(1, data)
 
 
 @pytest.mark.django_db
@@ -131,7 +131,7 @@ def test_modify_hall_non_existent(mock_repo):
     }
 
     with pytest.raises(Hall.DoesNotExist):
-        HallComponent.modify_hall(999, data)
+        HallComponent.modify_hall(1, 999, data)
 
 
 @pytest.mark.django_db
@@ -140,7 +140,7 @@ def test_remove_hall_non_existent(mock_repo):
     mock_repo.delete_hall.side_effect = Hall.DoesNotExist
 
     with pytest.raises(Hall.DoesNotExist):
-        HallComponent.remove_hall(999)
+        HallComponent.remove_hall(1, 999)
 
 
 @pytest.mark.django_db
@@ -149,7 +149,7 @@ def test_fetch_hall_by_id_non_existent(mock_repo):
     mock_repo.get_hall_by_id.side_effect = Hall.DoesNotExist
 
     with pytest.raises(Hall.DoesNotExist):
-        HallComponent.fetch_hall_by_id(999)
+        HallComponent.fetch_hall_by_id(1, 999)
 
 
 @pytest.mark.django_db
@@ -165,7 +165,7 @@ def test_add_hall_invalid_data(mock_repo):
     }
 
     with pytest.raises(ValueError, match="Invalid data"):
-        HallComponent.add_hall(data)
+        HallComponent.add_hall(1, data)
 
 
 @pytest.mark.django_db
@@ -181,4 +181,4 @@ def test_modify_hall_invalid_data(mock_repo):
     }
 
     with pytest.raises(ValueError, match="Invalid data"):
-        HallComponent.modify_hall(1, data)
+        HallComponent.modify_hall(1, 1, data)
