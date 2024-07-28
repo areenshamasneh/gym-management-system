@@ -14,7 +14,7 @@ class EmployeeRepository:
         gym = get_object_or_404(Gym, pk=gym_id)
         return Employee.objects.create(
             name=data["name"],
-            gym_id=gym,  # Changed from 'gym' to 'gym_id'
+            gym_id=gym,
             manager_id=data.get("manager_id"),
             address_city=data["address_city"],
             address_street=data["address_street"],

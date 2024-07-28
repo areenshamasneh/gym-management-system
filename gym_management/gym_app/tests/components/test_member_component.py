@@ -1,6 +1,6 @@
 import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
-from gym_app.components.member_component import MemberComponent
+from gym_app.components import MemberComponent
 from gym_app.models import Member, Gym
 
 

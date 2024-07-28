@@ -4,13 +4,13 @@ from django.shortcuts import get_object_or_404
 
 class AdminRepository:
 
-    def get_all_admins(gym_id):
+    def get_all_admins(self, gym_id):
         return Admin.objects.filter(gym_id=gym_id)
 
-    def get_admin_by_id(gym_id, admin_id):
+    def get_admin_by_id(self, gym_id, admin_id):
         return get_object_or_404(Admin, pk=admin_id, gym_id=gym_id)
 
-    def create_admin(gym_id, data):
+    def create_admin(self, gym_id, data):
         gym = get_object_or_404(Gym, pk=gym_id)
         return Admin.objects.create(
             name=data["name"],
@@ -21,7 +21,7 @@ class AdminRepository:
             address_street=data["address_street"],
         )
 
-    def update_admin(gym_id, admin_id, data):
+    def update_admin(self, gym_id, admin_id, data):
         admin = get_object_or_404(Admin, pk=admin_id, gym_id=gym_id)
         admin.name = data.get("name", admin.name)
         admin.phone_number = data.get("phone_number", admin.phone_number)
@@ -31,6 +31,6 @@ class AdminRepository:
         admin.save()
         return admin
 
-    def delete_admin(gym_id, admin_id):
+    def delete_admin(self, gym_id, admin_id):
         admin = get_object_or_404(Admin, pk=admin_id, gym_id=gym_id)
         admin.delete()

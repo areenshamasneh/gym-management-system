@@ -4,7 +4,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.forms.models import model_to_dict
-from gym_app.components.member_component import MemberComponent
+from gym_app.components import MemberComponent
 
 
 @method_decorator(csrf_exempt, name="dispatch")

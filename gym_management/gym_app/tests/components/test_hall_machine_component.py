@@ -1,6 +1,6 @@
 import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
-from gym_app.components.hall_machine_component import HallMachineComponents
+from gym_app.components import HallMachineComponents
 from gym_app.models import HallMachine
 
 
