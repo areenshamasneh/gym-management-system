@@ -2,15 +2,13 @@ from gym_app.models import Gym
 
 
 class GymRepository:
-    @staticmethod
+
     def get_all_gyms():
         return Gym.objects.all()
 
-    @staticmethod
     def get_gym_by_id(pk):
         return Gym.objects.get(pk=pk)
 
-    @staticmethod
     def create_gym(data):
         return Gym.objects.create(
             name=data.get("name"),
@@ -20,7 +18,6 @@ class GymRepository:
             address_street=data.get("address_street"),
         )
 
-    @staticmethod
     def update_gym(pk, data):
         gym = Gym.objects.get(pk=pk)
         gym.name = data.get("name", gym.name)
@@ -31,6 +28,5 @@ class GymRepository:
         gym.save()
         return gym
 
-    @staticmethod
     def delete_gym(pk):
         Gym.objects.get(pk=pk).delete()

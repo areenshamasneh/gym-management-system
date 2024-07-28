@@ -1,5 +1,5 @@
 from django.urls import path
-from gym_app.controllers import (
+from gym_app.views import (
     AdminController,
     EmployeeController,
     GymController,

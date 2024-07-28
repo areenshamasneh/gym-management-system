@@ -3,15 +3,13 @@ from django.shortcuts import get_object_or_404
 
 
 class MachineRepository:
-    @staticmethod
+
     def get_all_machines():
         return Machine.objects.all()
 
-    @staticmethod
     def get_machine_by_id(pk):
         return get_object_or_404(Machine, pk=pk)
 
-    @staticmethod
     def create_machine(data):
         return Machine.objects.create(
             serial_number=data.get("serial_number"),
@@ -22,7 +20,6 @@ class MachineRepository:
             maintenance_date=data.get("maintenance_date"),
         )
 
-    @staticmethod
     def update_machine(pk, data):
         machine = get_object_or_404(Machine, pk=pk)
         machine.serial_number = data.get("serial_number", machine.serial_number)
@@ -36,7 +33,6 @@ class MachineRepository:
         machine.save()
         return machine
 
-    @staticmethod
     def delete_machine(pk):
         machine = get_object_or_404(Machine, pk=pk)
         machine.delete()
