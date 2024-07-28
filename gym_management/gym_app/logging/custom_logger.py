@@ -7,7 +7,7 @@ class CustomLogger:
         self.logger.setLevel(logging.DEBUG)
 
         c_handler = logging.StreamHandler()
-        f_handler = logging.FileHandler("file.log")
+        f_handler = logging.FileHandler("logs/logging.log")
 
         c_handler.setLevel(logging.DEBUG)
         f_handler.setLevel(logging.ERROR)
