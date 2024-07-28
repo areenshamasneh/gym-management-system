@@ -14,21 +14,24 @@ class HallMachineRepository:
         return get_object_or_404(HallMachine, hall_id=hall_id, machine_id=machine_id)
 
     def create_hall_machine(self, data):
-        hall = get_object_or_404(Hall, pk=data.get("hall"))
-        machine = get_object_or_404(Machine, pk=data.get("machine"))
+        hall = get_object_or_404(Hall, pk=data.get("hall_id"))
+        machine = get_object_or_404(Machine, pk=data.get("machine_id"))
         return HallMachine.objects.create(
-            hall=hall, machine=machine, name=data.get("name"), uid=data.get("uid")
+            hall_id=hall,
+            machine_id=machine,
+            name=data.get("name"),
+            uid=data.get("uid")
         )
 
     def update_hall_machine(self, hall_id, machine_id, data):
         hall_machine = self.get_hall_machine_by_id(hall_id, machine_id)
-        if "hall" in data:
-            hall_instance = get_object_or_404(Hall, pk=data.get("hall"))
-            hall_machine.hall = hall_instance
+        if "hall_id" in data:
+            hall_instance = get_object_or_404(Hall, pk=data.get("hall_id"))
+            hall_machine.hall_id = hall_instance
 
-        if "machine" in data:
-            machine_instance = get_object_or_404(Machine, pk=data.get("machine"))
-            hall_machine.machine = machine_instance
+        if "machine_id" in data:
+            machine_instance = get_object_or_404(Machine, pk=data.get("machine_id"))
+            hall_machine.machine_id = machine_instance
 
         if "name" in data:
             hall_machine.name = data.get("name")

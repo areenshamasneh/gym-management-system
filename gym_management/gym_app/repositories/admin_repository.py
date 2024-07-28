@@ -13,7 +13,7 @@ class AdminRepository:
 
     @staticmethod
     def create_admin(data):
-        gym = get_object_or_404(Gym, pk=data["gym"])
+        gym = get_object_or_404(Gym, pk=data["gym_id"])
         return Admin.objects.create(
             name=data["name"],
             phone_number=data.get("phone_number", ""),
@@ -26,7 +26,7 @@ class AdminRepository:
     @staticmethod
     def update_admin(admin_id, data):
         admin = get_object_or_404(Admin, pk=admin_id)
-        gym = get_object_or_404(Gym, pk=data.get("gym", admin.gym.pk))
+        gym = get_object_or_404(Gym, pk=data.get("gym_id", admin.gym_id))
         admin.name = data.get("name", admin.name)
         admin.phone_number = data.get("phone_number", admin.phone_number)
         admin.email = data.get("email", admin.email)
