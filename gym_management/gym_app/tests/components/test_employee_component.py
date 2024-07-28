@@ -114,3 +114,90 @@ def test_remove_employee(mock_repo):
 
     assert mock_repo.delete_employee.called
     assert mock_repo.delete_employee.call_count == 1
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.employee_component.EmployeeRepository")
+def test_add_employee_with_missing_fields(mock_repo):
+    mock_repo.create_employee.side_effect = KeyError("Missing required field")
+
+    data = {
+        "name": "John Doe",
+        "email": "john@example.com",
+        # Missing positions, gym_id, address_city, address_street
+    }
+
+    with pytest.raises(KeyError, match="Missing required field"):
+        EmployeeComponent.add_employee(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.employee_component.EmployeeRepository")
+def test_modify_employee_non_existent(mock_repo):
+    mock_repo.update_employee.side_effect = Employee.DoesNotExist
+
+    data = {
+        "name": "Non Existent Employee",
+        "email": "nonexistent@example.com",
+        "positions": "None",
+        "gym_id": 1,
+        "address_city": "Nowhere",
+        "address_street": "No Street",
+    }
+
+    with pytest.raises(Employee.DoesNotExist):
+        EmployeeComponent.modify_employee(999, data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.employee_component.EmployeeRepository")
+def test_remove_employee_non_existent(mock_repo):
+    mock_repo.delete_employee.side_effect = Employee.DoesNotExist
+
+    with pytest.raises(Employee.DoesNotExist):
+        EmployeeComponent.remove_employee(999)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.employee_component.EmployeeRepository")
+def test_fetch_employee_by_id_non_existent(mock_repo):
+    mock_repo.get_employee_by_id.side_effect = Employee.DoesNotExist
+
+    with pytest.raises(Employee.DoesNotExist):
+        EmployeeComponent.fetch_employee_by_id(999)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.employee_component.EmployeeRepository")
+def test_add_employee_invalid_data(mock_repo):
+    mock_repo.create_employee.side_effect = ValueError("Invalid data")
+
+    data = {
+        "name": "John Doe",
+        "email": "invalid_email_format",
+        "positions": "Trainer, Cleaner",
+        "gym_id": 1,
+        "address_city": "New York",
+        "address_street": "123 Street",
+    }
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        EmployeeComponent.add_employee(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.employee_component.EmployeeRepository")
+def test_modify_employee_invalid_data(mock_repo):
+    mock_repo.update_employee.side_effect = ValueError("Invalid data")
+
+    data = {
+        "name": "John Updated",
+        "email": "invalid_email_format",
+        "positions": "Trainer",
+        "gym_id": 1,
+        "address_city": "New York",
+        "address_street": "456 Avenue",
+    }
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        EmployeeComponent.modify_employee(1, data)

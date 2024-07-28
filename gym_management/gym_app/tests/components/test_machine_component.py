@@ -113,3 +113,74 @@ def test_remove_machine(mock_repo):
 
     assert mock_repo.delete_machine.called
     assert mock_repo.delete_machine.call_count == 1
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.machine_component.MachineRepository")
+def test_add_machine_with_missing_fields(mock_repo):
+    mock_repo.create_machine.side_effect = KeyError("Missing required field")
+
+    data = {"serial_number": "SN001"}
+
+    with pytest.raises(KeyError, match="Missing required field"):
+        MachineComponent.add_machine(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.machine_component.MachineRepository")
+def test_modify_machine_non_existent(mock_repo):
+    mock_repo.update_machine.side_effect = Machine.DoesNotExist
+
+    data = {"model": "Non Existent Machine"}
+
+    with pytest.raises(Machine.DoesNotExist):
+        MachineComponent.modify_machine("SN999", data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.machine_component.MachineRepository")
+def test_remove_machine_non_existent(mock_repo):
+    mock_repo.delete_machine.side_effect = Machine.DoesNotExist
+
+    with pytest.raises(Machine.DoesNotExist):
+        MachineComponent.remove_machine("SN999")
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.machine_component.MachineRepository")
+def test_fetch_machine_by_id_non_existent(mock_repo):
+    mock_repo.get_machine_by_id.side_effect = Machine.DoesNotExist
+
+    with pytest.raises(Machine.DoesNotExist):
+        MachineComponent.fetch_machine_by_id("SN999")
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.machine_component.MachineRepository")
+def test_add_machine_invalid_data(mock_repo):
+    mock_repo.create_machine.side_effect = ValueError("Invalid data")
+
+    data = {
+        "serial_number": "SN001",
+        "type": "",
+        "model": "Invalid Machine",
+        "brand": "Brand 1",
+        "status": "operational",
+        "maintenance_date": "2024-01-01",
+    }
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        MachineComponent.add_machine(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.machine_component.MachineRepository")
+def test_modify_machine_invalid_data(mock_repo):
+    mock_repo.update_machine.side_effect = ValueError("Invalid data")
+
+    data = {
+        "model": "",
+    }
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        MachineComponent.modify_machine("SN001", data)

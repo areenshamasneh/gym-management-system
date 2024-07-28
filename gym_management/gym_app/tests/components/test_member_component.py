@@ -1,4 +1,4 @@
-import pytest # type: ignore
+import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
 from gym_app.components.member_component import MemberComponent
 from gym_app.models import Member, Gym
@@ -100,3 +100,70 @@ def test_remove_member(mock_repo):
 
     assert mock_repo.delete_member.called
     assert mock_repo.delete_member.call_count == 1
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.member_component.MemberRepository")
+def test_add_member_with_missing_fields(mock_repo):
+    mock_repo.create_member.side_effect = KeyError("Missing required field")
+
+    data = {"name": "Member 1"}
+
+    with pytest.raises(KeyError, match="Missing required field"):
+        MemberComponent.add_member(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.member_component.MemberRepository")
+def test_modify_member_non_existent(mock_repo):
+    mock_repo.update_member.side_effect = Member.DoesNotExist
+
+    data = {"name": "Non Existent Member"}
+
+    with pytest.raises(Member.DoesNotExist):
+        MemberComponent.modify_member(999, data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.member_component.MemberRepository")
+def test_remove_member_non_existent(mock_repo):
+    mock_repo.delete_member.side_effect = Member.DoesNotExist
+
+    with pytest.raises(Member.DoesNotExist):
+        MemberComponent.remove_member(999)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.member_component.MemberRepository")
+def test_fetch_member_by_id_non_existent(mock_repo):
+    mock_repo.get_member_by_id.side_effect = Member.DoesNotExist
+
+    with pytest.raises(Member.DoesNotExist):
+        MemberComponent.fetch_member_by_id(999)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.member_component.MemberRepository")
+def test_add_member_invalid_data(mock_repo):
+    mock_repo.create_member.side_effect = ValueError("Invalid data")
+
+    data = {
+        "name": "Member 1",
+        "gym_id": 1,
+        "birth_date": "invalid_date",
+        "phone_number": "123456789",
+    }
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        MemberComponent.add_member(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.member_component.MemberRepository")
+def test_modify_member_invalid_data(mock_repo):
+    mock_repo.update_member.side_effect = ValueError("Invalid data")
+
+    data = {"birth_date": "invalid_date"}
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        MemberComponent.modify_member(1, data)

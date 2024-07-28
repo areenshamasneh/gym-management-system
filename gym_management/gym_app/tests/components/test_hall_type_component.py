@@ -89,3 +89,70 @@ def test_remove_hall_type(mock_repo):
 
     assert mock_repo.delete_hall_type.called
     assert mock_repo.delete_hall_type.call_count == 1
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_type_component.HallTypeRepository")
+def test_add_hall_type_with_missing_fields(mock_repo):
+    mock_repo.create_hall_type.side_effect = KeyError("Missing required field")
+
+    data = {"type": "sauna"}
+
+    with pytest.raises(KeyError, match="Missing required field"):
+        HallTypeComponent.add_hall_type(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_type_component.HallTypeRepository")
+def test_modify_hall_type_non_existent(mock_repo):
+    mock_repo.update_hall_type.side_effect = HallType.DoesNotExist
+
+    data = {"type_description": "Non Existent HallType"}
+
+    with pytest.raises(HallType.DoesNotExist):
+        HallTypeComponent.modify_hall_type(999, data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_type_component.HallTypeRepository")
+def test_remove_hall_type_non_existent(mock_repo):
+    mock_repo.delete_hall_type.side_effect = HallType.DoesNotExist
+
+    with pytest.raises(HallType.DoesNotExist):
+        HallTypeComponent.remove_hall_type(999)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_type_component.HallTypeRepository")
+def test_fetch_hall_type_by_id_non_existent(mock_repo):
+    mock_repo.get_hall_type_by_id.side_effect = HallType.DoesNotExist
+
+    with pytest.raises(HallType.DoesNotExist):
+        HallTypeComponent.fetch_hall_type_by_id(999)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_type_component.HallTypeRepository")
+def test_add_hall_type_invalid_data(mock_repo):
+    mock_repo.create_hall_type.side_effect = ValueError("Invalid data")
+
+    data = {
+        "type": "",
+        "type_description": "Invalid HallType",
+    }
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        HallTypeComponent.add_hall_type(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_type_component.HallTypeRepository")
+def test_modify_hall_type_invalid_data(mock_repo):
+    mock_repo.update_hall_type.side_effect = ValueError("Invalid data")
+
+    data = {
+        "type_description": "",
+    }
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        HallTypeComponent.modify_hall_type(1, data)

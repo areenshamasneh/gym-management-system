@@ -102,3 +102,83 @@ def test_remove_hall(mock_repo):
 
     assert mock_repo.delete_hall.called
     assert mock_repo.delete_hall.call_count == 1
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+def test_add_hall_with_missing_fields(mock_repo):
+    mock_repo.create_hall.side_effect = KeyError("Missing required field")
+
+    data = {
+        "name": "Hall 1",
+        # Missing users_capacity, hall_type_id, gym_id
+    }
+
+    with pytest.raises(KeyError, match="Missing required field"):
+        HallComponent.add_hall(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+def test_modify_hall_non_existent(mock_repo):
+    mock_repo.update_hall.side_effect = Hall.DoesNotExist
+
+    data = {
+        "name": "Non Existent Hall",
+        "users_capacity": 20,
+        "hall_type_id": 1,
+        "gym_id": 1,
+    }
+
+    with pytest.raises(Hall.DoesNotExist):
+        HallComponent.modify_hall(999, data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+def test_remove_hall_non_existent(mock_repo):
+    mock_repo.delete_hall.side_effect = Hall.DoesNotExist
+
+    with pytest.raises(Hall.DoesNotExist):
+        HallComponent.remove_hall(999)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+def test_fetch_hall_by_id_non_existent(mock_repo):
+    mock_repo.get_hall_by_id.side_effect = Hall.DoesNotExist
+
+    with pytest.raises(Hall.DoesNotExist):
+        HallComponent.fetch_hall_by_id(999)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+def test_add_hall_invalid_data(mock_repo):
+    mock_repo.create_hall.side_effect = ValueError("Invalid data")
+
+    data = {
+        "name": "Hall 1",
+        "users_capacity": -10,
+        "hall_type_id": 1,
+        "gym_id": 1,
+    }
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        HallComponent.add_hall(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+def test_modify_hall_invalid_data(mock_repo):
+    mock_repo.update_hall.side_effect = ValueError("Invalid data")
+
+    data = {
+        "name": "Hall Updated",
+        "users_capacity": -20,
+        "hall_type_id": 1,
+        "gym_id": 1,
+    }
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        HallComponent.modify_hall(1, data)

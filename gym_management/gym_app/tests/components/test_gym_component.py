@@ -1,6 +1,7 @@
 import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
 from gym_app.components.gym_component import GymComponent
+from gym_app.models.system_models import Gym
 
 
 @patch("gym_app.components.gym_component.GymRepository")
@@ -106,3 +107,86 @@ def test_remove_gym(mock_repo):
     GymComponent.remove_gym(1)
 
     mock_repo.delete_gym.assert_called_once_with(1)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.gym_component.GymRepository")
+def test_add_gym_with_missing_fields(mock_repo):
+    mock_repo.create_gym.side_effect = KeyError("Missing required field")
+
+    data = {
+        "name": "New Gym",
+        # Missing type, description, address_city, address_street
+    }
+
+    with pytest.raises(KeyError, match="Missing required field"):
+        GymComponent.add_gym(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.gym_component.GymRepository")
+def test_modify_gym_non_existent(mock_repo):
+    mock_repo.update_gym.side_effect = Gym.DoesNotExist
+
+    data = {
+        "name": "Non Existent Gym",
+        "type": "Type C",
+        "description": "Non Existent Desc",
+        "address_city": "Non Existent City",
+        "address_street": "Non Existent Street",
+    }
+
+    with pytest.raises(Gym.DoesNotExist):
+        GymComponent.modify_gym(999, data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.gym_component.GymRepository")
+def test_remove_gym_non_existent(mock_repo):
+    mock_repo.delete_gym.side_effect = Gym.DoesNotExist
+
+    with pytest.raises(Gym.DoesNotExist):
+        GymComponent.remove_gym(999)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.gym_component.GymRepository")
+def test_fetch_gym_by_id_non_existent(mock_repo):
+    mock_repo.get_gym_by_id.side_effect = Gym.DoesNotExist
+
+    with pytest.raises(Gym.DoesNotExist):
+        GymComponent.fetch_gym_by_id(999)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.gym_component.GymRepository")
+def test_add_gym_invalid_data(mock_repo):
+    mock_repo.create_gym.side_effect = ValueError("Invalid data")
+
+    data = {
+        "name": "New Gym",
+        "type": "Invalid Type",
+        "description": "Desc",
+        "address_city": "City",
+        "address_street": "Street",
+    }
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        GymComponent.add_gym(data)
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.gym_component.GymRepository")
+def test_modify_gym_invalid_data(mock_repo):
+    mock_repo.update_gym.side_effect = ValueError("Invalid data")
+
+    data = {
+        "name": "Updated Gym",
+        "type": "Invalid Type",
+        "description": "Updated Desc",
+        "address_city": "Updated City",
+        "address_street": "Updated Street",
+    }
+
+    with pytest.raises(ValueError, match="Invalid data"):
+        GymComponent.modify_gym(1, data)
