@@ -29,7 +29,7 @@ def test_fetch_all_members(mock_logger, mock_repo):
     assert len(members) == 2
     assert members[0].name == "Member 1"
     assert members[1].name == "Member 2"
-    mock_logger.log.assert_called_with("Fetching all members")
+    mock_logger.log_info.assert_called_with("Fetching all members")
 
 
 @pytest.mark.django_db
@@ -48,7 +48,7 @@ def test_fetch_member_by_id(mock_logger, mock_repo):
 
     assert member.name == "Member 1"
     assert member.gym.id == 1
-    mock_logger.log.assert_called_with("Fetching member with ID 1")
+    mock_logger.log_info.assert_called_with("Fetching member with ID 1")
 
 
 @pytest.mark.django_db
@@ -73,7 +73,7 @@ def test_add_member(mock_logger, mock_repo):
 
     assert member.name == "Member 1"
     assert member.gym.id == 1
-    mock_logger.log.assert_called_with(f"Adding new member with data: {data}")
+    mock_logger.log_info.assert_called_with(f"Adding new member with data: {data}")
 
 
 @pytest.mark.django_db
@@ -98,7 +98,7 @@ def test_modify_member(mock_logger, mock_repo):
 
     assert member.name == "Member Updated"
     assert member.gym.id == 1
-    mock_logger.log.assert_called_with(f"Modifying member with ID 1 with data: {data}")
+    mock_logger.log_info.assert_called_with(f"Modifying member with ID 1 with data: {data}")
 
 
 @pytest.mark.django_db
@@ -110,7 +110,7 @@ def test_remove_member(mock_logger, mock_repo):
 
     assert mock_repo.delete_member.called
     assert mock_repo.delete_member.call_count == 1
-    mock_logger.log.assert_called_with("Removing member with ID 1")
+    mock_logger.log_info.assert_called_with("Removing member with ID 1")
 
 
 @pytest.mark.django_db

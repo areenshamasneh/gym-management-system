@@ -34,7 +34,7 @@ def test_fetch_all_halls(mock_logger_class, mock_repo_class):
     assert len(halls) == 2
     assert halls[0].name == "Hall 1"
     assert halls[1].name == "Hall 2"
-    mock_logger.log.assert_called_with("Fetching all halls")
+    mock_logger.log_info.assert_called_with("Fetching all halls")
 
 
 @pytest.mark.django_db

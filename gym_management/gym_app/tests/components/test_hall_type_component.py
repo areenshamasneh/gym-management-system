@@ -27,7 +27,7 @@ def test_fetch_all_hall_types(mock_logger, mock_repo):
     assert len(hall_types) == 2
     assert hall_types[0].type == "sauna"
     assert hall_types[1].type == "training"
-    mock_logger.log.assert_called_with("Fetching all hall types")
+    mock_logger.log_info.assert_called_with("Fetching all hall types")
 
 
 @pytest.mark.django_db
@@ -46,7 +46,7 @@ def test_fetch_hall_type_by_id(mock_logger, mock_repo):
 
     assert hall_type.type == "sauna"
     assert hall_type.type_description == "Relaxing sauna"
-    mock_logger.log.assert_called_with("Fetching hall type with ID 1")
+    mock_logger.log_info.assert_called_with("Fetching hall type with ID 1")
 
 
 @pytest.mark.django_db
@@ -67,7 +67,7 @@ def test_add_hall_type(mock_logger, mock_repo):
 
     assert hall_type.type == "sauna"
     assert hall_type.type_description == "Relaxing sauna"
-    mock_logger.log.assert_called_with(f"Adding new hall type with data: {data}")
+    mock_logger.log_info.assert_called_with(f"Adding new hall type with data: {data}")
 
 
 @pytest.mark.django_db
@@ -87,7 +87,7 @@ def test_modify_hall_type(mock_logger, mock_repo):
     hall_type = component.modify_hall_type(1, data)
 
     assert hall_type.type_description == "Updated description"
-    mock_logger.log.assert_called_with(
+    mock_logger.log_info.assert_called_with(
         f"Modifying hall type with ID 1 with data: {data}"
     )
 
@@ -101,7 +101,7 @@ def test_remove_hall_type(mock_logger, mock_repo):
 
     assert mock_repo.delete_hall_type.called
     assert mock_repo.delete_hall_type.call_count == 1
-    mock_logger.log.assert_called_with("Removing hall type with ID 1")
+    mock_logger.log_info.assert_called_with("Removing hall type with ID 1")
 
 
 @pytest.mark.django_db
@@ -116,7 +116,7 @@ def test_add_hall_type_with_missing_fields(mock_logger, mock_repo):
 
     with pytest.raises(KeyError, match="Missing required field"):
         component.add_hall_type(data)
-    mock_logger.log.assert_called_with(f"Adding new hall type with data: {data}")
+    mock_logger.log_info.assert_called_with(f"Adding new hall type with data: {data}")
 
 
 @pytest.mark.django_db
@@ -131,7 +131,7 @@ def test_modify_hall_type_non_existent(mock_logger, mock_repo):
 
     with pytest.raises(HallType.DoesNotExist):
         component.modify_hall_type(999, data)
-    mock_logger.log.assert_called_with(
+    mock_logger.log_info.assert_called_with(
         f"Modifying hall type with ID 999 with data: {data}"
     )
 
@@ -146,7 +146,7 @@ def test_remove_hall_type_non_existent(mock_logger, mock_repo):
 
     with pytest.raises(HallType.DoesNotExist):
         component.remove_hall_type(999)
-    mock_logger.log.assert_called_with("Removing hall type with ID 999")
+    mock_logger.log_info.assert_called_with("Removing hall type with ID 999")
 
 
 @pytest.mark.django_db
@@ -159,7 +159,7 @@ def test_fetch_hall_type_by_id_non_existent(mock_logger, mock_repo):
 
     with pytest.raises(HallType.DoesNotExist):
         component.fetch_hall_type_by_id(999)
-    mock_logger.log.assert_called_with("Fetching hall type with ID 999")
+    mock_logger.log_info.assert_called_with("Fetching hall type with ID 999")
 
 
 @pytest.mark.django_db
@@ -177,7 +177,7 @@ def test_add_hall_type_invalid_data(mock_logger, mock_repo):
 
     with pytest.raises(ValueError, match="Invalid data"):
         component.add_hall_type(data)
-    mock_logger.log.assert_called_with(f"Adding new hall type with data: {data}")
+    mock_logger.log_info.assert_called_with(f"Adding new hall type with data: {data}")
 
 
 @pytest.mark.django_db
@@ -195,4 +195,4 @@ def test_add_hall_type_invalid_data(mock_logger, mock_repo):
 
     with pytest.raises(ValueError, match="Invalid data"):
         component.add_hall_type(data)
-    mock_logger.log.assert_called_with("Error adding hall type: Invalid data")
+    mock_logger.log_info.assert_called_with("Error adding hall type: Invalid data")
