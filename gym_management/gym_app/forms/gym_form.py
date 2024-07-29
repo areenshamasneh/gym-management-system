@@ -1,6 +1,6 @@
 from django import forms
+from django.core.validators import MaxLengthValidator
 from gym_app.models import Gym
-
 
 class GymForm(forms.ModelForm):
     class Meta:
@@ -12,6 +12,11 @@ class GymForm(forms.ModelForm):
             "address_city",
             "address_street",
         ]
+        validators = {
+            'name': [MaxLengthValidator(255, "Name is too long")],
+            'address_city': [MaxLengthValidator(255, "Address city is too long")],
+            'address_street': [MaxLengthValidator(255, "Address street is too long")],
+        }
 
     def clean_name(self):
         name = self.cleaned_data.get("name")

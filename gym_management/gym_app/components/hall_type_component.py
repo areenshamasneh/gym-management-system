@@ -1,11 +1,12 @@
-from gym_app.logging import CustomLogger
+from gym_app.logging import SimpleLogger
 from gym_app.repositories.hall_type_repository import HallTypeRepository
 
 
 class HallTypeComponent:
-    def __init__(self, repo: HallTypeRepository, logger: CustomLogger):
-        self.repo = repo
-        self.logger = logger
+    def __init__(self, repo=None, logger=None):
+        self.repo = repo if repo else HallTypeRepository()
+        self.logger = logger if logger else SimpleLogger()
+        self.logger.log_info("HallTypeComponent initialized")
 
     def fetch_all_hall_types(self):
         self.logger.log("Fetching all hall types")

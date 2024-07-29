@@ -4,13 +4,13 @@ from django.shortcuts import get_object_or_404
 
 class EmployeeRepository:
 
-    def get_all_employees(gym_id):
+    def get_all_employees(self, gym_id):
         return Employee.objects.filter(gym_id=gym_id)
 
-    def get_employee_by_id(gym_id, employee_id):
+    def get_employee_by_id(self, gym_id, employee_id):
         return get_object_or_404(Employee, pk=employee_id, gym_id=gym_id)
 
-    def create_employee(gym_id, data):
+    def create_employee(self, gym_id, data):
         gym = get_object_or_404(Gym, pk=gym_id)
         return Employee.objects.create(
             name=data["name"],
@@ -23,7 +23,7 @@ class EmployeeRepository:
             positions=data.get("positions", ""),
         )
 
-    def update_employee(gym_id, employee_id, data):
+    def update_employee(self, gym_id, employee_id, data):
         employee = get_object_or_404(Employee, pk=employee_id, gym_id=gym_id)
         employee.name = data.get("name", employee.name)
         employee.manager_id = data.get("manager_id", employee.manager_id)
@@ -35,6 +35,6 @@ class EmployeeRepository:
         employee.save()
         return employee
 
-    def delete_employee(gym_id, employee_id):
+    def delete_employee(self, gym_id, employee_id):
         employee = get_object_or_404(Employee, pk=employee_id, gym_id=gym_id)
         employee.delete()

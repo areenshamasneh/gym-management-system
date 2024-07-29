@@ -1,11 +1,12 @@
-from gym_app.logging import CustomLogger
+from gym_app.logging import SimpleLogger
 from gym_app.repositories.member_repository import MemberRepository
 
 
 class MemberComponent:
-    def __init__(self, repo: MemberRepository, logger: CustomLogger):
-        self.repo = repo
-        self.logger = logger
+    def __init__(self, repo=None, logger=None):
+        self.repo = repo if repo else MemberRepository()
+        self.logger = logger if logger else SimpleLogger()
+        self.logger.log_info("MemberComponent initialized")
 
     def fetch_all_members(self, gym_id):
         self.logger.log("Fetching all members")

@@ -1,22 +1,20 @@
 import json
 from django.forms import model_to_dict
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.views import View
 from gym_app.components import AdminComponent
 from gym_app.forms import AdminForm
-from gym_app.logging import CustomLogger
-from gym_app.repositories.admin_repository import AdminRepository
 
-
+@method_decorator(csrf_exempt, name="dispatch")
 class AdminController(View):
     def __init__(self):
-        self.admin_component = AdminComponent(
-            admin_repository=AdminRepository(), logger=CustomLogger()
-        )
+        self.admin_component = AdminComponent()
 
     def get(self, request, gym_id, pk=None):
         try:
-            if pk:
+            if pk is not None:
                 admin = self.admin_component.fetch_admin_by_id(gym_id, pk)
                 data = model_to_dict(admin)
             else:

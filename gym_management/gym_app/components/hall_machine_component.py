@@ -1,13 +1,12 @@
-from gym_app.logging import CustomLogger
-from gym_app.repositories.hall_machine_repository import (
-    HallMachineRepository,
-)  # Import your custom logger
+from gym_app.logging import SimpleLogger
+from gym_app.repositories.hall_machine_repository import HallMachineRepository
 
 
 class HallMachineComponents:
     def __init__(self, repo=None, logger=None):
         self.repo = repo if repo else HallMachineRepository()
-        self.logger = logger if logger else CustomLogger()
+        self.logger = logger if logger else SimpleLogger()
+        self.logger.log_info("HallMachineComponents initialized")
 
     def fetch_all_hall_machines(self, gym_id, hall_id=None):
         self.logger.log(

@@ -1,7 +1,7 @@
 import logging
 
 
-class CustomLogger:
+class SimpleLogger:
     def __init__(self):
         self.logger = logging.getLogger("AdminComponent")
         self.logger.setLevel(logging.DEBUG)
@@ -22,6 +22,9 @@ class CustomLogger:
 
         self.logger.addHandler(c_handler)
         self.logger.addHandler(f_handler)
+
+    def log(self, message):
+        self.logger.info(message)
 
     def log_info(self, message):
         self.logger.info(message)

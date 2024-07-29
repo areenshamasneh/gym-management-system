@@ -2,14 +2,14 @@ import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
 from gym_app.components import EmployeeComponent
 from gym_app.models import Employee, Gym
-from gym_app.logging import CustomLogger
+from gym_app.logging import SimpleLogger
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
-@patch("gym_app.logging.custom_logger.CustomLogger")
+@patch("gym_app.logging.custom_logger.SimpleLogger")
 def test_fetch_all_employees(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=CustomLogger)
+    mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
     mock_employee1 = MagicMock(spec=Employee)
@@ -38,9 +38,9 @@ def test_fetch_all_employees(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
-@patch("gym_app.logging.custom_logger.CustomLogger")
+@patch("gym_app.logging.custom_logger.SimpleLogger")
 def test_fetch_employee_by_id(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=CustomLogger)
+    mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
     mock_employee = MagicMock(spec=Employee)
@@ -61,9 +61,9 @@ def test_fetch_employee_by_id(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
-@patch("gym_app.logging.custom_logger.CustomLogger")
+@patch("gym_app.logging.custom_logger.SimpleLogger")
 def test_add_employee(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=CustomLogger)
+    mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
     mock_employee = MagicMock(spec=Employee)
@@ -93,9 +93,9 @@ def test_add_employee(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
-@patch("gym_app.logging.custom_logger.CustomLogger")
+@patch("gym_app.logging.custom_logger.SimpleLogger")
 def test_modify_employee(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=CustomLogger)
+    mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
     mock_employee = MagicMock(spec=Employee)
@@ -125,9 +125,9 @@ def test_modify_employee(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
-@patch("gym_app.logging.custom_logger.CustomLogger")
+@patch("gym_app.logging.custom_logger.SimpleLogger")
 def test_remove_employee(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=CustomLogger)
+    mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
     component = EmployeeComponent(mock_repo, mock_logger_instance)
@@ -139,9 +139,9 @@ def test_remove_employee(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
-@patch("gym_app.logging.custom_logger.CustomLogger")
+@patch("gym_app.logging.custom_logger.SimpleLogger")
 def test_add_employee_with_missing_fields(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=CustomLogger)
+    mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
     mock_repo.create_employee.side_effect = KeyError("Missing required field")
@@ -159,9 +159,9 @@ def test_add_employee_with_missing_fields(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
-@patch("gym_app.logging.custom_logger.CustomLogger")
+@patch("gym_app.logging.custom_logger.SimpleLogger")
 def test_modify_employee_non_existent(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=CustomLogger)
+    mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
     mock_repo.update_employee.side_effect = Employee.DoesNotExist
@@ -182,9 +182,9 @@ def test_modify_employee_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
-@patch("gym_app.logging.custom_logger.CustomLogger")
+@patch("gym_app.logging.custom_logger.SimpleLogger")
 def test_remove_employee_non_existent(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=CustomLogger)
+    mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
     mock_repo.delete_employee.side_effect = Employee.DoesNotExist
@@ -196,9 +196,9 @@ def test_remove_employee_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
-@patch("gym_app.logging.custom_logger.CustomLogger")
+@patch("gym_app.logging.custom_logger.SimpleLogger")
 def test_fetch_employee_by_id_non_existent(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=CustomLogger)
+    mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
     mock_repo.get_employee_by_id.side_effect = Employee.DoesNotExist
@@ -210,9 +210,9 @@ def test_fetch_employee_by_id_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
-@patch("gym_app.logging.custom_logger.CustomLogger")
+@patch("gym_app.logging.custom_logger.SimpleLogger")
 def test_add_employee_invalid_data(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=CustomLogger)
+    mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
     mock_repo.create_employee.side_effect = ValueError("Invalid data")
@@ -233,9 +233,9 @@ def test_add_employee_invalid_data(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
-@patch("gym_app.logging.custom_logger.CustomLogger")
+@patch("gym_app.logging.custom_logger.SimpleLogger")
 def test_modify_employee_invalid_data(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=CustomLogger)
+    mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
     mock_repo.update_employee.side_effect = ValueError("Invalid data")

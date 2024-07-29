@@ -3,13 +3,13 @@ from unittest.mock import patch, MagicMock
 from django.core.exceptions import ValidationError
 from gym_app.components import MemberComponent
 from gym_app.models import Member, Gym
-from gym_app.logging import CustomLogger
+from gym_app.logging import SimpleLogger
 from gym_app.repositories.member_repository import MemberRepository
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.CustomLogger")
+@patch("gym_app.components.member_component.SimpleLogger")
 def test_fetch_all_members(mock_logger, mock_repo):
     mock_member1 = MagicMock(spec=Member)
     mock_member1.name = "Member 1"
@@ -34,7 +34,7 @@ def test_fetch_all_members(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.CustomLogger")
+@patch("gym_app.components.member_component.SimpleLogger")
 def test_fetch_member_by_id(mock_logger, mock_repo):
     mock_member = MagicMock(spec=Member)
     mock_member.name = "Member 1"
@@ -53,7 +53,7 @@ def test_fetch_member_by_id(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.CustomLogger")
+@patch("gym_app.components.member_component.SimpleLogger")
 def test_add_member(mock_logger, mock_repo):
     mock_member = MagicMock(spec=Member)
     mock_member.name = "Member 1"
@@ -78,7 +78,7 @@ def test_add_member(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.CustomLogger")
+@patch("gym_app.components.member_component.SimpleLogger")
 def test_modify_member(mock_logger, mock_repo):
     mock_member = MagicMock(spec=Member)
     mock_member.name = "Member Updated"
@@ -103,7 +103,7 @@ def test_modify_member(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.CustomLogger")
+@patch("gym_app.components.member_component.SimpleLogger")
 def test_remove_member(mock_logger, mock_repo):
     component = MemberComponent(repo=mock_repo, logger=mock_logger)
     component.remove_member(1, 1)
@@ -115,7 +115,7 @@ def test_remove_member(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.CustomLogger")
+@patch("gym_app.components.member_component.SimpleLogger")
 def test_add_member_with_missing_fields(mock_logger, mock_repo):
     mock_repo.create_member.side_effect = KeyError("Missing required field")
 
@@ -128,7 +128,7 @@ def test_add_member_with_missing_fields(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.CustomLogger")
+@patch("gym_app.components.member_component.SimpleLogger")
 def test_modify_member_non_existent(mock_logger, mock_repo):
     mock_repo.update_member.side_effect = Member.DoesNotExist
 
@@ -141,7 +141,7 @@ def test_modify_member_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.CustomLogger")
+@patch("gym_app.components.member_component.SimpleLogger")
 def test_remove_member_non_existent(mock_logger, mock_repo):
     mock_repo.delete_member.side_effect = Member.DoesNotExist
 
@@ -152,7 +152,7 @@ def test_remove_member_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.CustomLogger")
+@patch("gym_app.components.member_component.SimpleLogger")
 def test_fetch_member_by_id_non_existent(mock_logger, mock_repo):
     mock_repo.get_member_by_id.side_effect = Member.DoesNotExist
 
@@ -163,7 +163,7 @@ def test_fetch_member_by_id_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.CustomLogger")
+@patch("gym_app.components.member_component.SimpleLogger")
 def test_add_member_invalid_data(mock_logger, mock_repo):
     mock_repo.create_member.side_effect = ValueError("Invalid data")
 
@@ -180,7 +180,7 @@ def test_add_member_invalid_data(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.CustomLogger")
+@patch("gym_app.components.member_component.SimpleLogger")
 def test_modify_member_invalid_data(mock_logger, mock_repo):
     mock_repo.update_member.side_effect = ValueError("Invalid data")
 

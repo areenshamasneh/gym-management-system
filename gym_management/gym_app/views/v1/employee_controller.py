@@ -6,16 +6,12 @@ from django.utils.decorators import method_decorator
 from django.forms.models import model_to_dict
 from gym_app.components import EmployeeComponent
 from gym_app.forms import EmployeeForm
-from gym_app.logging import CustomLogger
-from gym_app.repositories.employee_repository import EmployeeRepository
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class EmployeeController(View):
     def __init__(self):
-        self.employee_component = EmployeeComponent(
-            employee_repository=EmployeeRepository(), logger=CustomLogger()
-        )
+        self.employee_component = EmployeeComponent()
 
     def get(self, request, gym_id, pk=None):
         try:
@@ -39,7 +35,7 @@ class EmployeeController(View):
                 response_data = model_to_dict(employee)
                 return JsonResponse(response_data, status=201)
             else:
-                errors = form.errors
+                errors = form.errors.as_json()
                 return JsonResponse(
                     {"error": f"Form validation errors: {errors}"}, status=400
                 )
@@ -62,7 +58,7 @@ class EmployeeController(View):
                 response_data = model_to_dict(employee)
                 return JsonResponse(response_data, status=200)
             else:
-                errors = form.errors
+                errors = form.errors.as_json()
                 return JsonResponse(
                     {"error": f"Form validation errors: {errors}"}, status=400
                 )

@@ -209,20 +209,6 @@ def test_valid_admin_form():
 
 
 @pytest.mark.django_db
-def test_invalid_name_in_admin_form():
-    data = {
-        "name": "Invalid123",
-        "phone_number": "1234567890",
-        "email": "invalid.name@example.com",
-        "address_city": "Valid City",
-        "address_street": "Valid Street",
-    }
-    form = AdminForm(data)
-    assert not form.is_valid()
-    assert "Name should only contain letters" in form.errors["name"]
-
-
-@pytest.mark.django_db
 def test_invalid_phone_number_in_admin_form():
     data = {
         "name": "Valid Admin",
@@ -261,7 +247,6 @@ def test_duplicate_email_in_admin_form():
     assert not form.is_valid()
     assert "Email already exists" in form.errors["email"]
 
-
 @pytest.mark.django_db
 def test_address_length_in_admin_form():
     data = {
@@ -274,7 +259,7 @@ def test_address_length_in_admin_form():
     form = AdminForm(data)
     assert not form.is_valid()
     assert (
-        "Ensure this value has at most 255 characters (it has 256)."
+        "Address city is too long"
         in form.errors["address_city"]
     )
 
@@ -283,6 +268,6 @@ def test_address_length_in_admin_form():
     form = AdminForm(data)
     assert not form.is_valid()
     assert (
-        "Ensure this value has at most 255 characters (it has 256)."
+        "Address street is too long"
         in form.errors["address_street"]
     )

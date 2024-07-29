@@ -5,18 +5,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.forms.models import model_to_dict
 from gym_app.components import HallComponent
-from gym_app.repositories import HallRepository
-from gym_app.logging import CustomLogger
 from gym_app.forms import HallForm
-
 
 @method_decorator(csrf_exempt, name="dispatch")
 class HallController(View):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.logger = CustomLogger()
-        self.repo = HallRepository()
-        self.component = HallComponent(self.repo, self.logger)
+        self.component = HallComponent()
 
     def get(self, request, gym_id, pk=None):
         try:
@@ -31,7 +26,7 @@ class HallController(View):
         except Http404:
             return JsonResponse({"error": "Hall not found"}, status=404)
         except Exception as e:
-            self.logger.log(f"Error in GET request: {e}")
+            self.component.logger.log(f"Error in GET request: {e}")
             return JsonResponse({"error": str(e)}, status=500)
 
     def post(self, request, gym_id):
@@ -49,7 +44,7 @@ class HallController(View):
         except Http404 as e:
             return JsonResponse({"error": str(e)}, status=400)
         except Exception as e:
-            self.logger.log(f"Error in POST request: {e}")
+            self.component.logger.log(f"Error in POST request: {e}")
             return JsonResponse({"error": str(e)}, status=500)
 
     def put(self, request, gym_id, pk):
@@ -67,7 +62,7 @@ class HallController(View):
         except Http404:
             return JsonResponse({"error": "Hall not found"}, status=404)
         except Exception as e:
-            self.logger.log(f"Error in PUT request: {e}")
+            self.component.logger.log(f"Error in PUT request: {e}")
             return JsonResponse({"error": str(e)}, status=500)
 
     def delete(self, request, gym_id, pk):
@@ -77,5 +72,5 @@ class HallController(View):
         except Http404:
             return JsonResponse({"error": "Hall not found"}, status=404)
         except Exception as e:
-            self.logger.log(f"Error in DELETE request: {e}")
+            self.component.logger.log(f"Error in DELETE request: {e}")
             return JsonResponse({"error": str(e)}, status=500)

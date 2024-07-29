@@ -1,15 +1,12 @@
 from gym_app.repositories.gym_repository import GymRepository
-from gym_app.logging import CustomLogger
+from gym_app.logging import SimpleLogger
 from gym_app.models import Gym
 
 
 class GymComponent:
-    def __init__(self, gym_repository: GymRepository, logger: CustomLogger):
-        self.gym_repository = gym_repository
-        self.logger = logger
-        self._initiate_component()
-
-    def _initiate_component(self):
+    def __init__(self, gym_repository=None, logger=None):
+        self.gym_repository = gym_repository or GymRepository()
+        self.logger = logger or SimpleLogger()
         self.logger.log_info("GymComponent initialized")
 
     def fetch_all_gyms(self):

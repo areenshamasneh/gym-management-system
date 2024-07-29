@@ -1,14 +1,11 @@
 from gym_app.repositories.employee_repository import EmployeeRepository
-from gym_app.logging import CustomLogger
+from gym_app.logging import SimpleLogger
 
 
 class EmployeeComponent:
-    def __init__(self, employee_repository: EmployeeRepository, logger: CustomLogger):
-        self.employee_repository = employee_repository
-        self.logger = logger
-        self._initiate_component()
-
-    def _initiate_component(self):
+    def __init__(self, employee_repository=None, logger=None):
+        self.employee_repository = employee_repository or EmployeeRepository()
+        self.logger = logger or SimpleLogger()
         self.logger.log_info("EmployeeComponent initialized")
 
     def fetch_all_employees(self, gym_id):

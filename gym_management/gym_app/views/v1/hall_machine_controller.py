@@ -6,29 +6,29 @@ from django.utils.decorators import method_decorator
 from django.forms.models import model_to_dict
 from gym_app.components import HallMachineComponents
 from gym_app.forms import HallMachineForm
-from gym_app.logging import CustomLogger
-
 
 @method_decorator(csrf_exempt, name="dispatch")
 class HallMachineController(View):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.component = HallMachineComponents(logger=CustomLogger())
+        self.component = HallMachineComponents()
 
     def get(self, request, gym_id, hall_id, machine_id=None):
-        if machine_id:
-            try:
+        try:
+            if machine_id:
                 hall_machine = self.component.fetch_hall_machine_by_id(
                     gym_id, hall_id, machine_id
                 )
                 data = model_to_dict(hall_machine)
                 return JsonResponse(data)
-            except Http404:
-                return JsonResponse({"error": "HallMachine not found"}, status=404)
-        else:
-            hall_machines = self.component.fetch_all_hall_machines(gym_id, hall_id)
-            data = [model_to_dict(hall_machine) for hall_machine in hall_machines]
-            return JsonResponse(data, safe=False)
+            else:
+                hall_machines = self.component.fetch_all_hall_machines(gym_id, hall_id)
+                data = [model_to_dict(hall_machine) for hall_machine in hall_machines]
+                return JsonResponse(data, safe=False)
+        except Http404:
+            return JsonResponse({"error": "HallMachine not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
 
     def post(self, request, gym_id, hall_id):
         try:

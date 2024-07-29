@@ -1,16 +1,13 @@
 from django.http import Http404
 from gym_app.repositories.admin_repository import AdminRepository
-from gym_app.logging import CustomLogger
+from gym_app.logging import SimpleLogger
 from gym_app.models import Admin
 
 
 class AdminComponent:
-    def __init__(self, admin_repository: AdminRepository, logger: CustomLogger):
-        self.admin_repository = admin_repository
-        self.logger = logger
-        self._initiate_component()
-
-    def _initiate_component(self):
+    def __init__(self, admin_repository=None, logger=None):
+        self.admin_repository = admin_repository or AdminRepository()
+        self.logger = logger or SimpleLogger()
         self.logger.log_info("AdminComponent initialized")
 
     def fetch_all_admins(self, gym_id):

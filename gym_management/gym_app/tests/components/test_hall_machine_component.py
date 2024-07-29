@@ -6,7 +6,7 @@ from gym_app.repositories.hall_machine_repository import HallMachineRepository
 
 
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
-@patch("gym_app.components.hall_machine_component.CustomLogger")
+@patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_fetch_all_hall_machines(mock_logger, mock_repo):
     mock_hall_machine1 = MagicMock(spec=HallMachine)
     mock_hall_machine1.hall_id = 1
@@ -30,7 +30,7 @@ def test_fetch_all_hall_machines(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
-@patch("gym_app.components.hall_machine_component.CustomLogger")
+@patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_fetch_hall_machine_by_id(mock_logger, mock_repo):
     mock_hall_machine = MagicMock(spec=HallMachine)
     mock_hall_machine.hall_id = 1
@@ -48,7 +48,7 @@ def test_fetch_hall_machine_by_id(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
-@patch("gym_app.components.hall_machine_component.CustomLogger")
+@patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_add_hall_machine(mock_logger, mock_repo):
     mock_hall_machine = MagicMock(spec=HallMachine)
     mock_hall_machine.hall_id = 1
@@ -77,7 +77,7 @@ def test_add_hall_machine(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
-@patch("gym_app.components.hall_machine_component.CustomLogger")
+@patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_modify_hall_machine(mock_logger, mock_repo):
     mock_hall_machine = MagicMock(spec=HallMachine)
     mock_hall_machine.name = "Updated HallMachine"
@@ -97,7 +97,7 @@ def test_modify_hall_machine(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
-@patch("gym_app.components.hall_machine_component.CustomLogger")
+@patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_remove_hall_machine(mock_logger, mock_repo):
     hall_machine_component = HallMachineComponents()
     hall_machine_component.remove_hall_machine(gym_id=1, hall_id=1, machine_id=1)
@@ -106,7 +106,7 @@ def test_remove_hall_machine(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
-@patch("gym_app.components.hall_machine_component.CustomLogger")
+@patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_add_hall_machine_with_missing_fields(mock_logger, mock_repo):
     mock_repo.return_value.create_hall_machine.side_effect = KeyError(
         "Missing required field"
@@ -120,7 +120,7 @@ def test_add_hall_machine_with_missing_fields(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
-@patch("gym_app.components.hall_machine_component.CustomLogger")
+@patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_modify_hall_machine_non_existent(mock_logger, mock_repo):
     mock_repo.return_value.update_hall_machine.side_effect = HallMachine.DoesNotExist
 
@@ -134,7 +134,7 @@ def test_modify_hall_machine_non_existent(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
-@patch("gym_app.components.hall_machine_component.CustomLogger")
+@patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_remove_hall_machine_non_existent(mock_logger, mock_repo):
     mock_repo.return_value.delete_hall_machine.side_effect = HallMachine.DoesNotExist
 
@@ -146,7 +146,7 @@ def test_remove_hall_machine_non_existent(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
-@patch("gym_app.components.hall_machine_component.CustomLogger")
+@patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_fetch_hall_machine_by_id_non_existent(mock_logger, mock_repo):
     mock_repo.return_value.get_hall_machine_by_id.side_effect = HallMachine.DoesNotExist
 
@@ -158,7 +158,7 @@ def test_fetch_hall_machine_by_id_non_existent(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
-@patch("gym_app.components.hall_machine_component.CustomLogger")
+@patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_add_hall_machine_invalid_data(mock_logger, mock_repo):
     mock_repo.return_value.create_hall_machine.side_effect = ValueError("Invalid data")
 
@@ -175,7 +175,7 @@ def test_add_hall_machine_invalid_data(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
-@patch("gym_app.components.hall_machine_component.CustomLogger")
+@patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_modify_hall_machine_invalid_data(mock_logger, mock_repo):
     mock_repo.return_value.update_hall_machine.side_effect = ValueError("Invalid data")
 

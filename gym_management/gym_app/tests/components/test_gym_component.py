@@ -5,7 +5,7 @@ from gym_app.models.system_models import Gym
 
 
 @patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.CustomLogger")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_fetch_all_gyms(mock_logger, mock_repo):
     gym1 = MagicMock()
     gym1.id = 1
@@ -34,7 +34,7 @@ def test_fetch_all_gyms(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.CustomLogger")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_fetch_gym_by_id(mock_logger, mock_repo):
     gym = MagicMock()
     gym.id = 1
@@ -54,7 +54,7 @@ def test_fetch_gym_by_id(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.CustomLogger")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_add_gym(mock_logger, mock_repo):
     mock_gym = MagicMock()
     mock_gym.id = 1
@@ -82,7 +82,7 @@ def test_add_gym(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.CustomLogger")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_modify_gym(mock_logger, mock_repo):
     gym = MagicMock()
     gym.id = 1
@@ -109,7 +109,7 @@ def test_modify_gym(mock_logger, mock_repo):
 
 
 @patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.CustomLogger")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_remove_gym(mock_logger, mock_repo):
     mock_repo.delete_gym.return_value = None
 
@@ -121,7 +121,7 @@ def test_remove_gym(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.CustomLogger")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_add_gym_with_missing_fields(mock_logger, mock_repo):
     mock_repo.create_gym.side_effect = KeyError("Missing required field")
 
@@ -137,7 +137,7 @@ def test_add_gym_with_missing_fields(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.CustomLogger")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_modify_gym_non_existent(mock_logger, mock_repo):
     mock_repo.update_gym.side_effect = Gym.DoesNotExist
 
@@ -156,7 +156,7 @@ def test_modify_gym_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.CustomLogger")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_remove_gym_non_existent(mock_logger, mock_repo):
     mock_repo.delete_gym.side_effect = Gym.DoesNotExist
 
@@ -167,7 +167,7 @@ def test_remove_gym_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.CustomLogger")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_fetch_gym_by_id_non_existent(mock_logger, mock_repo):
     mock_repo.get_gym_by_id.side_effect = Gym.DoesNotExist
 
@@ -178,7 +178,7 @@ def test_fetch_gym_by_id_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.CustomLogger")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_add_gym_invalid_data(mock_logger, mock_repo):
     mock_repo.create_gym.side_effect = ValueError("Invalid data")
 
@@ -197,7 +197,7 @@ def test_add_gym_invalid_data(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.CustomLogger")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_modify_gym_invalid_data(mock_logger, mock_repo):
     mock_repo.update_gym.side_effect = ValueError("Invalid data")
 

@@ -2,12 +2,12 @@ import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
 from gym_app.components import HallTypeComponent
 from gym_app.models import HallType
-from gym_app.logging import CustomLogger
+from gym_app.logging import SimpleLogger
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.CustomLogger")
+@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_fetch_all_hall_types(mock_logger, mock_repo):
     mock_hall_type1 = MagicMock(spec=HallType)
     mock_hall_type1.id = 1
@@ -32,7 +32,7 @@ def test_fetch_all_hall_types(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.CustomLogger")
+@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_fetch_hall_type_by_id(mock_logger, mock_repo):
     mock_hall_type = MagicMock(spec=HallType)
     mock_hall_type.id = 1
@@ -51,7 +51,7 @@ def test_fetch_hall_type_by_id(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.CustomLogger")
+@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_add_hall_type(mock_logger, mock_repo):
     mock_hall_type = MagicMock(spec=HallType)
     mock_hall_type.id = 1
@@ -72,7 +72,7 @@ def test_add_hall_type(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.CustomLogger")
+@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_modify_hall_type(mock_logger, mock_repo):
     mock_hall_type = MagicMock(spec=HallType)
     mock_hall_type.id = 1
@@ -94,7 +94,7 @@ def test_modify_hall_type(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.CustomLogger")
+@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_remove_hall_type(mock_logger, mock_repo):
     component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
     component.remove_hall_type(1)
@@ -106,7 +106,7 @@ def test_remove_hall_type(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.CustomLogger")
+@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_add_hall_type_with_missing_fields(mock_logger, mock_repo):
     mock_repo.create_hall_type.side_effect = KeyError("Missing required field")
 
@@ -121,7 +121,7 @@ def test_add_hall_type_with_missing_fields(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.CustomLogger")
+@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_modify_hall_type_non_existent(mock_logger, mock_repo):
     mock_repo.update_hall_type.side_effect = HallType.DoesNotExist
 
@@ -138,7 +138,7 @@ def test_modify_hall_type_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.CustomLogger")
+@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_remove_hall_type_non_existent(mock_logger, mock_repo):
     mock_repo.delete_hall_type.side_effect = HallType.DoesNotExist
 
@@ -151,7 +151,7 @@ def test_remove_hall_type_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.CustomLogger")
+@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_fetch_hall_type_by_id_non_existent(mock_logger, mock_repo):
     mock_repo.get_hall_type_by_id.side_effect = HallType.DoesNotExist
 
@@ -164,7 +164,7 @@ def test_fetch_hall_type_by_id_non_existent(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.CustomLogger")
+@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_add_hall_type_invalid_data(mock_logger, mock_repo):
     mock_repo.create_hall_type.side_effect = ValueError("Invalid data")
 
@@ -182,7 +182,7 @@ def test_add_hall_type_invalid_data(mock_logger, mock_repo):
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.CustomLogger")
+@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_add_hall_type_invalid_data(mock_logger, mock_repo):
     mock_repo.create_hall_type.side_effect = ValueError("Invalid data")
 
