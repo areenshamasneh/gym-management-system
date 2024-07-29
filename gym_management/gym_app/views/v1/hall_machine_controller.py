@@ -7,6 +7,7 @@ from django.forms.models import model_to_dict
 from gym_app.components import HallMachineComponents
 from gym_app.forms import HallMachineForm
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class HallMachineController(View):
     def __init__(self, *args, **kwargs):

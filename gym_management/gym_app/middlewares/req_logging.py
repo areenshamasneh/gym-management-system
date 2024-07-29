@@ -6,6 +6,7 @@ import json
 
 request_logger = logging.getLogger("custom.request")
 
+
 class RequestLogMiddleware(MiddlewareMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

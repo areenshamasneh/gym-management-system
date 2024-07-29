@@ -7,6 +7,7 @@ from gym_app.components import GymComponent
 from gym_app.forms import GymForm
 from gym_app.models.system_models import Gym
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class GymController(View):
     def __init__(self, *args, **kwargs):
@@ -65,7 +66,9 @@ class GymController(View):
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Exception as e:
-            return JsonResponse({"error": "Creation failed", "details": str(e)}, status=500)
+            return JsonResponse(
+                {"error": "Creation failed", "details": str(e)}, status=500
+            )
 
     def put(self, request, pk):
         try:
@@ -89,7 +92,9 @@ class GymController(View):
         except Gym.DoesNotExist:
             return JsonResponse({"error": "Gym not found"}, status=404)
         except Exception as e:
-            return JsonResponse({"error": "Update failed", "details": str(e)}, status=500)
+            return JsonResponse(
+                {"error": "Update failed", "details": str(e)}, status=500
+            )
 
     def delete(self, request, pk):
         try:

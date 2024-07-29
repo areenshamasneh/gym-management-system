@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from gym_app.components import HallTypeComponent
 from gym_app.forms.hall_type import HallTypeForm
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class HallTypeController(View):
     def __init__(self, *args, **kwargs):
@@ -37,34 +38,48 @@ class HallTypeController(View):
                 response_data = model_to_dict(hall_type)
                 return JsonResponse(response_data, status=201)
             else:
-                return JsonResponse({"error": "Invalid data", "details": form.errors}, status=400)
+                return JsonResponse(
+                    {"error": "Invalid data", "details": form.errors}, status=400
+                )
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Exception as e:
-            return JsonResponse({"error": "Creation failed", "details": str(e)}, status=500)
+            return JsonResponse(
+                {"error": "Creation failed", "details": str(e)}, status=500
+            )
 
     def put(self, request, hall_type_id, *args, **kwargs):
         try:
             data = json.loads(request.body)
             form = HallTypeForm(data)
             if form.is_valid():
-                hall_type = self.component.modify_hall_type(hall_type_id, form.cleaned_data)
+                hall_type = self.component.modify_hall_type(
+                    hall_type_id, form.cleaned_data
+                )
                 response_data = model_to_dict(hall_type)
                 return JsonResponse(response_data)
             else:
-                return JsonResponse({"error": "Invalid data", "details": form.errors}, status=400)
+                return JsonResponse(
+                    {"error": "Invalid data", "details": form.errors}, status=400
+                )
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Http404:
             return JsonResponse({"error": "HallType not found"}, status=404)
         except Exception as e:
-            return JsonResponse({"error": "Update failed", "details": str(e)}, status=500)
+            return JsonResponse(
+                {"error": "Update failed", "details": str(e)}, status=500
+            )
 
     def delete(self, request, hall_type_id, *args, **kwargs):
         try:
             self.component.remove_hall_type(hall_type_id)
-            return JsonResponse({"message": "HallType deleted successfully"}, status=204)
+            return JsonResponse(
+                {"message": "HallType deleted successfully"}, status=204
+            )
         except Http404:
             return JsonResponse({"error": "HallType not found"}, status=404)
         except Exception as e:
-            return JsonResponse({"error": "Deletion failed", "details": str(e)}, status=500)
+            return JsonResponse(
+                {"error": "Deletion failed", "details": str(e)}, status=500
+            )

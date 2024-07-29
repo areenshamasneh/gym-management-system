@@ -247,6 +247,7 @@ def test_duplicate_email_in_admin_form():
     assert not form.is_valid()
     assert "Email already exists" in form.errors["email"]
 
+
 @pytest.mark.django_db
 def test_address_length_in_admin_form():
     data = {
@@ -258,16 +259,10 @@ def test_address_length_in_admin_form():
     }
     form = AdminForm(data)
     assert not form.is_valid()
-    assert (
-        "Address city is too long"
-        in form.errors["address_city"]
-    )
+    assert "Address city is too long" in form.errors["address_city"]
 
     data["address_city"] = "Valid City"
     data["address_street"] = "S" * 256
     form = AdminForm(data)
     assert not form.is_valid()
-    assert (
-        "Address street is too long"
-        in form.errors["address_street"]
-    )
+    assert "Address street is too long" in form.errors["address_street"]

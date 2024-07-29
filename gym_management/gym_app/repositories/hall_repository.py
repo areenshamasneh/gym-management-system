@@ -10,7 +10,7 @@ class HallRepository:
         return get_object_or_404(Hall, pk=hall_id, gym_id=gym_id)
 
     def create_hall(self, gym_id, data):
-        hall_type_id = data.get("hall_type_id")  # Use hall_type_id here
+        hall_type_id = data.get("hall_type_id")
         if not hall_type_id:
             raise ValueError("hall_type_id is required")
 
@@ -18,7 +18,7 @@ class HallRepository:
         return Hall.objects.create(
             name=data.get("name"),
             users_capacity=data.get("users_capacity"),
-            hall_type_id=hall_type_id,  # Use hall_type_id directly
+            hall_type_id=hall_type_id,
             gym_id=gym_instance,
         )
 

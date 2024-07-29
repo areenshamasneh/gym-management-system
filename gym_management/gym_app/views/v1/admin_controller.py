@@ -7,6 +7,7 @@ from django.views import View
 from gym_app.components import AdminComponent
 from gym_app.forms import AdminForm
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class AdminController(View):
     def __init__(self):

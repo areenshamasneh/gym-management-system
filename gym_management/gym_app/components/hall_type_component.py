@@ -25,7 +25,9 @@ class HallTypeComponent:
             raise ValueError("Invalid data") from e
 
     def modify_hall_type(self, hall_type_id, data):
-        self.logger.log_info(f"Modifying hall type with ID {hall_type_id} with data: {data}")
+        self.logger.log_info(
+            f"Modifying hall type with ID {hall_type_id} with data: {data}"
+        )
         return self.repo.update_hall_type(hall_type_id, data)
 
     def remove_hall_type(self, hall_type_id):

@@ -7,6 +7,7 @@ from django.forms.models import model_to_dict
 from gym_app.components import MemberComponent
 from gym_app.forms import MemberForm
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class MemberController(View):
     def __init__(self, *args, **kwargs):
@@ -37,7 +38,9 @@ class MemberController(View):
                 response_data = model_to_dict(member)
                 return JsonResponse(response_data, status=201)
             else:
-                return JsonResponse({"error": "Invalid data", "details": form.errors}, status=400)
+                return JsonResponse(
+                    {"error": "Invalid data", "details": form.errors}, status=400
+                )
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except ValueError as e:
@@ -54,13 +57,17 @@ class MemberController(View):
                 response_data = model_to_dict(member)
                 return JsonResponse(response_data, status=200)
             else:
-                return JsonResponse({"error": "Invalid data", "details": form.errors}, status=400)
+                return JsonResponse(
+                    {"error": "Invalid data", "details": form.errors}, status=400
+                )
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Http404:
             return JsonResponse({"error": "Member not found"}, status=404)
         except Exception as e:
-            return JsonResponse({"error": "Update failed", "details": str(e)}, status=500)
+            return JsonResponse(
+                {"error": "Update failed", "details": str(e)}, status=500
+            )
 
     def delete(self, request, gym_id, pk):
         try:
