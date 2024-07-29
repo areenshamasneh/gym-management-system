@@ -37,32 +37,49 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "gym_app.middlewares.json_logging.RequestLogMiddleware",
+    "gym_app.middlewares.req_logging.RequestLogMiddleware",
 ]
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "default": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        },
+    },
     "handlers": {
-        "file": {
+        "file_logging": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "logs", "requests_responses.log"),
+            "filename": os.path.join(BASE_DIR, "logs", "logging.log"),
+            "formatter": "default",
         },
-        "console": {
-            "level": "DEBUG",
+        "console_logging": {
+            "level": "INFO",
             "class": "logging.StreamHandler",
+            "formatter": "default",
+        },
+        "request_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "requests_responses.log"),
+            "formatter": "default",
         },
     },
     "loggers": {
         "custom.request": {
-            "handlers": ["file", "console"],
-            "level": "DEBUG",
+            "handlers": ["request_file", "console_logging"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "gym_app.components": {
+            "handlers": ["file_logging", "console_logging"],
+            "level": "INFO",
             "propagate": False,
         },
     },
 }
-
 
 ROOT_URLCONF = "gym_management.urls"
 

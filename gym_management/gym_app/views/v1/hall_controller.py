@@ -26,7 +26,7 @@ class HallController(View):
         except Http404:
             return JsonResponse({"error": "Hall not found"}, status=404)
         except Exception as e:
-            self.component.logger.log(f"Error in GET request: {e}")
+            self.component.logger.log_info(f"Error in GET request: {e}")
             return JsonResponse({"error": str(e)}, status=500)
 
     def post(self, request, gym_id):
@@ -44,7 +44,7 @@ class HallController(View):
         except Http404 as e:
             return JsonResponse({"error": str(e)}, status=400)
         except Exception as e:
-            self.component.logger.log(f"Error in POST request: {e}")
+            self.component.logger.log_info(f"Error in POST request: {e}")
             return JsonResponse({"error": str(e)}, status=500)
 
     def put(self, request, gym_id, pk):
@@ -62,7 +62,7 @@ class HallController(View):
         except Http404:
             return JsonResponse({"error": "Hall not found"}, status=404)
         except Exception as e:
-            self.component.logger.log(f"Error in PUT request: {e}")
+            self.component.logger.log_info(f"Error in PUT request: {e}")
             return JsonResponse({"error": str(e)}, status=500)
 
     def delete(self, request, gym_id, pk):
@@ -72,5 +72,5 @@ class HallController(View):
         except Http404:
             return JsonResponse({"error": "Hall not found"}, status=404)
         except Exception as e:
-            self.component.logger.log(f"Error in DELETE request: {e}")
+            self.component.logger.log_info(f"Error in DELETE request: {e}")
             return JsonResponse({"error": str(e)}, status=500)

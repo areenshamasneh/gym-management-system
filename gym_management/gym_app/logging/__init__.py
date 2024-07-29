@@ -1,1 +1,1 @@
-from gym_app.logging.custom_logger import *
+from gym_app.logging.simple_logger import *

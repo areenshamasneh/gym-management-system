@@ -9,7 +9,7 @@ class HallComponent:
         self.logger.log_info("HallComponent initialized")
 
     def fetch_all_halls(self, gym_id):
-        self.logger.log("Fetching all halls")
+        self.logger.log_info("Fetching all halls")
         return self.repo.get_all_halls(gym_id)
 
     def fetch_hall_by_id(self, gym_id, hall_id):
