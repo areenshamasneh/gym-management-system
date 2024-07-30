@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from gym_app.components import GymComponent
 from gym_app.forms import GymForm
 from gym_app.models.system_models import Gym
+from django.db.models import Q
 
 @method_decorator(csrf_exempt, name="dispatch")
 class GymController(View):
@@ -16,7 +17,21 @@ class GymController(View):
     def get(self, request, pk=None):
         try:
             if pk is None:
-                gyms = self.gym_component.fetch_all_gyms()
+                # Fetch query parameters
+                name = request.GET.get('name', None)
+                gym_type = request.GET.get('type', None)
+                description = request.GET.get('description', None)
+
+                # Create a Q object to handle complex queries
+                filters = Q()
+                if name:
+                    filters &= Q(name__icontains=name)
+                if gym_type:
+                    filters &= Q(type__icontains=gym_type)
+                if description:
+                    filters &= Q(description__icontains=description)
+
+                gyms = Gym.objects.filter(filters)
                 gym_list = [
                     {
                         "id": gym.id,
@@ -66,7 +81,9 @@ class GymController(View):
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Exception as e:
-            return JsonResponse({"error": "Creation failed", "details": str(e)}, status=500)
+            return JsonResponse(
+                {"error": "Creation failed", "details": str(e)}, status=500
+            )
 
     def put(self, request, pk):
         try:
@@ -91,7 +108,9 @@ class GymController(View):
         except Gym.DoesNotExist:
             return JsonResponse({"error": "Gym not found"}, status=404)
         except Exception as e:
-            return JsonResponse({"error": "Update failed", "details": str(e)}, status=500)
+            return JsonResponse(
+                {"error": "Update failed", "details": str(e)}, status=500
+            )
 
     def delete(self, request, pk):
         try:

@@ -21,8 +21,20 @@ class MemberController(View):
                 data = model_to_dict(member)
                 return JsonResponse(data)
             else:
-                members = self.component.fetch_all_members(gym_id)
-                data = [model_to_dict(member) for member in members]
+                name_filter = request.GET.get("name", None)
+
+                all_members = self.component.fetch_all_members(gym_id)
+
+                if name_filter:
+                    filtered_members = [
+                        member
+                        for member in all_members
+                        if name_filter.lower() in member.name.lower()
+                    ]
+                else:
+                    filtered_members = all_members
+
+                data = [model_to_dict(member) for member in filtered_members]
                 return JsonResponse(data, safe=False)
         except Http404:
             return JsonResponse({"error": "Member not found"}, status=404)
@@ -38,8 +50,13 @@ class MemberController(View):
                 response_data = model_to_dict(member)
                 return JsonResponse(response_data, status=201)
             else:
-                errors = {field: [e for e in error_list] for field, error_list in form.errors.items()}
-                return JsonResponse({"error": "Invalid data", "details": errors}, status=400)
+                errors = {
+                    field: [e for e in error_list]
+                    for field, error_list in form.errors.items()
+                }
+                return JsonResponse(
+                    {"error": "Invalid data", "details": errors}, status=400
+                )
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except ValueError as e:
@@ -56,14 +73,21 @@ class MemberController(View):
                 response_data = model_to_dict(member)
                 return JsonResponse(response_data, status=200)
             else:
-                errors = {field: [e for e in error_list] for field, error_list in form.errors.items()}
-                return JsonResponse({"error": "Invalid data", "details": errors}, status=400)
+                errors = {
+                    field: [e for e in error_list]
+                    for field, error_list in form.errors.items()
+                }
+                return JsonResponse(
+                    {"error": "Invalid data", "details": errors}, status=400
+                )
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Http404:
             return JsonResponse({"error": "Member not found"}, status=404)
         except Exception as e:
-            return JsonResponse({"error": "Update failed", "details": str(e)}, status=500)
+            return JsonResponse(
+                {"error": "Update failed", "details": str(e)}, status=500
+            )
 
     def delete(self, request, gym_id, pk):
         try:
