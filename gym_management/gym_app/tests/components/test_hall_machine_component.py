@@ -16,13 +16,13 @@ def test_fetch_all_hall_machines(mock_logger, mock_repo):
     mock_hall_machine2.hall_id = 1
     mock_hall_machine2.machine_id = 2
 
-    mock_repo.return_value.get_all_hall_machines.return_value = [
+    mock_repo.return_value.get_all_hall_machines_in_gym.return_value = [
         mock_hall_machine1,
         mock_hall_machine2,
     ]
 
     hall_machine_component = HallMachineComponents()
-    hall_machines = hall_machine_component.fetch_all_hall_machines(gym_id=1, hall_id=1)
+    hall_machines = hall_machine_component.fetch_all_machines_in_gym(gym_id=1)
 
     assert len(hall_machines) == 2
     assert hall_machines[0].hall_id == 1
@@ -36,10 +36,10 @@ def test_fetch_hall_machine_by_id(mock_logger, mock_repo):
     mock_hall_machine.hall_id = 1
     mock_hall_machine.machine_id = 1
 
-    mock_repo.return_value.get_hall_machine_by_id.return_value = mock_hall_machine
+    mock_repo.return_value.get_machine_by_id_in_hall.return_value = mock_hall_machine
 
     hall_machine_component = HallMachineComponents()
-    hall_machine = hall_machine_component.fetch_hall_machine_by_id(
+    hall_machine = hall_machine_component.fetch_machine_by_id_in_hall(
         gym_id=1, hall_id=1, machine_id=1
     )
 
@@ -148,11 +148,13 @@ def test_remove_hall_machine_non_existent(mock_logger, mock_repo):
 @patch("gym_app.components.hall_machine_component.HallMachineRepository")
 @patch("gym_app.components.hall_machine_component.SimpleLogger")
 def test_fetch_hall_machine_by_id_non_existent(mock_logger, mock_repo):
-    mock_repo.return_value.get_hall_machine_by_id.side_effect = HallMachine.DoesNotExist
+    mock_repo.return_value.get_machine_by_id_in_hall.side_effect = (
+        HallMachine.DoesNotExist
+    )
 
     hall_machine_component = HallMachineComponents()
     with pytest.raises(HallMachine.DoesNotExist):
-        hall_machine_component.fetch_hall_machine_by_id(
+        hall_machine_component.fetch_machine_by_id_in_hall(
             gym_id=1, hall_id=999, machine_id=999
         )
 

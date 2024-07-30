@@ -1,4 +1,3 @@
-from gym_app.urls.health_urls import health_check
 from django.urls import path, include
 
 urlpatterns = [

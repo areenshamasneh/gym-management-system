@@ -1,11 +1,11 @@
-import json
 from django.forms import model_to_dict
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+import json
 from django.views import View
 from gym_app.components import AdminComponent
 from gym_app.forms import AdminForm
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -35,9 +35,9 @@ class AdminController(View):
                 response_data = model_to_dict(admin)
                 return JsonResponse(response_data, status=201)
             else:
-                errors = form.errors
+                errors = {field: errors for field, errors in form.errors.items()}
                 return JsonResponse(
-                    {"error": f"Form validation errors: {errors}"}, status=400
+                    {"error": "Form validation errors", "details": errors}, status=400
                 )
         except Exception as e:
             return JsonResponse({"error": f"Creation failed: {str(e)}"}, status=500)
@@ -52,9 +52,9 @@ class AdminController(View):
                 response_data = model_to_dict(admin)
                 return JsonResponse(response_data, status=200)
             else:
-                errors = form.errors
+                errors = {field: errors for field, errors in form.errors.items()}
                 return JsonResponse(
-                    {"error": f"Form validation errors: {errors}"}, status=400
+                    {"error": "Form validation errors", "details": errors}, status=400
                 )
         except ValueError as e:
             return JsonResponse({"error": str(e)}, status=400)

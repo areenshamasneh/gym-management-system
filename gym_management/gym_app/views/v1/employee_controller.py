@@ -1,4 +1,3 @@
-import json
 from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -6,6 +5,7 @@ from django.utils.decorators import method_decorator
 from django.forms.models import model_to_dict
 from gym_app.components import EmployeeComponent
 from gym_app.forms import EmployeeForm
+import json
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -35,10 +35,7 @@ class EmployeeController(View):
                 response_data = model_to_dict(employee)
                 return JsonResponse(response_data, status=201)
             else:
-                errors = form.errors.as_json()
-                return JsonResponse(
-                    {"error": f"Form validation errors: {errors}"}, status=400
-                )
+                return JsonResponse({"errors": form.errors}, status=400)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except ValueError as e:
@@ -58,10 +55,7 @@ class EmployeeController(View):
                 response_data = model_to_dict(employee)
                 return JsonResponse(response_data, status=200)
             else:
-                errors = form.errors.as_json()
-                return JsonResponse(
-                    {"error": f"Form validation errors: {errors}"}, status=400
-                )
+                return JsonResponse({"errors": form.errors}, status=400)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except ValueError as e:

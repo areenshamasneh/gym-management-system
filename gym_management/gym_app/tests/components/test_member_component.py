@@ -98,7 +98,9 @@ def test_modify_member(mock_logger, mock_repo):
 
     assert member.name == "Member Updated"
     assert member.gym.id == 1
-    mock_logger.log_info.assert_called_with(f"Modifying member with ID 1 with data: {data}")
+    mock_logger.log_info.assert_called_with(
+        f"Modifying member with ID 1 with data: {data}"
+    )
 
 
 @pytest.mark.django_db

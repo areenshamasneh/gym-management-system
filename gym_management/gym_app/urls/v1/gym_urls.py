@@ -5,7 +5,6 @@ from gym_app.views import (
     GymController,
     HallController,
     MemberController,
-    HallTypeController,
     HallMachineController,
 )
 
@@ -40,20 +39,19 @@ urlpatterns = [
         MemberController.as_view(),
         name="member-detail",
     ),
-    path("hall_types/", HallTypeController.as_view(), name="hall_type-list"),
-    path(
-        "hall_types/<int:hall_type_id>/",
-        HallTypeController.as_view(),
-        name="hall_type-detail",
-    ),
     path(
         "gyms/<int:gym_id>/halls/<int:hall_id>/machines/",
         HallMachineController.as_view(),
         name="hall-machine-list",
     ),
     path(
-        "gyms/<int:gym_id>/halls/<int:hall_id>/machines/<str:machine_id>/",
+        "gyms/<int:gym_id>/halls/<int:hall_id>/machines/<int:machine_id>/",
         HallMachineController.as_view(),
         name="hall-machine-detail",
+    ),
+    path(
+        "gyms/<int:gym_id>/halls/machines/",
+        HallMachineController.as_view(),
+        name="hall-machine-list",
     ),
 ]

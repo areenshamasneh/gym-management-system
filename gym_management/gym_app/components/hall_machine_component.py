@@ -8,15 +8,20 @@ class HallMachineComponents:
         self.logger = logger if logger else SimpleLogger()
         self.logger.log_info("HallMachineComponents initialized")
 
-    def fetch_all_hall_machines(self, gym_id, hall_id=None):
-        self.logger.log_info(
-            f"Fetching all hall machines for gym_id: {gym_id}, hall_id: {hall_id}"
-        )
-        return self.repo.get_all_hall_machines(gym_id, hall_id=hall_id)
+    def fetch_all_machines_in_gym(self, gym_id):
+        self.logger.log_info(f"Fetching all hall machines for gym_id: {gym_id}")
+        hall_machines = self.repo.get_all_hall_machines_in_gym(gym_id)
+        return hall_machines
 
-    def fetch_hall_machine_by_id(self, gym_id, hall_id, machine_id):
-        self.logger.log_info(f"Fetching hall machine by ID: {machine_id}")
-        return self.repo.get_hall_machine_by_id(gym_id, hall_id, machine_id)
+    def fetch_all_machines_in_hall(self, gym_id, hall_id):
+        self.logger.log_info(
+            f"Fetching all machines for gym_id: {gym_id}, hall_id: {hall_id}"
+        )
+        return self.repo.get_all_machines_in_hall(gym_id, hall_id)
+
+    def fetch_machine_by_id_in_hall(self, gym_id, hall_id, machine_id):
+        self.logger.log_info(f"Fetching machine by ID: {machine_id} in hall: {hall_id}")
+        return self.repo.get_machine_by_id_in_hall(gym_id, hall_id, machine_id)
 
     def add_hall_machine(self, gym_id, hall_id, data):
         self.logger.log_info(f"Adding hall machine with data: {data}")
