@@ -1,3 +1,4 @@
+from django.http import Http404
 from gym_app.repositories.gym_repository import GymRepository
 from gym_app.logging import SimpleLogger
 from gym_app.models import Gym
@@ -25,7 +26,7 @@ class GymComponent:
             return gym
         except Gym.DoesNotExist:
             self.logger.log_error(f"Gym with ID {pk} not found")
-            raise
+            raise Http404(f"Gym with ID {pk} does not exist")
         except Exception as e:
             self.logger.log_error(f"Error fetching gym by ID {pk}: {str(e)}")
             raise
@@ -46,7 +47,7 @@ class GymComponent:
             return gym
         except Gym.DoesNotExist:
             self.logger.log_error(f"Gym with ID {pk} not found")
-            raise
+            raise Http404(f"Gym with ID {pk} does not exist")
         except Exception as e:
             self.logger.log_error(f"Error modifying gym ID {pk}: {str(e)}")
             raise
@@ -57,7 +58,7 @@ class GymComponent:
             self.gym_repository.delete_gym(pk)
         except Gym.DoesNotExist:
             self.logger.log_error(f"Gym with ID {pk} not found")
-            raise
+            raise Http404(f"Gym with ID {pk} does not exist")
         except Exception as e:
             self.logger.log_error(f"Error removing gym ID {pk}: {str(e)}")
             raise

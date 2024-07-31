@@ -38,6 +38,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "gym_app.middlewares.req_logging.RequestLogMiddleware",
+    "gym_app.middlewares.exception_handler.ExceptionMiddleware",
 ]
 
 LOGGING = {

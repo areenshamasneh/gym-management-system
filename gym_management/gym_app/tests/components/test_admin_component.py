@@ -151,14 +151,16 @@ def test_modify_admin_non_existent(mock_repo):
         "email": "nonexistent@example.com",
         "address_city": "Nowhere",
         "address_street": "No Street",
-        "gym_id": mock_gym.id,
     }
 
-    mock_repo_instance.get_admin_by_id.side_effect = Admin.DoesNotExist
+    mock_repo_instance.get_admin_by_id.side_effect = Http404(
+        f"Admin with ID {non_existent_admin_id} not found for gym_id {mock_gym.id}"
+    )
 
     admin_component = AdminComponent(
         admin_repository=mock_repo_instance, logger=MagicMock()
     )
+
     with pytest.raises(ValueError, match="Admin with ID 999 does not exist"):
         admin_component.modify_admin(mock_gym.id, non_existent_admin_id, data)
 

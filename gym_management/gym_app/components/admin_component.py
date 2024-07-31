@@ -51,9 +51,9 @@ class AdminComponent:
     def modify_admin(self, gym_id, admin_id, admin_data):
         try:
             admin = self.admin_repository.get_admin_by_id(gym_id, admin_id)
-        except Admin.DoesNotExist:
+        except Http404 as e:
             self.logger.log_error(
-                f"Admin with ID {admin_id} not found for gym_id {gym_id}"
+                f"Admin with ID {admin_id} not found for gym_id {gym_id}: {str(e)}"
             )
             raise ValueError(f"Admin with ID {admin_id} does not exist")
 
