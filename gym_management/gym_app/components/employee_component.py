@@ -1,5 +1,7 @@
+from django.http import Http404
 from gym_app.repositories.employee_repository import EmployeeRepository
 from gym_app.logging import SimpleLogger
+from gym_app.models import Employee
 
 
 class EmployeeComponent:
@@ -25,7 +27,11 @@ class EmployeeComponent:
                 f"Fetching employee by ID {employee_id} for gym_id: {gym_id}"
             )
             employee = self.employee_repository.get_employee_by_id(gym_id, employee_id)
+            if not employee:
+                raise ValueError(f"Employee with ID {employee_id} does not exist")
             return employee
+        except Employee.DoesNotExist:
+            raise ValueError(f"Employee with ID {employee_id} does not exist")
         except Exception as e:
             self.logger.log_error(
                 f"Unexpected error fetching employee by ID {employee_id} for gym_id: {gym_id}: {str(e)}"

@@ -35,15 +35,13 @@ class MemberForm(forms.ModelForm):
         required=False,
         validators=[
             RegexValidator(
-                regex=r'^\d+$',
-                message="Phone number should only contain digits."
+                regex=r"^\d+$", message="Phone number should only contain digits."
             ),
             MaxLengthValidator(
                 20, "Phone number length exceeds the limit of 20 characters."
-            )
+            ),
         ],
     )
-
 
     def clean_birth_date(self):
         birth_date = self.cleaned_data.get("birth_date")

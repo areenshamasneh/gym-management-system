@@ -201,10 +201,12 @@ def test_fetch_employee_by_id_non_existent(mock_logger, mock_repo):
     mock_logger_instance = MagicMock(spec=SimpleLogger)
     mock_logger.return_value = mock_logger_instance
 
-    mock_repo.get_employee_by_id.side_effect = Employee.DoesNotExist
+    mock_repo.get_employee_by_id.side_effect = ValueError(
+        "Employee with ID 999 does not exist"
+    )
 
     component = EmployeeComponent(mock_repo, mock_logger_instance)
-    with pytest.raises(Employee.DoesNotExist):
+    with pytest.raises(ValueError, match="Employee with ID 999 does not exist"):
         component.fetch_employee_by_id(1, 999)
 
 

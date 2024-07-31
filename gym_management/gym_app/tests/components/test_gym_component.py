@@ -1,5 +1,6 @@
 import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
+from django.http import Http404
 from gym_app.components import GymComponent
 from gym_app.models.system_models import Gym
 
@@ -119,7 +120,6 @@ def test_remove_gym(mock_logger, mock_repo):
     mock_repo.delete_gym.assert_called_once_with(1)
 
 
-@pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_add_gym_with_missing_fields(mock_logger, mock_repo):
@@ -135,11 +135,10 @@ def test_add_gym_with_missing_fields(mock_logger, mock_repo):
         component.add_gym(data)
 
 
-@pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_modify_gym_non_existent(mock_logger, mock_repo):
-    mock_repo.update_gym.side_effect = Gym.DoesNotExist
+    mock_repo.update_gym.side_effect = Http404("Gym with ID 999 does not exist")
 
     data = {
         "name": "Non Existent Gym",
@@ -150,33 +149,30 @@ def test_modify_gym_non_existent(mock_logger, mock_repo):
     }
 
     component = GymComponent(mock_repo, mock_logger)
-    with pytest.raises(Gym.DoesNotExist):
+    with pytest.raises(Http404, match="Gym with ID 999 does not exist"):
         component.modify_gym(999, data)
 
 
-@pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_remove_gym_non_existent(mock_logger, mock_repo):
-    mock_repo.delete_gym.side_effect = Gym.DoesNotExist
+    mock_repo.delete_gym.side_effect = Http404("Gym with ID 999 does not exist")
 
     component = GymComponent(mock_repo, mock_logger)
-    with pytest.raises(Gym.DoesNotExist):
+    with pytest.raises(Http404, match="Gym with ID 999 does not exist"):
         component.remove_gym(999)
 
 
-@pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_fetch_gym_by_id_non_existent(mock_logger, mock_repo):
-    mock_repo.get_gym_by_id.side_effect = Gym.DoesNotExist
+    mock_repo.get_gym_by_id.side_effect = Http404("Gym with ID 999 does not exist")
 
     component = GymComponent(mock_repo, mock_logger)
-    with pytest.raises(Gym.DoesNotExist):
+    with pytest.raises(Http404, match="Gym with ID 999 does not exist"):
         component.fetch_gym_by_id(999)
 
 
-@pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_add_gym_invalid_data(mock_logger, mock_repo):
@@ -195,7 +191,6 @@ def test_add_gym_invalid_data(mock_logger, mock_repo):
         component.add_gym(data)
 
 
-@pytest.mark.django_db
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_modify_gym_invalid_data(mock_logger, mock_repo):
