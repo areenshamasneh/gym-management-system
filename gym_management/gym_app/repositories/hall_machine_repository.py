@@ -3,31 +3,39 @@ from django.shortcuts import get_object_or_404
 
 
 class HallMachineRepository:
-    def get_all_hall_machines(self, hall_id=None, machine_id=None):
-        if hall_id:
-            return HallMachine.objects.filter(hall_id=hall_id)
-        if machine_id:
-            return HallMachine.objects.filter(machine_id=machine_id)
-        return HallMachine.objects.all()
-
-    def get_hall_machine_by_id(self, hall_id, machine_id):
-        return get_object_or_404(HallMachine, hall_id=hall_id, machine_id=machine_id)
-
-    def create_hall_machine(self, data):
-        hall = get_object_or_404(Hall, pk=data.get("hall_id"))
-        machine = get_object_or_404(Machine, pk=data.get("machine_id"))
+    def create_hall_machine(self, gym_id, hall_id, data):
+        hall = get_object_or_404(Hall, pk=hall_id, gym_id=gym_id)
+        machine = get_object_or_404(Machine, id=data.get("machine_id"))
         return HallMachine.objects.create(
             hall_id=hall, machine_id=machine, name=data.get("name"), uid=data.get("uid")
         )
 
-    def update_hall_machine(self, hall_id, machine_id, data):
-        hall_machine = self.get_hall_machine_by_id(hall_id, machine_id)
+    def get_all_machines_in_hall(self, gym_id, hall_id):
+        hall = get_object_or_404(Hall, pk=hall_id, gym_id=gym_id)
+        hall_machines = HallMachine.objects.filter(hall_id=hall)
+        machines = [hall_machine.machine_id for hall_machine in hall_machines]
+        return machines
+
+    def get_machine_by_id_in_hall(self, gym_id, hall_id, machine_id):
+        hall = get_object_or_404(Hall, pk=hall_id, gym_id=gym_id)
+        hall_machine = get_object_or_404(
+            HallMachine, hall_id=hall, machine_id=machine_id
+        )
+        return hall_machine.machine_id
+
+    def get_all_hall_machines_in_gym(self, gym_id):
+        return HallMachine.objects.filter(hall_id__gym_id=gym_id)
+
+    def update_hall_machine(self, gym_id, hall_id, machine_id, data):
+        hall_machine = self.get_hall_machine_by_id(gym_id, hall_id, machine_id)
         if "hall_id" in data:
-            hall_instance = get_object_or_404(Hall, pk=data.get("hall_id"))
+            hall_instance = get_object_or_404(
+                Hall, pk=data.get("hall_id"), gym_id=gym_id
+            )
             hall_machine.hall_id = hall_instance
 
         if "machine_id" in data:
-            machine_instance = get_object_or_404(Machine, pk=data.get("machine_id"))
+            machine_instance = get_object_or_404(Machine, id=data.get("machine_id"))
             hall_machine.machine_id = machine_instance
 
         if "name" in data:
@@ -39,6 +47,6 @@ class HallMachineRepository:
         hall_machine.save()
         return hall_machine
 
-    def delete_hall_machine(self, hall_id, machine_id):
-        hall_machine = self.get_hall_machine_by_id(hall_id, machine_id)
+    def delete_hall_machine(self, gym_id, hall_id, machine_id):
+        hall_machine = self.get_hall_machine_by_id(gym_id, hall_id, machine_id)
         hall_machine.delete()

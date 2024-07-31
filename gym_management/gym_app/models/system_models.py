@@ -27,7 +27,7 @@ class Machine(models.Model):
         ("stair_climber", "Stair Climber"),
     ]
 
-    serial_number = models.CharField(max_length=100, primary_key=True)
+    serial_number = models.CharField(max_length=100)
     type = models.CharField(max_length=100, choices=TYPE_CHOICES)
     model = models.CharField(max_length=100, blank=True, null=True)
     brand = models.CharField(max_length=100, blank=True, null=True)
@@ -39,18 +39,21 @@ class Machine(models.Model):
 
 
 class HallType(models.Model):
-    TYPE_CHOICES = [
-        ("sauna", "Sauna"),
-        ("training", "Training"),
-        ("yoga", "Yoga"),
-        ("swimming", "Swimming"),
+    CODE_CHOICES = [
+        ("SAUNA", "Sauna"),
+        ("TRAINING", "Training"),
+        ("YOGA", "Yoga"),
+        ("SWIMMING", "Swimming"),
     ]
 
+    name = models.CharField(max_length=100, choices=CODE_CHOICES, default="Training")
+    code = models.CharField(
+        max_length=20, choices=CODE_CHOICES, unique=True, default="TRAINING"
+    )
     type_description = models.CharField(max_length=255, blank=True, null=True)
-    type = models.CharField(max_length=100, choices=TYPE_CHOICES)
 
     def __str__(self):
-        return self.type
+        return self.name
 
 
 class Hall(models.Model):
@@ -113,7 +116,7 @@ class Member(models.Model):
     gym_id = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="members")
     name = models.CharField(max_length=255)
     birth_date = models.DateField()
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True, unique=True)
 
     def __str__(self):
         return self.name

@@ -1,78 +1,110 @@
-import json
-from django.http import JsonResponse
+from django.forms import model_to_dict
+from django.http import Http404, JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from django.forms.models import model_to_dict
 from gym_app.components import HallMachineComponents
+from gym_app.forms.hall_machine import HallMachineForm
+from gym_app.models import Machine
+import json
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class HallMachineController(View):
     def __init__(self, *args, **kwargs):
-        self.components = HallMachineComponents()
         super().__init__(*args, **kwargs)
+        self.component = HallMachineComponents()
 
-    @method_decorator(csrf_exempt, name="dispatch")
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
-    def get(self, request, hall_id=None, machine_id=None):
+    def get(self, request, gym_id, hall_id=None, machine_id=None):
         try:
-            if hall_id and machine_id:
-                hall_machine = self.components.fetch_hall_machine_by_id(
-                    hall_id, machine_id
+            if machine_id:
+                # Fetch specific Machine associated with the hall
+                machine = self.component.fetch_machine_by_id_in_hall(
+                    gym_id, hall_id, machine_id
                 )
-                data = model_to_dict(hall_machine)
+                data = model_to_dict(machine)
                 return JsonResponse(data)
             elif hall_id:
-                hall_machines = self.components.fetch_all_hall_machines(hall_id=hall_id)
-                data = [model_to_dict(hall_machine) for hall_machine in hall_machines]
-                return JsonResponse(data, safe=False)
-            elif machine_id:
-                machine_halls = self.components.fetch_all_hall_machines(
-                    machine_id=machine_id
-                )
-                data = [model_to_dict(hall_machine) for hall_machine in machine_halls]
+                # Fetch all Machines in the hall
+                machines = self.component.fetch_all_machines_in_hall(gym_id, hall_id)
+                data = [model_to_dict(machine) for machine in machines]
                 return JsonResponse(data, safe=False)
             else:
-                return JsonResponse(
-                    {"error": "Hall ID or Machine ID required"}, status=400
-                )
+                # Fetch all HallMachine records for the specified gym
+                hall_machines = self.component.fetch_all_machines_in_gym(gym_id)
+                data = [model_to_dict(hall_machine) for hall_machine in hall_machines]
+                return JsonResponse(data, safe=False)
+        except Http404:
+            return JsonResponse({"error": "Machine or Hall not found"}, status=404)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
-    def post(self, request, hall_id=None):
-        if not hall_id:
-            return JsonResponse({"error": "Hall ID required"}, status=400)
+    def post(self, request, gym_id, hall_id):
+        data = json.loads(request.body)
+        if "serial_number" not in data:
+            return JsonResponse({"error": "serial_number is required"}, status=400)
+
         try:
-            data = json.loads(request.body)
-            data["hall"] = hall_id
-            hall_machine = self.components.add_hall_machine(data)
+            machine, created = Machine.objects.get_or_create(
+                serial_number=data["serial_number"],
+                defaults={
+                    "type": data.get("type"),
+                    "model": data.get("model"),
+                    "brand": data.get("brand"),
+                    "status": data.get("status"),
+                    "maintenance_date": data.get("maintenance_date"),
+                },
+            )
+
+            if created:
+                self.component.logger.log_info(
+                    f"Machine created: {machine.serial_number}"
+                )
+            else:
+                self.component.logger.log_info(
+                    f"Machine already exists: {machine.serial_number}"
+                )
+
+            hall_machine = self.component.add_hall_machine(
+                gym_id,
+                hall_id,
+                {
+                    "name": data.get("name"),
+                    "uid": data.get("uid"),
+                    "machine_id": machine.id,
+                },
+            )
+
             response_data = model_to_dict(hall_machine)
             return JsonResponse(response_data, status=201)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
-        except Exception as e:
-            return JsonResponse({"error": f"Creation failed: {str(e)}"}, status=500)
 
-    def put(self, request, hall_id, machine_id):
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    def put(self, request, gym_id, hall_id, machine_id):
         try:
             data = json.loads(request.body)
-            hall_machine = self.components.modify_hall_machine(
-                hall_id, machine_id, data
-            )
-            response_data = model_to_dict(hall_machine)
-            return JsonResponse(response_data, status=200)
+            form = HallMachineForm(data)
+            if form.is_valid():
+                hall_machine = self.component.modify_hall_machine(
+                    gym_id, hall_id, machine_id, form.cleaned_data
+                )
+                response_data = model_to_dict(hall_machine)
+                return JsonResponse(response_data, status=200)
+            else:
+                return JsonResponse({"errors": form.errors}, status=400)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Http404:
+            return JsonResponse({"error": "HallMachine not found"}, status=404)
         except Exception as e:
-            return JsonResponse({"error": f"Update failed: {str(e)}"}, status=500)
+            return JsonResponse({"error": "Update failed"}, status=500)
 
-    def delete(self, request, hall_id, machine_id):
+    def delete(self, request, gym_id, hall_id, machine_id):
         try:
-            self.components.remove_hall_machine(hall_id, machine_id)
-            return JsonResponse(
-                {"message": "HallMachine deleted successfully"}, status=204
-            )
+            self.component.remove_hall_machine(gym_id, hall_id, machine_id)
+            return JsonResponse({"message": "Deleted successfully"}, status=204)
+        except Http404:
+            return JsonResponse({"error": "HallMachine not found"}, status=404)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
