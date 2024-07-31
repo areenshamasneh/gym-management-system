@@ -7,7 +7,6 @@ from gym_app.components import GymComponent
 from gym_app.forms import GymForm
 from gym_app.models.system_models import Gym
 from django.db.models import Q
-from gym_app.decorators import handle_exceptions
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -16,7 +15,6 @@ class GymController(View):
         self.gym_component = GymComponent()
         super().__init__(*args, **kwargs)
 
-    @handle_exceptions
     def get(self, request, pk=None):
         if pk is None:
             name = request.GET.get("name", None)
@@ -56,7 +54,6 @@ class GymController(View):
             }
             return JsonResponse(gym_data)
 
-    @handle_exceptions
     def post(self, request):
         data = json.loads(request.body)
         form = GymForm(data)
@@ -75,7 +72,6 @@ class GymController(View):
             errors = {field: errors for field, errors in form.errors.items()}
             return JsonResponse({"errors": errors}, status=400)
 
-    @handle_exceptions
     def put(self, request, pk):
         data = json.loads(request.body)
         form = GymForm(data)
@@ -94,7 +90,6 @@ class GymController(View):
             errors = {field: errors for field, errors in form.errors.items()}
             return JsonResponse({"errors": errors}, status=400)
 
-    @handle_exceptions
     def delete(self, request, pk):
         self.gym_component.remove_gym(pk)
         return JsonResponse({"message": "Gym deleted"}, status=204)

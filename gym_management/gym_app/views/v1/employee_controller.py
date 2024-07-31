@@ -5,7 +5,6 @@ from django.utils.decorators import method_decorator
 from django.forms.models import model_to_dict
 from gym_app.components import EmployeeComponent
 from gym_app.forms import EmployeeForm
-from gym_app.decorators import handle_exceptions
 import json
 from django.db.models import Q
 
@@ -15,7 +14,6 @@ class EmployeeController(View):
     def __init__(self):
         self.employee_component = EmployeeComponent()
 
-    @handle_exceptions
     def get(self, request, gym_id, pk=None):
         name = request.GET.get("name", "")
         email = request.GET.get("email", "")
@@ -52,7 +50,6 @@ class EmployeeController(View):
 
         return JsonResponse(data, safe=False)
 
-    @handle_exceptions
     def post(self, request, gym_id):
         data = json.loads(request.body)
         form = EmployeeForm(data)
@@ -64,7 +61,6 @@ class EmployeeController(View):
         else:
             return JsonResponse({"errors": form.errors}, status=400)
 
-    @handle_exceptions
     def put(self, request, gym_id, pk):
         data = json.loads(request.body)
         form = EmployeeForm(data)
@@ -78,7 +74,6 @@ class EmployeeController(View):
         else:
             return JsonResponse({"errors": form.errors}, status=400)
 
-    @handle_exceptions
     def delete(self, request, gym_id, pk=None):
         if pk is None:
             return JsonResponse(

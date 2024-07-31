@@ -7,7 +7,6 @@ from gym_app.components import HallMachineComponents
 from gym_app.forms.hall_machine import HallMachineForm
 from gym_app.models import Machine
 import json
-from gym_app.decorators import handle_exceptions
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -16,7 +15,6 @@ class HallMachineController(View):
         super().__init__(*args, **kwargs)
         self.component = HallMachineComponents()
 
-    @handle_exceptions
     def get(self, request, gym_id, hall_id=None, machine_id=None):
         if machine_id:
             machine = self.component.fetch_machine_by_id_in_hall(
@@ -33,7 +31,6 @@ class HallMachineController(View):
             data = [model_to_dict(hall_machine) for hall_machine in hall_machines]
             return JsonResponse(data, safe=False)
 
-    @handle_exceptions
     def post(self, request, gym_id, hall_id):
         data = json.loads(request.body)
         if "serial_number" not in data:
@@ -70,7 +67,6 @@ class HallMachineController(View):
         response_data = model_to_dict(hall_machine)
         return JsonResponse(response_data, status=201)
 
-    @handle_exceptions
     def put(self, request, gym_id, hall_id, machine_id):
         data = json.loads(request.body)
         form = HallMachineForm(data)
@@ -83,7 +79,6 @@ class HallMachineController(View):
         else:
             return JsonResponse({"errors": form.errors}, status=400)
 
-    @handle_exceptions
     def delete(self, request, gym_id, hall_id, machine_id):
         self.component.remove_hall_machine(gym_id, hall_id, machine_id)
         return JsonResponse({"message": "Deleted successfully"}, status=204)

@@ -7,7 +7,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from gym_app.components import AdminComponent
 from gym_app.forms import AdminForm
-from gym_app.decorators import handle_exceptions
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -15,7 +14,6 @@ class AdminController(View):
     def __init__(self):
         self.admin_component = AdminComponent()
 
-    @handle_exceptions
     def get(self, request, gym_id, pk=None):
         name = request.GET.get("name", "")
         email = request.GET.get("email", "")
@@ -45,7 +43,6 @@ class AdminController(View):
             data = [model_to_dict(admin) for admin in admins]
         return JsonResponse(data, safe=False)
 
-    @handle_exceptions
     def post(self, request, gym_id):
         data = json.loads(request.body)
         form = AdminForm(data)
@@ -60,7 +57,6 @@ class AdminController(View):
                 {"error": "Form validation errors", "details": errors}, status=400
             )
 
-    @handle_exceptions
     def put(self, request, gym_id, pk):
         data = json.loads(request.body)
         form = AdminForm(data)
@@ -75,7 +71,6 @@ class AdminController(View):
                 {"error": "Form validation errors", "details": errors}, status=400
             )
 
-    @handle_exceptions
     def delete(self, request, gym_id, pk):
         self.admin_component.remove_admin(gym_id, pk)
         return JsonResponse({}, status=204)

@@ -6,7 +6,6 @@ from django.utils.decorators import method_decorator
 from django.forms.models import model_to_dict
 from gym_app.components import MemberComponent
 from gym_app.forms import MemberForm
-from gym_app.decorators import handle_exceptions
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -15,7 +14,6 @@ class MemberController(View):
         super().__init__(*args, **kwargs)
         self.component = MemberComponent()
 
-    @handle_exceptions
     def get(self, request, gym_id, pk=None):
         if pk:
             member = self.component.fetch_member_by_id(gym_id, pk)
@@ -37,7 +35,6 @@ class MemberController(View):
             data = [model_to_dict(member) for member in filtered_members]
             return JsonResponse(data, safe=False)
 
-    @handle_exceptions
     def post(self, request, gym_id):
         data = json.loads(request.body)
         form = MemberForm(data)
@@ -54,7 +51,6 @@ class MemberController(View):
                 {"error": "Invalid data", "details": errors}, status=400
             )
 
-    @handle_exceptions
     def put(self, request, gym_id, pk):
         data = json.loads(request.body)
         form = MemberForm(data)
@@ -71,7 +67,6 @@ class MemberController(View):
                 {"error": "Invalid data", "details": errors}, status=400
             )
 
-    @handle_exceptions
     def delete(self, request, gym_id, pk):
         self.component.remove_member(gym_id, pk)
         return JsonResponse({"message": "Deleted successfully"}, status=204)

@@ -10,10 +10,8 @@ request_logger = logging.getLogger("custom.request")
 class RequestLogMiddleware(MiddlewareMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        print("RequestLogMiddleware initialized")
 
     def __call__(self, request):
-        print("Middleware __call__")
         response = self.get_response(request)
         if request.path.startswith("/api/"):
             log_data = self.extract_log_info(request=request, response=response)
@@ -21,14 +19,12 @@ class RequestLogMiddleware(MiddlewareMixin):
         return response
 
     def process_request(self, request):
-        print("Middleware process_request")
         if request.method in ["POST", "PUT", "PATCH"]:
             request.req_body = request.body
         if request.path.startswith("/api/"):
             request.start_time = time.time()
 
     def extract_log_info(self, request, response=None, exception=None):
-        print("Middleware extract_log_info")
         log_data = {
             "remote_address": request.META.get("REMOTE_ADDR"),
             "server_hostname": socket.gethostname(),
@@ -59,14 +55,12 @@ class RequestLogMiddleware(MiddlewareMixin):
         return log_data
 
     def process_response(self, request, response):
-        print("Middleware process_response")
         if request.path.startswith("/api/"):
             log_data = self.extract_log_info(request=request, response=response)
             request_logger.info(json.dumps(log_data, indent=4))
         return response
 
     def process_exception(self, request, exception):
-        print("Middleware process_exception")
         if request.path.startswith("/api/"):
             log_data = self.extract_log_info(request=request, exception=exception)
             request_logger.error(json.dumps(log_data, indent=4))

@@ -5,7 +5,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.forms.models import model_to_dict
 from gym_app.components import HallComponent
-from gym_app.decorators import handle_exceptions
 from gym_app.forms import HallForm
 
 
@@ -15,7 +14,6 @@ class HallController(View):
         super().__init__(*args, **kwargs)
         self.component = HallComponent()
 
-    @handle_exceptions
     def get(self, request, gym_id, pk=None):
         if pk:
             hall = self.component.fetch_hall_by_id(gym_id, pk)
@@ -26,7 +24,6 @@ class HallController(View):
             data = [model_to_dict(hall) for hall in halls]
             return JsonResponse(data, safe=False)
 
-    @handle_exceptions
     def post(self, request, gym_id):
         data = json.loads(request.body)
         form = HallForm(data)
@@ -37,7 +34,6 @@ class HallController(View):
         else:
             return JsonResponse({"error": form.errors}, status=400)
 
-    @handle_exceptions
     def put(self, request, gym_id, pk):
         data = json.loads(request.body)
         form = HallForm(data)
@@ -48,7 +44,6 @@ class HallController(View):
         else:
             return JsonResponse({"error": form.errors}, status=400)
 
-    @handle_exceptions
     def delete(self, request, gym_id, pk):
         self.component.remove_hall(gym_id, pk)
         return JsonResponse({"message": "Hall deleted"}, status=204)
