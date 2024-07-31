@@ -1,57 +1,11 @@
-from django.urls import path
-from gym_app.views import (
-    AdminController,
-    EmployeeController,
-    GymController,
-    HallController,
-    MemberController,
-    HallMachineController,
-)
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter  # type: ignore
+from gym_app.views import GymView, AdminView
+
+router = DefaultRouter()
+router.register(r"gyms", GymView, basename="gym")
+router.register(r"gyms/(?P<gym_id>\d+)/admins", AdminView, basename="admin")
 
 urlpatterns = [
-    path("gyms/", GymController.as_view(), name="gym-list"),
-    path("gyms/<int:pk>/", GymController.as_view(), name="gym-detail"),
-    path("gyms/<int:gym_id>/admins/", AdminController.as_view(), name="admin-list"),
-    path(
-        "gyms/<int:gym_id>/admins/<int:pk>/",
-        AdminController.as_view(),
-        name="admin-detail",
-    ),
-    path(
-        "gyms/<int:gym_id>/employees/",
-        EmployeeController.as_view(),
-        name="employees-list",
-    ),
-    path(
-        "gyms/<int:gym_id>/employees/<int:pk>/",
-        EmployeeController.as_view(),
-        name="employees-detail",
-    ),
-    path("gyms/<int:gym_id>/halls/", HallController.as_view(), name="hall-list"),
-    path(
-        "gyms/<int:gym_id>/halls/<int:pk>/",
-        HallController.as_view(),
-        name="hall-detail",
-    ),
-    path("gyms/<int:gym_id>/members/", MemberController.as_view(), name="member-list"),
-    path(
-        "gyms/<int:gym_id>/members/<int:pk>/",
-        MemberController.as_view(),
-        name="member-detail",
-    ),
-    path(
-        "gyms/<int:gym_id>/halls/<int:hall_id>/machines/",
-        HallMachineController.as_view(),
-        name="hall-machine-list",
-    ),
-    path(
-        "gyms/<int:gym_id>/halls/<int:hall_id>/machines/<int:machine_id>/",
-        HallMachineController.as_view(),
-        name="hall-machine-detail",
-    ),
-    path(
-        "gyms/<int:gym_id>/halls/machines/",
-        HallMachineController.as_view(),
-        name="hall-machine-list",
-    ),
+    path("", include(router.urls)),
 ]

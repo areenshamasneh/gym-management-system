@@ -2,8 +2,6 @@ import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
 from django.http import Http404
 from gym_app.components import GymComponent
-from gym_app.models.system_models import Gym
-
 
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
@@ -54,16 +52,14 @@ def test_fetch_gym_by_id(mock_logger, mock_repo):
     assert result.address_city == "City 1"
 
 
-@patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.SimpleLogger")
+@patch("gym_app.repositories.GymRepository")
+@patch("gym_app.logging.SimpleLogger")
 def test_add_gym(mock_logger, mock_repo):
-    mock_gym = MagicMock()
-    mock_gym.id = 1
-    mock_gym.name = "New Gym"
-    mock_gym.type = "Type A"
-    mock_gym.description = "Desc"
-    mock_gym.address_city = "City"
-    mock_gym.address_street = "Street"
+
+    mock_repo.create_gym = MagicMock()
+    mock_logger.log_info = MagicMock()
+
+    component = GymComponent(mock_repo, mock_logger)
 
     mock_data = {
         "name": "New Gym",
@@ -73,27 +69,25 @@ def test_add_gym(mock_logger, mock_repo):
         "address_street": "Street",
     }
 
-    mock_repo.create_gym.return_value = mock_gym
+    component.add_gym(mock_data)
 
-    component = GymComponent(mock_repo, mock_logger)
-    result = component.add_gym(mock_data)
-
-    assert result.name == "New Gym"
-    assert result.address_city == "City"
+    mock_repo.create_gym.assert_called_once_with(mock_data)
+    mock_logger.log_info.assert_called_with("Adding new gym")
 
 
-@patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.SimpleLogger")
+@patch("gym_app.repositories.GymRepository")
+@patch("gym_app.logging.SimpleLogger")
 def test_modify_gym(mock_logger, mock_repo):
+
     gym = MagicMock()
     gym.id = 1
-    gym.name = "Updated Gym"
-    gym.type = "Type B"
-    gym.description = "Updated Desc"
-    gym.address_city = "Updated City"
-    gym.address_street = "Updated Street"
 
-    mock_repo.update_gym.return_value = gym
+    mock_repo.get_gym_by_id = MagicMock(return_value=gym)
+    mock_repo.update_gym = MagicMock()
+    mock_logger.log_info = MagicMock()
+
+    component = GymComponent(mock_repo, mock_logger)
+
     mock_data = {
         "name": "Updated Gym",
         "type": "Type B",
@@ -102,11 +96,13 @@ def test_modify_gym(mock_logger, mock_repo):
         "address_street": "Updated Street",
     }
 
-    component = GymComponent(mock_repo, mock_logger)
-    result = component.modify_gym(1, mock_data)
+    # Call
+    component.modify_gym(1, mock_data)
 
-    assert result.name == "Updated Gym"
-    assert result.address_city == "Updated City"
+    # Assertions
+    mock_repo.get_gym_by_id.assert_called_once_with(1)
+    mock_repo.update_gym.assert_called_once_with(1, mock_data)
+    mock_logger.log_info.assert_called_with("Modifying gym ID 1")
 
 
 @patch("gym_app.components.gym_component.GymRepository")

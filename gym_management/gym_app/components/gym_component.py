@@ -1,7 +1,7 @@
-from django.http import Http404
-from gym_app.repositories.gym_repository import GymRepository
+from gym_app.models.system_models import Gym
+from gym_app.repositories import GymRepository
 from gym_app.logging import SimpleLogger
-from gym_app.models import Gym
+from django.http import Http404
 
 
 class GymComponent:
@@ -13,8 +13,7 @@ class GymComponent:
     def fetch_all_gyms(self):
         try:
             self.logger.log_info("Fetching all gyms")
-            gyms = self.gym_repository.get_all_gyms()
-            return gyms
+            return self.gym_repository.get_all_gyms()
         except Exception as e:
             self.logger.log_error(f"Error fetching gyms: {str(e)}")
             raise
@@ -23,6 +22,8 @@ class GymComponent:
         try:
             self.logger.log_info(f"Fetching gym by ID {pk}")
             gym = self.gym_repository.get_gym_by_id(pk)
+            if not gym:
+                raise Http404("Gym not found")
             return gym
         except Gym.DoesNotExist:
             self.logger.log_error(f"Gym with ID {pk} not found")
@@ -34,8 +35,7 @@ class GymComponent:
     def add_gym(self, data):
         try:
             self.logger.log_info("Adding new gym")
-            gym = self.gym_repository.create_gym(data)
-            return gym
+            self.gym_repository.create_gym(data)
         except Exception as e:
             self.logger.log_error(f"Error adding gym: {str(e)}")
             raise
@@ -43,8 +43,10 @@ class GymComponent:
     def modify_gym(self, pk, data):
         try:
             self.logger.log_info(f"Modifying gym ID {pk}")
-            gym = self.gym_repository.update_gym(pk, data)
-            return gym
+            gym = self.gym_repository.get_gym_by_id(pk)
+            if not gym:
+                raise Http404("Gym not found")
+            self.gym_repository.update_gym(pk, data)
         except Gym.DoesNotExist:
             self.logger.log_error(f"Gym with ID {pk} not found")
             raise Http404(f"Gym with ID {pk} does not exist")
@@ -55,6 +57,9 @@ class GymComponent:
     def remove_gym(self, pk):
         try:
             self.logger.log_info(f"Removing gym ID {pk}")
+            gym = self.gym_repository.get_gym_by_id(pk)
+            if not gym:
+                raise Http404("Gym not found")
             self.gym_repository.delete_gym(pk)
         except Gym.DoesNotExist:
             self.logger.log_error(f"Gym with ID {pk} not found")

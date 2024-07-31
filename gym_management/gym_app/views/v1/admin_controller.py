@@ -1,20 +1,23 @@
-import json
-from django.forms import model_to_dict
-from django.http import JsonResponse
-from django.utils.decorators import method_decorator
-from django.views import View
-from django.views.decorators.csrf import csrf_exempt
+from gym_app.models.system_models import Gym
+from rest_framework import viewsets  # type: ignore
+from rest_framework.response import Response  # type: ignore
+from rest_framework import status  # type: ignore
+from django.shortcuts import get_object_or_404
+from gym_app.models import Admin
+from gym_app.serializers import AdminSerializer
 from django.db.models import Q
-from gym_app.components import AdminComponent
-from gym_app.forms import AdminForm
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class AdminController(View):
-    def __init__(self):
-        self.admin_component = AdminComponent()
+class AdminView(viewsets.ViewSet):
+    def list(self, request, gym_id=None):
+        try:
+            gym = Gym.objects.get(id=gym_id)
+        except Gym.DoesNotExist:
+            return Response(
+                {"detail": "Gym with ID {} does not exist".format(gym_id)},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
-    def get(self, request, gym_id, pk=None):
         name = request.GET.get("name", "")
         email = request.GET.get("email", "")
         phone_number = request.GET.get("phone_number", "")
@@ -33,44 +36,69 @@ class AdminController(View):
         if address_street:
             filter_criteria &= Q(address_street__icontains=address_street)
 
-        if pk is not None:
-            admin = self.admin_component.fetch_admin_by_id(gym_id, pk)
-            data = model_to_dict(admin)
-        else:
-            admins = self.admin_component.fetch_all_admins(gym_id).filter(
-                filter_criteria
-            )
-            data = [model_to_dict(admin) for admin in admins]
-        return JsonResponse(data, safe=False)
+        admins = Admin.objects.filter(filter_criteria)
+        serializer = AdminSerializer(admins, many=True)
+        return Response(serializer.data)
 
-    def post(self, request, gym_id):
-        data = json.loads(request.body)
-        form = AdminForm(data)
-        if form.is_valid():
-            admin_data = form.cleaned_data
-            admin = self.admin_component.add_admin(gym_id, admin_data)
-            response_data = model_to_dict(admin)
-            return JsonResponse(response_data, status=201)
-        else:
-            errors = {field: errors for field, errors in form.errors.items()}
-            return JsonResponse(
-                {"error": "Form validation errors", "details": errors}, status=400
+    def retrieve(self, request, pk=None, gym_id=None):
+        if gym_id is None:
+            return Response({"detail": "Gym ID is required"}, status=400)
+        try:
+            gym = Gym.objects.get(id=gym_id)
+        except Gym.DoesNotExist:
+            return Response(
+                {"detail": "Gym with ID {} does not exist".format(gym_id)},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
-    def put(self, request, gym_id, pk):
-        data = json.loads(request.body)
-        form = AdminForm(data)
-        if form.is_valid():
-            admin_data = form.cleaned_data
-            admin = self.admin_component.modify_admin(gym_id, pk, admin_data)
-            response_data = model_to_dict(admin)
-            return JsonResponse(response_data, status=200)
-        else:
-            errors = {field: errors for field, errors in form.errors.items()}
-            return JsonResponse(
-                {"error": "Form validation errors", "details": errors}, status=400
-            )
+        admin = get_object_or_404(Admin, pk=pk, gym_id=gym_id)
+        serializer = AdminSerializer(admin)
+        return Response(serializer.data)
 
-    def delete(self, request, gym_id, pk):
-        self.admin_component.remove_admin(gym_id, pk)
-        return JsonResponse({}, status=204)
+    def create(self, request, gym_id=None):
+        if gym_id is None:
+            return Response({"detail": "Gym ID is required"}, status=400)
+
+        gym = get_object_or_404(Gym, pk=gym_id)
+        data = request.data.copy()
+        data["gym_id"] = gym.id
+
+        serializer = AdminSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save(gym_id=gym.id)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+    def update(self, request, pk=None, gym_id=None):
+        if gym_id is None:
+            return Response({"detail": "Gym ID is required"}, status=400)
+
+        admin = get_object_or_404(Admin, pk=pk, gym_id=gym_id)
+        data = request.data.copy()
+        data["gym_id"] = gym_id
+        serializer = AdminSerializer(admin, data=data, partial=False)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    def partial_update(self, request, pk=None, gym_id=None):
+        if gym_id is None:
+            return Response({"detail": "Gym ID is required"}, status=400)
+
+        admin = get_object_or_404(Admin, pk=pk, gym_id=gym_id)
+        data = request.data.copy()
+        data["gym_id"] = gym_id
+        serializer = AdminSerializer(admin, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    def destroy(self, request, pk=None, gym_id=None):
+        if gym_id is None:
+            return Response({"detail": "Gym ID is required"}, status=400)
+
+        admin = get_object_or_404(Admin, pk=pk, gym_id=gym_id)
+        admin.delete()
+        return Response(status=204)

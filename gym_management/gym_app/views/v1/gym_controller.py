@@ -1,95 +1,42 @@
-import json
-from django.http import JsonResponse, Http404
-from django.utils.decorators import method_decorator
-from django.views import View
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework import viewsets  # type: ignore
 from gym_app.components import GymComponent
-from gym_app.forms import GymForm
-from gym_app.models.system_models import Gym
-from django.db.models import Q
+from gym_app.serializers import GymSerializer
+from rest_framework.response import Response  # type: ignore
+from rest_framework import status  # type: ignore
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class GymController(View):
-    def __init__(self, *args, **kwargs):
+class GymView(viewsets.ViewSet):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.gym_component = GymComponent()
-        super().__init__(*args, **kwargs)
 
-    def get(self, request, pk=None):
-        if pk is None:
-            name = request.GET.get("name", None)
-            gym_type = request.GET.get("type", None)
-            description = request.GET.get("description", None)
+    def list(self, request):
+        gyms = self.gym_component.fetch_all_gyms()
+        serializer = GymSerializer(gyms, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-            filters = Q()
-            if name:
-                filters &= Q(name__icontains=name)
-            if gym_type:
-                filters &= Q(type__icontains=gym_type)
-            if description:
-                filters &= Q(description__icontains=description)
+    def retrieve(self, request, pk=None):
+        gym = self.gym_component.fetch_gym_by_id(pk)
+        serializer = GymSerializer(gym)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-            gyms = Gym.objects.filter(filters)
-            gym_list = [
-                {
-                    "id": gym.id,
-                    "name": gym.name,
-                    "type": gym.type,
-                    "description": gym.description,
-                    "address_city": gym.address_city,
-                    "address_street": gym.address_street,
-                }
-                for gym in gyms
-            ]
-            return JsonResponse(gym_list, safe=False)
-        else:
-            gym = self.gym_component.fetch_gym_by_id(pk)
-            gym_data = {
-                "id": gym.id,
-                "name": gym.name,
-                "type": gym.type,
-                "description": gym.description,
-                "address_city": gym.address_city,
-                "address_street": gym.address_street,
-            }
-            return JsonResponse(gym_data)
+    def create(self, request):
+        serializer = GymSerializer(data=request.data)
+        if serializer.is_valid():
+            self.gym_component.add_gym(serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request):
-        data = json.loads(request.body)
-        form = GymForm(data)
-        if form.is_valid():
-            gym = self.gym_component.add_gym(form.cleaned_data)
-            gym_data = {
-                "id": gym.id,
-                "name": gym.name,
-                "type": gym.type,
-                "description": gym.description,
-                "address_city": gym.address_city,
-                "address_street": gym.address_street,
-            }
-            return JsonResponse(gym_data, status=201)
-        else:
-            errors = {field: errors for field, errors in form.errors.items()}
-            return JsonResponse({"errors": errors}, status=400)
+    def update(self, request, pk=None):
+        serializer = GymSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            self.gym_component.modify_gym(pk, serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, pk):
-        data = json.loads(request.body)
-        form = GymForm(data)
-        if form.is_valid():
-            gym = self.gym_component.modify_gym(pk, form.cleaned_data)
-            gym_data = {
-                "id": gym.id,
-                "name": gym.name,
-                "type": gym.type,
-                "description": gym.description,
-                "address_city": gym.address_city,
-                "address_street": gym.address_street,
-            }
-            return JsonResponse(gym_data)
-        else:
-            errors = {field: errors for field, errors in form.errors.items()}
-            return JsonResponse({"errors": errors}, status=400)
+    def partial_update(self, request, pk=None):
+        return self.update(request, pk)
 
-    def delete(self, request, pk):
+    def destroy(self, request, pk=None):
         self.gym_component.remove_gym(pk)
-        return JsonResponse({"message": "Gym deleted"}, status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
