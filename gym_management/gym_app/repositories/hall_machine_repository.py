@@ -1,4 +1,4 @@
-from gym_app.models import HallMachine, Hall
+from gym_app.models.system_models import Hall, HallMachine
 
 
 class HallMachineRepository:
@@ -7,11 +7,6 @@ class HallMachineRepository:
         if not halls.exists():
             raise ValueError("No halls found for the given gym ID")
 
-        hall_machines = []
-        for hall in halls:
-            hall_machines.extend(self.get_hall_machines_by_hall(hall.id))
+        hall_ids = halls.values_list("id", flat=True)
 
-        return hall_machines
-
-    def get_hall_machines_by_hall(self, hall_id):
-        return HallMachine.objects.filter(hall_id=hall_id)
+        return HallMachine.objects.filter(hall_id__in=hall_ids)
