@@ -8,7 +8,7 @@ from gym_app.serializers import AdminSerializer
 from django.db.models import Q
 
 
-class AdminView(viewsets.ViewSet):
+class AdminViewSet(viewsets.ViewSet):
     def list(self, request, gym_id=None):
         try:
             gym = Gym.objects.get(id=gym_id)

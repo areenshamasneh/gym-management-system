@@ -1,4 +1,4 @@
-from gym_app.models import Hall, HallType, Gym
+from gym_app.models import Hall, Gym
 from django.shortcuts import get_object_or_404
 
 
@@ -25,10 +25,12 @@ class HallRepository:
     def update_hall(self, gym_id, hall_id, data):
         hall = get_object_or_404(Hall, pk=hall_id, gym_id=gym_id)
         for attr, value in data.items():
-            if attr == "hall_type_id":
-                if not value:
-                    raise ValueError("hall_type_id is required")
-            else:
-                setattr(hall, attr, value)
+            if attr == "hall_type_id" and not value:
+                raise ValueError("hall_type_id is required")
+            setattr(hall, attr, value)
         hall.save()
         return hall
+
+    def delete_hall(self, gym_id, hall_id):
+        hall = get_object_or_404(Hall, pk=hall_id, gym_id=gym_id)
+        hall.delete()

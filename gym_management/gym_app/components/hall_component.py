@@ -1,5 +1,5 @@
 from gym_app.logging import SimpleLogger
-from gym_app.repositories.hall_repository import HallRepository
+from gym_app.repositories import HallRepository
 
 
 class HallComponent:

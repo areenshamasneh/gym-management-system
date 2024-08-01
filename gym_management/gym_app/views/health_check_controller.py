@@ -1,5 +1,8 @@
-from django.http import JsonResponse
+from rest_framework import viewsets  # type: ignore
+from rest_framework.response import Response  # type: ignore
+from rest_framework import status  # type: ignore
 
 
-def health_check(request):
-    return JsonResponse({"status": "ok"}, status=200)
+class HealthCheckViewSet(viewsets.ViewSet):
+    def list(self, request):
+        return Response({"status": "ok"}, status=status.HTTP_200_OK)

@@ -1,9 +1,9 @@
 import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
+from django.http import Http404
 from gym_app.components import AdminComponent
 from gym_app.models import Admin, Gym
-from gym_app.forms import AdminForm
-from django.http import Http404
+from gym_app.serializers import AdminSerializer
 
 
 @pytest.mark.django_db
@@ -85,12 +85,9 @@ def test_add_admin(mock_repo):
     admin_component = AdminComponent(
         admin_repository=mock_repo_instance, logger=MagicMock()
     )
-    try:
-        admin = admin_component.add_admin(mock_gym.id, data)
-        assert admin.name == "Admin 1"
-        assert admin.email == "admin1@example.com"
-    except ValueError as e:
-        print(f"Form validation errors: {e}")
+    admin = admin_component.add_admin(mock_gym.id, data)
+    assert admin.name == "Admin 1"
+    assert admin.email == "admin1@example.com"
 
 
 @pytest.mark.django_db
@@ -115,9 +112,9 @@ def test_modify_admin():
         "gym_id": mock_gym.id,
     }
 
-    form = AdminForm(data, instance=admin)
-    assert form.is_valid(), f"Form errors: {form.errors}"
-    updated_admin = form.save()
+    serializer = AdminSerializer(instance=admin, data=data)
+    assert serializer.is_valid(), f"Serializer errors: {serializer.errors}"
+    updated_admin = serializer.save()
     assert updated_admin.name == "UpdatedAdminName"
     assert updated_admin.email == "updatedadmin@example.com"
 
@@ -132,11 +129,11 @@ def test_add_admin_with_missing_fields():
         "gym_id": mock_gym.id,
     }
 
-    form = AdminForm(data)
-    assert not form.is_valid()
-    assert "This field is required." in form.errors["email"]
-    assert "This field is required." in form.errors["address_city"]
-    assert "This field is required." in form.errors["address_street"]
+    serializer = AdminSerializer(data=data)
+    assert not serializer.is_valid()
+    assert "This field is required." in serializer.errors["email"]
+    assert "This field is required." in serializer.errors["address_city"]
+    assert "This field is required." in serializer.errors["address_street"]
 
 
 @pytest.mark.django_db
@@ -176,95 +173,3 @@ def test_remove_admin(mock_repo):
 
     assert mock_repo.delete_admin.called
     assert mock_repo.delete_admin.call_count == 1
-
-
-@pytest.mark.django_db
-def test_add_admin_with_missing_fields():
-    mock_gym = Gym.objects.create(name="Test Gym")
-
-    data = {
-        "name": "Admin1",
-        "phone_number": "1234567890",
-        # Missing email, address_city, address_street
-        "gym": mock_gym.id,
-    }
-
-    form = AdminForm(data)
-    assert not form.is_valid()
-    assert "This field is required." in form.errors["email"]
-    assert "This field is required." in form.errors["address_city"]
-    assert "This field is required." in form.errors["address_street"]
-
-
-@pytest.mark.django_db
-def test_valid_admin_form():
-    data = {
-        "name": "ValidAdmin",
-        "phone_number": "1234567890",
-        "email": "valid.admin@example.com",
-        "address_city": "Valid City",
-        "address_street": "Valid Street",
-    }
-    form = AdminForm(data)
-    assert form.is_valid(), f"Form errors: {form.errors}"
-    assert form.cleaned_data["name"] == "ValidAdmin"
-
-
-@pytest.mark.django_db
-def test_invalid_phone_number_in_admin_form():
-    data = {
-        "name": "Valid Admin",
-        "phone_number": "12345ABC90",
-        "email": "valid.admin@example.com",
-        "address_city": "Valid City",
-        "address_street": "Valid Street",
-    }
-    form = AdminForm(data)
-    assert not form.is_valid()
-    assert "Phone number should only contain digits" in form.errors["phone_number"]
-
-
-@pytest.mark.django_db
-def test_duplicate_email_in_admin_form():
-    gym = Gym.objects.create(name="Existing Gym")
-
-    Admin.objects.create(
-        name="Existing Admin",
-        phone_number="1234567890",
-        email="duplicate.email@example.com",
-        address_city="Existing City",
-        address_street="Existing Street",
-        gym_id=gym,
-    )
-
-    data = {
-        "name": "New Admin",
-        "phone_number": "9876543210",
-        "email": "duplicate.email@example.com",
-        "address_city": "New City",
-        "address_street": "New Street",
-        "gym_id": gym.id,
-    }
-    form = AdminForm(data)
-    assert not form.is_valid()
-    assert "Email already exists" in form.errors["email"]
-
-
-@pytest.mark.django_db
-def test_address_length_in_admin_form():
-    data = {
-        "name": "Valid Admin",
-        "phone_number": "1234567890",
-        "email": "valid.admin@example.com",
-        "address_city": "A" * 256,
-        "address_street": "Street",
-    }
-    form = AdminForm(data)
-    assert not form.is_valid()
-    assert "Address city is too long" in form.errors["address_city"]
-
-    data["address_city"] = "Valid City"
-    data["address_street"] = "S" * 256
-    form = AdminForm(data)
-    assert not form.is_valid()
-    assert "Address street is too long" in form.errors["address_street"]

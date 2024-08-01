@@ -5,7 +5,7 @@ from rest_framework.response import Response  # type: ignore
 from rest_framework import status  # type: ignore
 
 
-class GymView(viewsets.ViewSet):
+class GymViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.gym_component = GymComponent()

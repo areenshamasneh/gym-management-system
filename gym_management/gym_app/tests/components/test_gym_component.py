@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 from django.http import Http404
 from gym_app.components import GymComponent
 
+
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_fetch_all_gyms(mock_logger, mock_repo):

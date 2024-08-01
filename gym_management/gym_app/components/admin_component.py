@@ -1,7 +1,6 @@
 from django.http import Http404
 from gym_app.repositories.admin_repository import AdminRepository
 from gym_app.logging import SimpleLogger
-from gym_app.models import Admin
 
 
 class AdminComponent:
