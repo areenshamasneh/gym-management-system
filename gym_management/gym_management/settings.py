@@ -43,7 +43,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "gym_app.middlewares.req_logging.RequestLogMiddleware",
-    "gym_app.middlewares.exception_handler.ExceptionMiddleware",
 ]
 
 LOGGING = {
@@ -90,6 +89,7 @@ LOGGING = {
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -102,8 +102,10 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
+        "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly",
+
     ],
-    #'EXCEPTION_HANDLER': 'gym_app.middlewares.exception_handler.ExceptionMiddleware',
+    'EXCEPTION_HANDLER': 'gym_app.utils.custom_exception_handler',
 }
 
 ROOT_URLCONF = "gym_management.urls"
