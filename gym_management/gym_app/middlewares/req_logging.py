@@ -45,11 +45,14 @@ class RequestLogMiddleware(MiddlewareMixin):
             log_data["response_status"] = response.status_code
             if response.get("content-type") == "application/json":
                 try:
-                    log_data["response_body"] = json.loads(
-                        response.content.decode("utf-8")
-                    )
+                    if hasattr(response, "rendered_content"):
+                        content = response.rendered_content
+                    else:
+                        content = response.content
+
+                    log_data["response_body"] = json.loads(content.decode("utf-8"))
                 except json.JSONDecodeError:
-                    log_data["response_body"] = response.content.decode("utf-8")
+                    log_data["response_body"] = content.decode("utf-8")
         if exception:
             log_data["exception"] = str(exception)
         return log_data

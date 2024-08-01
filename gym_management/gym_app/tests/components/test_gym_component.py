@@ -97,10 +97,8 @@ def test_modify_gym(mock_logger, mock_repo):
         "address_street": "Updated Street",
     }
 
-    # Call
     component.modify_gym(1, mock_data)
 
-    # Assertions
     mock_repo.get_gym_by_id.assert_called_once_with(1)
     mock_repo.update_gym.assert_called_once_with(1, mock_data)
     mock_logger.log_info.assert_called_with("Modifying gym ID 1")

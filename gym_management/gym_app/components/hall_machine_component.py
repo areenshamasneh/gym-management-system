@@ -1,6 +1,7 @@
 from gym_app.repositories.hall_machine_repository import HallMachineRepository
 from gym_app.logging import SimpleLogger
 
+
 class HallMachineComponent:
     def __init__(self, repo=None, logger=None):
         self.repo = repo if repo else HallMachineRepository()
@@ -14,3 +15,11 @@ class HallMachineComponent:
         except ValueError as e:
             self.logger.log_error(f"Error fetching hall machines: {e}")
             raise e
+
+    def fetch_hall_machines_by_hall(self, hall_id):
+        self.logger.log_info(f"Fetching hall machines for hall ID {hall_id}")
+        return self.repo.get_hall_machines_by_hall(hall_id)
+
+    def fetch_hall_machine_by_id(self, machine_id):
+        self.logger.log_info(f"Fetching hall machine with ID {machine_id}")
+        return self.repo.get_hall_machine_by_id(machine_id)
