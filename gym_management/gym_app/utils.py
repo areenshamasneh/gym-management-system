@@ -1,48 +1,29 @@
-from rest_framework.views import exception_handler  # type: ignore
-from rest_framework.response import Response  # type: ignore
-from rest_framework.exceptions import APIException  # type: ignore
-from gym_app.exceptions import (
-    ResourceNotFoundException,
-    InvalidInputException,
-    PermissionDeniedException,
-)
+from rest_framework.views import exception_handler # type: ignore
+from rest_framework.response import Response # type: ignore
+from rest_framework.exceptions import APIException # type: ignore
 from django.http import Http404
-from django.core.exceptions import ValidationError, PermissionDenied
-
+from gym_app.exceptions import ValidationException
 
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
     status_code = 500
     message = "An unexpected error occurred."
 
-    if isinstance(exc, ResourceNotFoundException):
-        status_code = exc.status_code
-        message = exc.detail
-    elif isinstance(exc, InvalidInputException):
-        status_code = exc.status_code
-        message = exc.detail
-    elif isinstance(exc, PermissionDeniedException):
+    if isinstance(exc, APIException):
         status_code = exc.status_code
         message = exc.detail
     elif isinstance(exc, Http404):
         status_code = 404
         message = str(exc)
-    elif isinstance(exc, ValidationError):
-        status_code = 400
-        message = exc.message_dict
-    elif isinstance(exc, PermissionDenied):
-        status_code = 403
-        message = "Permission denied"
     elif isinstance(exc, NotImplementedError):
         status_code = 501
-        message = "Feature not implemented"
+        message = "Feature not implemented."
     elif isinstance(exc, KeyError):
         status_code = 400
         message = f"Missing key: {str(exc)}"
-    elif not isinstance(exc, APIException):
-        # Handle any other non-APIException exception
-        status_code = 500
-        message = "An unexpected error occurred."
+
+    if isinstance(exc, ValidationException) and response is not None:
+        message = exc.message_dict
 
     error_message = {
         "error": {
