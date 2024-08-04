@@ -1,5 +1,6 @@
 from rest_framework.views import exception_handler  # type: ignore
 from rest_framework.response import Response  # type: ignore
+from rest_framework.exceptions import APIException  # type: ignore
 from gym_app.exceptions import (
     ResourceNotFoundException,
     InvalidInputException,
@@ -38,6 +39,10 @@ def custom_exception_handler(exc, context):
     elif isinstance(exc, KeyError):
         status_code = 400
         message = f"Missing key: {str(exc)}"
+    elif not isinstance(exc, APIException):
+        # Handle any other non-APIException exception
+        status_code = 500
+        message = "An unexpected error occurred."
 
     error_message = {
         "error": {

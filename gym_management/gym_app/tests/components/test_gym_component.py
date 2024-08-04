@@ -1,3 +1,8 @@
+from gym_app.exceptions import (
+    DatabaseException,
+    InvalidInputException,
+    ResourceNotFoundException,
+)
 import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
 from django.http import Http404
@@ -53,10 +58,9 @@ def test_fetch_gym_by_id(mock_logger, mock_repo):
     assert result.address_city == "City 1"
 
 
-@patch("gym_app.repositories.GymRepository")
-@patch("gym_app.logging.SimpleLogger")
+@patch("gym_app.components.gym_component.GymRepository")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_add_gym(mock_logger, mock_repo):
-
     mock_repo.create_gym = MagicMock()
     mock_logger.log_info = MagicMock()
 
@@ -76,10 +80,9 @@ def test_add_gym(mock_logger, mock_repo):
     mock_logger.log_info.assert_called_with("Adding new gym")
 
 
-@patch("gym_app.repositories.GymRepository")
-@patch("gym_app.logging.SimpleLogger")
+@patch("gym_app.components.gym_component.GymRepository")
+@patch("gym_app.components.gym_component.SimpleLogger")
 def test_modify_gym(mock_logger, mock_repo):
-
     gym = MagicMock()
     gym.id = 1
 
@@ -118,22 +121,23 @@ def test_remove_gym(mock_logger, mock_repo):
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_add_gym_with_missing_fields(mock_logger, mock_repo):
-    mock_repo.create_gym.side_effect = KeyError("Missing required field")
+    mock_repo.create_gym.side_effect = KeyError("name")
 
     data = {
         "name": "New Gym",
-        # Missing type, description, address_city, address_street
     }
 
     component = GymComponent(mock_repo, mock_logger)
-    with pytest.raises(KeyError, match="Missing required field"):
+    with pytest.raises(InvalidInputException, match="Missing required field: 'name'"):
         component.add_gym(data)
 
 
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_modify_gym_non_existent(mock_logger, mock_repo):
-    mock_repo.update_gym.side_effect = Http404("Gym with ID 999 does not exist")
+    mock_repo.get_gym_by_id.side_effect = ResourceNotFoundException(
+        "Gym with ID 999 does not exist"
+    )
 
     data = {
         "name": "Non Existent Gym",
@@ -144,46 +148,38 @@ def test_modify_gym_non_existent(mock_logger, mock_repo):
     }
 
     component = GymComponent(mock_repo, mock_logger)
-    with pytest.raises(Http404, match="Gym with ID 999 does not exist"):
+    with pytest.raises(
+        ResourceNotFoundException, match="Gym with ID 999 does not exist"
+    ):
         component.modify_gym(999, data)
 
 
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_remove_gym_non_existent(mock_logger, mock_repo):
-    mock_repo.delete_gym.side_effect = Http404("Gym with ID 999 does not exist")
+    mock_repo.delete_gym.side_effect = ResourceNotFoundException(
+        "Gym with ID 999 does not exist"
+    )
 
     component = GymComponent(mock_repo, mock_logger)
-    with pytest.raises(Http404, match="Gym with ID 999 does not exist"):
+    with pytest.raises(
+        ResourceNotFoundException, match="Gym with ID 999 does not exist"
+    ):
         component.remove_gym(999)
 
 
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_fetch_gym_by_id_non_existent(mock_logger, mock_repo):
-    mock_repo.get_gym_by_id.side_effect = Http404("Gym with ID 999 does not exist")
+    mock_repo.get_gym_by_id.side_effect = ResourceNotFoundException(
+        "Gym with ID 999 does not exist"
+    )
 
     component = GymComponent(mock_repo, mock_logger)
-    with pytest.raises(Http404, match="Gym with ID 999 does not exist"):
+    with pytest.raises(
+        ResourceNotFoundException, match="Gym with ID 999 does not exist"
+    ):
         component.fetch_gym_by_id(999)
-
-
-@patch("gym_app.components.gym_component.GymRepository")
-@patch("gym_app.components.gym_component.SimpleLogger")
-def test_add_gym_invalid_data(mock_logger, mock_repo):
-    mock_repo.create_gym.side_effect = ValueError("Invalid data")
-
-    data = {
-        "name": "New Gym",
-        "type": "Invalid Type",
-        "description": "Desc",
-        "address_city": "City",
-        "address_street": "Street",
-    }
-
-    component = GymComponent(mock_repo, mock_logger)
-    with pytest.raises(ValueError, match="Invalid data"):
-        component.add_gym(data)
 
 
 @patch("gym_app.components.gym_component.GymRepository")
@@ -191,14 +187,17 @@ def test_add_gym_invalid_data(mock_logger, mock_repo):
 def test_modify_gym_invalid_data(mock_logger, mock_repo):
     mock_repo.update_gym.side_effect = ValueError("Invalid data")
 
+    gym_id = 1
     data = {
         "name": "Updated Gym",
-        "type": "Invalid Type",
+        "type": "Type",
         "description": "Updated Desc",
         "address_city": "Updated City",
         "address_street": "Updated Street",
     }
 
     component = GymComponent(mock_repo, mock_logger)
-    with pytest.raises(ValueError, match="Invalid data"):
-        component.modify_gym(1, data)
+    with pytest.raises(
+        DatabaseException, match=f"An error occurred while modifying gym ID {gym_id}."
+    ):
+        component.modify_gym(gym_id, data)

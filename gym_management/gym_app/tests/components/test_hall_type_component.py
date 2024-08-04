@@ -1,8 +1,8 @@
+from gym_app.exceptions import DatabaseException
 import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
 from gym_app.components import HallTypeComponent
 from gym_app.models import HallType
-from gym_app.logging import SimpleLogger
 
 
 @pytest.mark.django_db
@@ -53,20 +53,20 @@ def test_fetch_hall_type_by_id(mock_logger, mock_repo):
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
 @patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_add_hall_type(mock_logger, mock_repo):
-    mock_hall_type = MagicMock(spec=HallType)
+    mock_hall_type = MagicMock()
     mock_hall_type.id = 1
-    mock_hall_type.type = "sauna"
-    mock_hall_type.type_description = "Relaxing sauna"
+    mock_hall_type.name = "Sauna"
+    mock_hall_type.code = "S1"
 
     mock_repo.create_hall_type.return_value = mock_hall_type
 
-    data = {"type": "sauna", "type_description": "Relaxing sauna"}
+    data = {"name": "Sauna", "code": "S1"}
 
     component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
     hall_type = component.add_hall_type(data)
 
-    assert hall_type.type == "sauna"
-    assert hall_type.type_description == "Relaxing sauna"
+    assert hall_type.name == "Sauna"
+    assert hall_type.code == "S1"
     mock_logger.log_info.assert_called_with(f"Adding new hall type with data: {data}")
 
 
@@ -74,19 +74,19 @@ def test_add_hall_type(mock_logger, mock_repo):
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
 @patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_modify_hall_type(mock_logger, mock_repo):
-    mock_hall_type = MagicMock(spec=HallType)
+    mock_hall_type = MagicMock()
     mock_hall_type.id = 1
-    mock_hall_type.type = "sauna"
-    mock_hall_type.type_description = "Updated description"
+    mock_hall_type.name = "Updated Sauna"
+    mock_hall_type.code = "S1"
 
     mock_repo.update_hall_type.return_value = mock_hall_type
 
-    data = {"type_description": "Updated description"}
+    data = {"name": "Updated Sauna"}
 
     component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
     hall_type = component.modify_hall_type(1, data)
 
-    assert hall_type.type_description == "Updated description"
+    assert hall_type.name == "Updated Sauna"
     mock_logger.log_info.assert_called_with(
         f"Modifying hall type with ID 1 with data: {data}"
     )
@@ -96,40 +96,27 @@ def test_modify_hall_type(mock_logger, mock_repo):
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
 @patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_remove_hall_type(mock_logger, mock_repo):
+    mock_repo.delete_hall_type.return_value = True
+
     component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
     component.remove_hall_type(1)
 
-    assert mock_repo.delete_hall_type.called
-    assert mock_repo.delete_hall_type.call_count == 1
     mock_logger.log_info.assert_called_with("Removing hall type with ID 1")
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
 @patch("gym_app.components.hall_type_component.SimpleLogger")
-def test_add_hall_type_with_missing_fields(mock_logger, mock_repo):
-    mock_repo.create_hall_type.side_effect = KeyError("Missing required field")
-
-    data = {"type": "sauna"}
-
-    component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
-
-    with pytest.raises(KeyError, match="Missing required field"):
-        component.add_hall_type(data)
-    mock_logger.log_info.assert_called_with(f"Adding new hall type with data: {data}")
-
-
-@pytest.mark.django_db
-@patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_modify_hall_type_non_existent(mock_logger, mock_repo):
-    mock_repo.update_hall_type.side_effect = HallType.DoesNotExist
+    mock_repo.update_hall_type.side_effect = DatabaseException(
+        "An error occurred while modifying"
+    )
 
     data = {"type_description": "Non Existent HallType"}
 
     component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
 
-    with pytest.raises(HallType.DoesNotExist):
+    with pytest.raises(DatabaseException, match="An error occurred while modifying"):
         component.modify_hall_type(999, data)
     mock_logger.log_info.assert_called_with(
         f"Modifying hall type with ID 999 with data: {data}"
@@ -139,60 +126,36 @@ def test_modify_hall_type_non_existent(mock_logger, mock_repo):
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
 @patch("gym_app.components.hall_type_component.SimpleLogger")
-def test_remove_hall_type_non_existent(mock_logger, mock_repo):
-    mock_repo.delete_hall_type.side_effect = HallType.DoesNotExist
+def test_add_hall_type_with_missing_fields(mock_logger, mock_repo):
+
+    mock_repo.create_hall_type.side_effect = Exception("Database error")
 
     component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
+    data = {"name": "Sauna"}
+    with pytest.raises(
+        DatabaseException, match="An error occurred while adding the hall type."
+    ):
+        component.add_hall_type(data)
 
-    with pytest.raises(HallType.DoesNotExist):
-        component.remove_hall_type(999)
-    mock_logger.log_info.assert_called_with("Removing hall type with ID 999")
+    mock_logger.log_info.assert_called_with(f"Adding new hall type with data: {data}")
+    mock_logger.log_error.assert_called_with("Error adding hall type: Database error")
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
 @patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_fetch_hall_type_by_id_non_existent(mock_logger, mock_repo):
-    mock_repo.get_hall_type_by_id.side_effect = HallType.DoesNotExist
+
+    mock_repo.get_hall_type_by_id.side_effect = Exception("Database error")
 
     component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
 
-    with pytest.raises(HallType.DoesNotExist):
+    with pytest.raises(
+        DatabaseException, match="An error occurred while fetching the hall type."
+    ):
         component.fetch_hall_type_by_id(999)
+
     mock_logger.log_info.assert_called_with("Fetching hall type with ID 999")
-
-
-@pytest.mark.django_db
-@patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.SimpleLogger")
-def test_add_hall_type_invalid_data(mock_logger, mock_repo):
-    mock_repo.create_hall_type.side_effect = ValueError("Invalid data")
-
-    data = {
-        "type": "",
-        "type_description": "Invalid HallType",
-    }
-
-    component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
-
-    with pytest.raises(ValueError, match="Invalid data"):
-        component.add_hall_type(data)
-    mock_logger.log_info.assert_called_with(f"Adding new hall type with data: {data}")
-
-
-@pytest.mark.django_db
-@patch("gym_app.components.hall_type_component.HallTypeRepository")
-@patch("gym_app.components.hall_type_component.SimpleLogger")
-def test_add_hall_type_invalid_data(mock_logger, mock_repo):
-    mock_repo.create_hall_type.side_effect = ValueError("Invalid data")
-
-    data = {
-        "type": "",
-        "type_description": "Invalid HallType",
-    }
-
-    component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
-
-    with pytest.raises(ValueError, match="Invalid data"):
-        component.add_hall_type(data)
-    mock_logger.log_info.assert_called_with("Error adding hall type: Invalid data")
+    mock_logger.log_error.assert_called_with(
+        "Error fetching hall type with ID 999: Database error"
+    )

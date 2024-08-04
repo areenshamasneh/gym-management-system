@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 from gym_app.components import EmployeeComponent
 from gym_app.models import Employee, Gym
 from rest_framework.exceptions import NotFound, APIException  # type: ignore
+from gym_app.exceptions import ResourceNotFoundException
 
 
 @pytest.mark.django_db
@@ -224,7 +225,9 @@ def test_fetch_employee_by_id_non_existent(mock_logger, mock_repo):
     component = EmployeeComponent(
         employee_repository=mock_repo, logger=mock_logger_instance
     )
-    with pytest.raises(NotFound, match="Employee with ID 999 does not exist"):
+    with pytest.raises(
+        ResourceNotFoundException, match="Employee with ID 999 does not exist"
+    ):
         component.fetch_employee_by_id(1, 999)
 
 
