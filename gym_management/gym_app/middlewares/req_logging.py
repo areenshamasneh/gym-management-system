@@ -1,8 +1,9 @@
+import json
 import logging
-from django.utils.deprecation import MiddlewareMixin
 import socket
 import time
-import json
+
+from django.utils.deprecation import MiddlewareMixin
 
 request_logger = logging.getLogger("custom.request")
 

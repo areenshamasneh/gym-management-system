@@ -1,7 +1,8 @@
-from gym_app.models.system_models import HallType
 from rest_framework import viewsets, status  # type: ignore
 from rest_framework.response import Response  # type: ignore
+
 from gym_app.components import HallTypeComponent
+from gym_app.models.system_models import HallType
 from gym_app.serializers import HallTypeSerializer
 
 

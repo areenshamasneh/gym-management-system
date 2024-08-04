@@ -1,10 +1,10 @@
 import unittest
 from unittest.mock import MagicMock, patch
+
 from gym_app.components.hall_machine_component import HallMachineComponent
 from gym_app.exceptions import (
     ResourceNotFoundException,
     ValidationException,
-    DatabaseException,
 )
 
 

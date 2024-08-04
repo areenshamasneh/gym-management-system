@@ -1,10 +1,10 @@
-from gym_app.logging import SimpleLogger
-from gym_app.repositories.member_repository import MemberRepository
 from gym_app.exceptions import (
     ResourceNotFoundException,
     ValidationException,
     DatabaseException,
 )
+from gym_app.logging import SimpleLogger
+from gym_app.repositories.member_repository import MemberRepository
 
 
 class MemberComponent:

@@ -1,7 +1,9 @@
-from gym_app.exceptions import DatabaseException
-import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
+
+import pytest  # type: ignore
+
 from gym_app.components import HallTypeComponent
+from gym_app.exceptions import DatabaseException
 from gym_app.models import HallType
 
 
@@ -127,13 +129,12 @@ def test_modify_hall_type_non_existent(mock_logger, mock_repo):
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
 @patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_add_hall_type_with_missing_fields(mock_logger, mock_repo):
-
     mock_repo.create_hall_type.side_effect = Exception("Database error")
 
     component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
     data = {"name": "Sauna"}
     with pytest.raises(
-        DatabaseException, match="An error occurred while adding the hall type."
+            DatabaseException, match="An error occurred while adding the hall type."
     ):
         component.add_hall_type(data)
 
@@ -145,13 +146,12 @@ def test_add_hall_type_with_missing_fields(mock_logger, mock_repo):
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
 @patch("gym_app.components.hall_type_component.SimpleLogger")
 def test_fetch_hall_type_by_id_non_existent(mock_logger, mock_repo):
-
     mock_repo.get_hall_type_by_id.side_effect = Exception("Database error")
 
     component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
 
     with pytest.raises(
-        DatabaseException, match="An error occurred while fetching the hall type."
+            DatabaseException, match="An error occurred while fetching the hall type."
     ):
         component.fetch_hall_type_by_id(999)
 

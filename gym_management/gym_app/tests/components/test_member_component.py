@@ -1,11 +1,13 @@
-import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
+
+import pytest  # type: ignore
+
 from gym_app.components import MemberComponent
-from gym_app.models import Member, Gym
 from gym_app.exceptions import (
     ResourceNotFoundException,
     DatabaseException,
 )
+from gym_app.models import Member, Gym
 
 
 @pytest.mark.django_db
@@ -128,7 +130,7 @@ def test_add_member_with_missing_fields(mock_logger, mock_repo):
     data = {"name": "Member 1"}
 
     with pytest.raises(
-        DatabaseException, match="An error occurred while adding the member."
+            DatabaseException, match="An error occurred while adding the member."
     ):
         component.add_member(1, data)
 
@@ -145,7 +147,7 @@ def test_modify_member_non_existent(mock_logger, mock_repo):
     data = {"name": "Non Existent Member"}
 
     with pytest.raises(
-        ResourceNotFoundException, match="Member with ID 999 not found."
+            ResourceNotFoundException, match="Member with ID 999 not found."
     ):
         component.modify_member(1, 999, data)
 
@@ -160,7 +162,7 @@ def test_remove_member_non_existent(mock_logger, mock_repo):
 
     component = MemberComponent(repo=mock_repo, logger=mock_logger)
     with pytest.raises(
-        ResourceNotFoundException, match="Member with ID 999 not found."
+            ResourceNotFoundException, match="Member with ID 999 not found."
     ):
         component.remove_member(1, 999)
 
@@ -175,6 +177,6 @@ def test_fetch_member_by_id_non_existent(mock_logger, mock_repo):
 
     component = MemberComponent(repo=mock_repo, logger=mock_logger)
     with pytest.raises(
-        ResourceNotFoundException, match="Member with ID 999 not found."
+            ResourceNotFoundException, match="Member with ID 999 not found."
     ):
         component.fetch_member_by_id(1, 999)

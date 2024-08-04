@@ -1,9 +1,10 @@
-from rest_framework import viewsets  # type: ignore
-from rest_framework.response import Response  # type: ignore
 from rest_framework import status  # type: ignore
-from gym_app.serializers import EmployeeSerializer
-from gym_app.components import EmployeeComponent
+from rest_framework import viewsets  # type: ignore
 from rest_framework.exceptions import NotFound  # type: ignore
+from rest_framework.response import Response  # type: ignore
+
+from gym_app.components import EmployeeComponent
+from gym_app.serializers import EmployeeSerializer
 
 
 class EmployeeViewSet(viewsets.ViewSet):

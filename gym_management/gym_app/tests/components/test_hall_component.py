@@ -1,5 +1,7 @@
-import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
+
+import pytest  # type: ignore
+
 from gym_app.components.hall_component import HallComponent
 from gym_app.exceptions import (
     ResourceNotFoundException,

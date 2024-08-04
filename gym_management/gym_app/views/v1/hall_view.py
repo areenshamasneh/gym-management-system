@@ -1,9 +1,10 @@
-from rest_framework import viewsets, status  # type: ignore
-from rest_framework.response import Response  # type: ignore
-from rest_framework.exceptions import NotFound  # type: ignore
-from gym_app.serializers import HallSerializer
-from gym_app.components import HallComponent
 from django.core.exceptions import ValidationError
+from rest_framework import viewsets, status  # type: ignore
+from rest_framework.exceptions import NotFound  # type: ignore
+from rest_framework.response import Response  # type: ignore
+
+from gym_app.components import HallComponent
+from gym_app.serializers import HallSerializer
 
 
 class HallViewSet(viewsets.ViewSet):

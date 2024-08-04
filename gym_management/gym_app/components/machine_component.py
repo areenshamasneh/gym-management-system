@@ -1,10 +1,10 @@
-from gym_app.repositories import MachineRepository
-from gym_app.logging import SimpleLogger
 from gym_app.exceptions import (
     ResourceNotFoundException,
     ValidationException,
     DatabaseException,
 )
+from gym_app.logging import SimpleLogger
+from gym_app.repositories import MachineRepository
 
 
 class MachineComponent:

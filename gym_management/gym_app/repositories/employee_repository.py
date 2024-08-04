@@ -1,5 +1,6 @@
-from gym_app.models import Employee, Gym
 from django.shortcuts import get_object_or_404
+
+from gym_app.models import Employee, Gym
 
 
 class EmployeeRepository:

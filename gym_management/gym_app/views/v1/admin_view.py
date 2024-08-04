@@ -1,14 +1,15 @@
-from gym_app.components.admin_component import AdminComponent
-from gym_app.models.system_models import Gym
+from rest_framework import status  # type: ignore
 from rest_framework import viewsets  # type: ignore
 from rest_framework.response import Response  # type: ignore
-from rest_framework import status  # type: ignore
-from gym_app.serializers import AdminSerializer
+
+from gym_app.components.admin_component import AdminComponent
 from gym_app.exceptions import (
     ResourceNotFoundException,
     InvalidInputException,
     ConflictException,
 )
+from gym_app.models.system_models import Gym
+from gym_app.serializers import AdminSerializer
 
 
 class AdminViewSet(viewsets.ViewSet):

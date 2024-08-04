@@ -1,6 +1,6 @@
+from rest_framework import status  # type: ignore
 from rest_framework import viewsets  # type: ignore
 from rest_framework.response import Response  # type: ignore
-from rest_framework import status  # type: ignore
 
 
 class HealthCheckViewSet(viewsets.ViewSet):

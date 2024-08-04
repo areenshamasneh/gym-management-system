@@ -1,8 +1,9 @@
 from rest_framework import viewsets, status  # type: ignore
 from rest_framework.response import Response  # type: ignore
+
+from gym_app.components import MachineComponent
 from gym_app.models import Machine
 from gym_app.serializers import MachineSerializer
-from gym_app.components import MachineComponent
 
 
 class MachineViewSet(viewsets.ViewSet):

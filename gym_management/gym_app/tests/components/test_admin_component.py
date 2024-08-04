@@ -1,10 +1,12 @@
-import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
+
+import pytest  # type: ignore
 from django.http import Http404
+
 from gym_app.components import AdminComponent
+from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models import Admin, Gym
 from gym_app.serializers import AdminSerializer
-from gym_app.exceptions import ResourceNotFoundException
 
 
 @pytest.mark.django_db
@@ -160,8 +162,8 @@ def test_modify_admin_non_existent(mock_repo):
     )
 
     with pytest.raises(
-        ResourceNotFoundException,
-        match=f"Admin with ID {non_existent_admin_id} not found",
+            ResourceNotFoundException,
+            match=f"Admin with ID {non_existent_admin_id} not found",
     ):
         admin_component.modify_admin(mock_gym.id, non_existent_admin_id, data)
 

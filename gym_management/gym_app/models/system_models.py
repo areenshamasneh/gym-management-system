@@ -146,10 +146,10 @@ class HallMachine(models.Model):
         # Generate the UID based on machine type and count
         if not self.uid:
             count = (
-                HallMachine.objects.filter(
-                    hall_id=self.hall_id, machine_id=self.machine_id
-                ).count()
-                + 1
+                    HallMachine.objects.filter(
+                        hall_id=self.hall_id, machine_id=self.machine_id
+                    ).count()
+                    + 1
             )
             self.uid = f"{self.machine_id.type}_{count}"
 

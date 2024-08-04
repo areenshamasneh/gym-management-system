@@ -1,10 +1,10 @@
-from gym_app.repositories.employee_repository import EmployeeRepository
-from gym_app.logging import SimpleLogger
-from gym_app.models import Employee
 from gym_app.exceptions import (
     ResourceNotFoundException,
     InvalidInputException,
 )
+from gym_app.logging import SimpleLogger
+from gym_app.models import Employee
+from gym_app.repositories.employee_repository import EmployeeRepository
 
 
 class EmployeeComponent:

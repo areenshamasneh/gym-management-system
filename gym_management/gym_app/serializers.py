@@ -1,4 +1,5 @@
 from rest_framework import serializers  # type: ignore
+
 from gym_app.models import (
     Gym,
     Machine,

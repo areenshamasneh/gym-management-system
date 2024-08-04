@@ -1,13 +1,14 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
+
 from gym_app.components.machine_component import MachineComponent
 from gym_app.exceptions import (
     DatabaseException,
     ResourceNotFoundException,
     ValidationException,
 )
-from gym_app.repositories.machine_repository import MachineRepository
 from gym_app.logging import SimpleLogger
+from gym_app.repositories.machine_repository import MachineRepository
 
 
 class TestMachineComponent(unittest.TestCase):

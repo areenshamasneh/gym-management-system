@@ -1,8 +1,10 @@
-from rest_framework.views import exception_handler # type: ignore
-from rest_framework.response import Response # type: ignore
-from rest_framework.exceptions import APIException # type: ignore
 from django.http import Http404
+from rest_framework.exceptions import APIException  # type: ignore
+from rest_framework.response import Response  # type: ignore
+from rest_framework.views import exception_handler  # type: ignore
+
 from gym_app.exceptions import ValidationException
+
 
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)

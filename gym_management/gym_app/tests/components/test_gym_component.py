@@ -1,12 +1,13 @@
+from unittest.mock import patch, MagicMock
+
+import pytest  # type: ignore
+
+from gym_app.components import GymComponent
 from gym_app.exceptions import (
     DatabaseException,
     InvalidInputException,
     ResourceNotFoundException,
 )
-import pytest  # type: ignore
-from unittest.mock import patch, MagicMock
-from django.http import Http404
-from gym_app.components import GymComponent
 
 
 @patch("gym_app.components.gym_component.GymRepository")
@@ -149,7 +150,7 @@ def test_modify_gym_non_existent(mock_logger, mock_repo):
 
     component = GymComponent(mock_repo, mock_logger)
     with pytest.raises(
-        ResourceNotFoundException, match="Gym with ID 999 does not exist"
+            ResourceNotFoundException, match="Gym with ID 999 does not exist"
     ):
         component.modify_gym(999, data)
 
@@ -163,7 +164,7 @@ def test_remove_gym_non_existent(mock_logger, mock_repo):
 
     component = GymComponent(mock_repo, mock_logger)
     with pytest.raises(
-        ResourceNotFoundException, match="Gym with ID 999 does not exist"
+            ResourceNotFoundException, match="Gym with ID 999 does not exist"
     ):
         component.remove_gym(999)
 
@@ -177,7 +178,7 @@ def test_fetch_gym_by_id_non_existent(mock_logger, mock_repo):
 
     component = GymComponent(mock_repo, mock_logger)
     with pytest.raises(
-        ResourceNotFoundException, match="Gym with ID 999 does not exist"
+            ResourceNotFoundException, match="Gym with ID 999 does not exist"
     ):
         component.fetch_gym_by_id(999)
 
@@ -198,6 +199,6 @@ def test_modify_gym_invalid_data(mock_logger, mock_repo):
 
     component = GymComponent(mock_repo, mock_logger)
     with pytest.raises(
-        DatabaseException, match=f"An error occurred while modifying gym ID {gym_id}."
+            DatabaseException, match=f"An error occurred while modifying gym ID {gym_id}."
     ):
         component.modify_gym(gym_id, data)

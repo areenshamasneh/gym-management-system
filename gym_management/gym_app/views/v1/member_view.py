@@ -1,6 +1,7 @@
+from rest_framework import status  # type: ignore
 from rest_framework import viewsets  # type: ignore
 from rest_framework.response import Response  # type: ignore
-from rest_framework import status  # type: ignore
+
 from gym_app.components import MemberComponent
 from gym_app.serializers import MemberSerializer
 

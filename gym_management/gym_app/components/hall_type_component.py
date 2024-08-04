@@ -1,6 +1,6 @@
+from gym_app.exceptions import ResourceNotFoundException, DatabaseException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.hall_type_repository import HallTypeRepository
-from gym_app.exceptions import ResourceNotFoundException, DatabaseException
 
 
 class HallTypeComponent:
