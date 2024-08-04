@@ -1,4 +1,4 @@
-from gym_app.views.health_check_controller import HealthCheckViewSet
+from gym_app.views.health_check_view import HealthCheckViewSet
 from gym_app.views.v1.admin_view import AdminViewSet
 from gym_app.views.v1.employee_view import EmployeeViewSet
 from gym_app.views.v1.gym_view import GymViewSet
