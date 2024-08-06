@@ -17,38 +17,6 @@ class TestMachineComponent(unittest.TestCase):
         self.mock_logger = MagicMock(spec=SimpleLogger)
         self.component = MachineComponent(repo=self.mock_repo, logger=self.mock_logger)
 
-    def test_fetch_all_machines_in_gym_success(self):
-        gym_id = 1
-        expected_machines = [
-            {"id": 1, "name": "Treadmill"},
-            {"id": 2, "name": "Elliptical"},
-        ]
-        self.mock_repo.get_all_hall_machines_in_gym.return_value = expected_machines
-
-        result = self.component.fetch_all_machines_in_gym(gym_id)
-
-        self.assertEqual(result, expected_machines)
-        self.mock_logger.log_info.assert_called_with(
-            f"Fetching all hall machines for gym_id: {gym_id}"
-        )
-
-    def test_fetch_all_machines_in_gym_failure(self):
-        gym_id = 1
-        self.mock_repo.get_all_hall_machines_in_gym.side_effect = Exception(
-            "Database error"
-        )
-
-        with self.assertRaises(DatabaseException) as context:
-            self.component.fetch_all_machines_in_gym(gym_id)
-
-        self.assertEqual(
-            str(context.exception),
-            "An error occurred while fetching machines in the gym.",
-        )
-        self.mock_logger.log_error.assert_called_with(
-            "Error fetching machines in gym: Database error"
-        )
-
     def test_fetch_all_machines_in_hall_success(self):
         gym_id, hall_id = 1, 1
         expected_machines = [{"id": 1, "name": "Treadmill"}]

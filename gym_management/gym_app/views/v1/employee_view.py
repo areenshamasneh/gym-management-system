@@ -1,8 +1,8 @@
-from rest_framework import status
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework.response import Response
-from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
+
 from gym_app.components import EmployeeComponent
+from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
 from gym_app.models import Gym
 from gym_app.serializers import EmployeeSerializer
 
@@ -12,7 +12,16 @@ class EmployeeViewSet(viewsets.ViewSet):
         self.employee_component = EmployeeComponent()
         super().__init__(**kwargs)
 
-    def list(self, request, gym_id=None):
+    @staticmethod
+    def get_gym(gym_id):
+        try:
+            return Gym.objects.get(id=gym_id)
+        except Gym.DoesNotExist:
+            raise ResourceNotFoundException(f"Gym with ID {gym_id} does not exist")
+
+    def list(self, request, gym_pk=None):
+        self.get_gym(gym_pk)
+
         name = request.query_params.get("name", "")
         email = request.query_params.get("email", "")
         phone_number = request.query_params.get("phone_number", "")
@@ -38,47 +47,47 @@ class EmployeeViewSet(viewsets.ViewSet):
             filter_criteria["positions__icontains"] = positions
 
         try:
-            employees = self.employee_component.fetch_all_employees(gym_id).filter(
+            employees = self.employee_component.fetch_all_employees(gym_pk).filter(
                 **filter_criteria
             )
             serializer = EmployeeSerializer(employees, many=True)
             return Response(serializer.data)
         except InvalidInputException as e:
             return Response({"errors": str(e)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except Exception as e:
+            print(f"Unexpected error occurred in list: {e}")
+            return Response(
+                {"detail": "An unexpected error occurred."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
-    def retrieve(self, request, gym_id=None, pk=None):
+    def retrieve(self, request, gym_pk=None, pk=None):
+        self.get_gym(gym_pk)
+
         try:
-            employee = self.employee_component.fetch_employee_by_id(gym_id, pk)
+            employee = self.employee_component.fetch_employee_by_id(gym_pk, pk)
             serializer = EmployeeSerializer(employee)
             return Response(serializer.data)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
-
-    def create(self, request, gym_id=None):
-        # Validate that gym_id is provided in URL and exists
-        if gym_id is None:
+        except Exception as e:
+            print(f"Unexpected error occurred in retrieve: {e}")
             return Response(
-                {"detail": "Gym ID is required"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "An unexpected error occurred."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        try:
-            gym = Gym.objects.get(id=gym_id)
-        except Gym.DoesNotExist:
-            return Response(
-                {"detail": f"Gym with ID {gym_id} does not exist"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+    def create(self, request, gym_pk=None):
+        self.get_gym(gym_pk)
 
         data = request.data.copy()
-        data['gym'] = gym_id  # Include gym_id in the data for serializer
+        data['gym'] = gym_pk
 
         serializer = EmployeeSerializer(data=data)
         if serializer.is_valid():
             try:
-                # Add employee using EmployeeComponent
                 employee = self.employee_component.add_employee(
-                    gym_id, serializer.validated_data
+                    gym_pk, serializer.validated_data
                 )
                 serializer = EmployeeSerializer(employee)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -88,6 +97,7 @@ class EmployeeViewSet(viewsets.ViewSet):
                     status=status.HTTP_422_UNPROCESSABLE_ENTITY
                 )
             except Exception as e:
+                print(f"Unexpected error occurred in create: {e}")
                 return Response(
                     {"detail": "An unexpected error occurred."},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -97,12 +107,14 @@ class EmployeeViewSet(viewsets.ViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    def update(self, request, gym_id=None, pk=None):
+    def update(self, request, gym_pk=None, pk=None):
+        self.get_gym(gym_pk)
+
         serializer = EmployeeSerializer(data=request.data, partial=True)
         if serializer.is_valid():
             try:
                 employee = self.employee_component.modify_employee(
-                    gym_id, pk, serializer.validated_data
+                    gym_pk, pk, serializer.validated_data
                 )
                 serializer = EmployeeSerializer(employee)
                 return Response(serializer.data)
@@ -110,30 +122,24 @@ class EmployeeViewSet(viewsets.ViewSet):
                 return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
             except InvalidInputException as e:
                 return Response({"errors": str(e)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        return Response(
-            {"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST
-        )
-
-    def partial_update(self, request, gym_id=None, pk=None):
-        serializer = EmployeeSerializer(data=request.data, partial=True)
-        if serializer.is_valid():
-            try:
-                employee = self.employee_component.modify_employee(
-                    gym_id, pk, serializer.validated_data
+            except Exception as e:
+                print(f"Unexpected error occurred in update: {e}")
+                return Response(
+                    {"detail": "An unexpected error occurred."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
-                serializer = EmployeeSerializer(employee)
-                return Response(serializer.data)
-            except ResourceNotFoundException as e:
-                return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
-            except InvalidInputException as e:
-                return Response({"errors": str(e)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         return Response(
             {"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST
         )
 
-    def destroy(self, request, gym_id=None, pk=None):
+    def partial_update(self, request, gym_pk=None, pk=None):
+        return self.update(request, gym_pk=gym_pk, pk=pk)
+
+    def destroy(self, request, gym_pk=None, pk=None):
+        self.get_gym(gym_pk)
+
         try:
-            self.employee_component.remove_employee(gym_id, pk)
+            self.employee_component.remove_employee(gym_pk, pk)
             return Response(
                 {"message": "Employee deleted successfully"},
                 status=status.HTTP_204_NO_CONTENT,
@@ -142,3 +148,9 @@ class EmployeeViewSet(viewsets.ViewSet):
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except InvalidInputException as e:
             return Response({"errors": str(e)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except Exception as e:
+            print(f"Unexpected error occurred in destroy: {e}")
+            return Response(
+                {"detail": "An unexpected error occurred."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

@@ -1,6 +1,7 @@
 from django.db import IntegrityError
-from gym_app.models import Member, Gym
+
 from gym_app.exceptions import ResourceNotFoundException, DatabaseException
+from gym_app.models import Member, Gym
 
 
 class MemberRepository:

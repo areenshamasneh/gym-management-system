@@ -1,5 +1,5 @@
-from gym_app.models import HallMachine, Hall
 from gym_app.exceptions import ResourceNotFoundException
+from gym_app.models import HallMachine, Hall
 
 
 class HallMachineRepository:

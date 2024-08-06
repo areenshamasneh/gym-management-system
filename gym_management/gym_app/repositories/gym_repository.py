@@ -1,5 +1,6 @@
-from gym_app.models import Gym
 from django.core.paginator import Paginator
+
+from gym_app.models import Gym
 
 
 class GymRepository:

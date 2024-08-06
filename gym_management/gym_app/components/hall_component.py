@@ -73,8 +73,8 @@ class HallComponent:
     def remove_hall(self, gym_id, hall_id):
         self.logger.log_info(f"Removing hall with ID {hall_id} for gym ID {gym_id}")
         try:
-            if not self.repo.delete_hall(gym_id, hall_id):
-                raise ResourceNotFoundException(f"Hall with ID {hall_id} not found.")
+            hall = self.repo.delete_hall(gym_id, hall_id)
+            self.logger.log_info(f"Hall with ID {hall_id} removed successfully.")
         except ResourceNotFoundException:
             self.logger.log_error(f"Hall with ID {hall_id} not found")
             raise

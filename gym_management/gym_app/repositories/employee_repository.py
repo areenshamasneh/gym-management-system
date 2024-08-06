@@ -1,4 +1,3 @@
-
 from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models import Employee, Gym
 

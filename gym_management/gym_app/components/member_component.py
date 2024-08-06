@@ -6,6 +6,7 @@ from gym_app.exceptions import (
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.member_repository import MemberRepository
 
+
 class MemberComponent:
     def __init__(self, repo=None, logger=None):
         self.repo = repo if repo else MemberRepository()
