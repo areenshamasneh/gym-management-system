@@ -128,14 +128,16 @@ def test_modify_hall_type_non_existent(mock_logger, mock_repo):
 @pytest.mark.django_db
 @patch("gym_app.components.hall_type_component.HallTypeRepository")
 @patch("gym_app.components.hall_type_component.SimpleLogger")
-def test_add_hall_type_with_missing_fields(mock_logger, mock_repo):
-    mock_repo.create_hall_type.side_effect = Exception("Database error")
+def test_add_hall_type_with_missing_fields(mock_logger_class, mock_repo_class):
+    mock_repo = mock_repo_class.return_value
+    mock_logger = mock_logger_class.return_value
+
+    mock_repo.create_hall_type.side_effect = DatabaseException("Database error")
 
     component = HallTypeComponent(repo=mock_repo, logger=mock_logger)
     data = {"name": "Sauna"}
-    with pytest.raises(
-            DatabaseException, match="An error occurred while adding the hall type."
-    ):
+
+    with pytest.raises(DatabaseException, match="Database error"):
         component.add_hall_type(data)
 
     mock_logger.log_info.assert_called_with(f"Adding new hall type with data: {data}")

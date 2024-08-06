@@ -44,7 +44,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "gym_app.middlewares.req_logging.RequestLogMiddleware",
 ]
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -71,6 +70,12 @@ LOGGING = {
             "filename": os.path.join(BASE_DIR, "logs", "requests_responses.log"),
             "formatter": "default",
         },
+        "sql_file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "sql_queries.log"),
+            "formatter": "default",
+        },
     },
     "loggers": {
         "custom.request": {
@@ -83,9 +88,13 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "django.db.backends": {
+            "handlers": ["sql_file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
 }
-
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',

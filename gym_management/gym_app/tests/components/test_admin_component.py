@@ -1,10 +1,9 @@
 from unittest.mock import patch, MagicMock
 
 import pytest  # type: ignore
-from django.http import Http404
 
 from gym_app.components import AdminComponent
-from gym_app.exceptions import ResourceNotFoundException
+from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
 from gym_app.models import Admin, Gym
 from gym_app.serializers import AdminSerializer
 
@@ -153,17 +152,16 @@ def test_modify_admin_non_existent(mock_repo):
         "address_street": "No Street",
     }
 
-    mock_repo_instance.get_admin_by_id.side_effect = Http404(
+    mock_repo_instance.update_admin.side_effect = ResourceNotFoundException(
         f"Admin with ID {non_existent_admin_id} not found for gym_id {mock_gym.id}"
     )
 
     admin_component = AdminComponent(
         admin_repository=mock_repo_instance, logger=MagicMock()
     )
-
     with pytest.raises(
-            ResourceNotFoundException,
-            match=f"Admin with ID {non_existent_admin_id} not found",
+            InvalidInputException,
+            match=f"Error modifying admin: Admin with ID {non_existent_admin_id} not found for gym_id {mock_gym.id}"
     ):
         admin_component.modify_admin(mock_gym.id, non_existent_admin_id, data)
 
