@@ -14,14 +14,12 @@ class MachineRepository:
 
     @staticmethod
     def get_all_machines_in_hall(gym_id, hall_id):
-        return get_object_or_404(HallMachine.objects.filter(
-            hall_id=hall_id, hall_id__gym_id=gym_id
-        ))
+        return HallMachine.objects.filter(hall_id_id=hall_id, hall_id__gym_id=gym_id)
 
     @staticmethod
     def get_machine_by_id_in_hall(gym_id, hall_id, machine_id):
         return get_object_or_404(
-            HallMachine, hall_id=hall_id, hall_id__gym_id=gym_id, machine_id=machine_id
+            HallMachine, hall_id_id=hall_id, hall_id__gym_id=gym_id, machine_id=machine_id
         )
 
     def update_hall_machine(self, gym_id, hall_id, machine_id, data):

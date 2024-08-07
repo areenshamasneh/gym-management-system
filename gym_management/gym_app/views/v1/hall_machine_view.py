@@ -11,10 +11,10 @@ class HallMachineViewSet(viewsets.ViewSet):
         super().__init__(*args, **kwargs)
         self.component = HallMachineComponent()
 
-    def list(self, request, gym_id=None):
-        if gym_id is not None:
+    def list(self, request, gym_pk=None):
+        if gym_pk is not None:
             try:
-                machines = self.component.fetch_hall_machines_by_gym(gym_id)
+                machines = self.component.fetch_hall_machines_by_gym(gym_pk)
                 serializer = HallMachineSerializer(machines, many=True)
                 return Response(serializer.data)
             except ValueError as e:
@@ -24,7 +24,7 @@ class HallMachineViewSet(viewsets.ViewSet):
                 {"error": "Gym ID is required"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-    def retrieve(self, request, pk=None, gym_id=None):
+    def retrieve(self, request, pk=None, gym_pk=None):
         if pk is not None:
             try:
                 machine = self.component.fetch_hall_machine_by_id(pk)
