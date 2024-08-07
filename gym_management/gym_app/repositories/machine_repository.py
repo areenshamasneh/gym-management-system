@@ -9,7 +9,7 @@ class MachineRepository:
         hall = get_object_or_404(Hall, pk=hall_id, gym_id=gym_id)
         machine = get_object_or_404(Machine, id=data.get("machine_id"))
         return HallMachine.objects.create(
-            hall=hall, machine=machine, name=data.get("name"), uid=data.get("uid")
+            hall_id=hall, machine_id=machine, name=data.get("name"), uid=data.get("uid")
         )
 
     @staticmethod

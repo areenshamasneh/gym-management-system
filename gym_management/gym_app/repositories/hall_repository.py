@@ -42,5 +42,9 @@ class HallRepository:
 
     @staticmethod
     def delete_hall(gym_id, hall_id):
-        hall = get_object_or_404(Hall.objects.select_related('gym_id'), pk=hall_id, gym_id=gym_id)
-        hall.delete()
+        try:
+            hall = Hall.objects.get(pk=hall_id, gym_id=gym_id)
+            hall.delete()
+            return True
+        except Hall.DoesNotExist:
+            return False

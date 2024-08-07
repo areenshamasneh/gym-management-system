@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction, IntegrityError
 
 
 class Gym(models.Model):
@@ -139,18 +139,27 @@ class HallMachine(models.Model):
         return f"{self.machine_id} in {self.hall_id}"
 
     def save(self, *args, **kwargs):
-        # Generate the name based on hall and machine
         if not self.name:
             self.name = f"{self.hall_id.name} - {self.machine_id.type}"
 
-        # Generate the UID based on machine type and count
         if not self.uid:
-            count = (
-                    HallMachine.objects.filter(
-                        hall_id=self.hall_id, machine_id=self.machine_id
-                    ).count()
-                    + 1
-            )
-            self.uid = f"{self.machine_id.type}_{count}"
+            if HallMachine.objects.filter(hall_id=self.hall_id, machine_id=self.machine_id).exists():
+                return
 
-        super().save(*args, **kwargs)
+            with transaction.atomic():
+                count = (
+                        HallMachine.objects.filter(
+                            hall_id=self.hall_id, machine_id=self.machine_id
+                        ).count() + 1
+                )
+                self.uid = f"{self.machine_id.type}_{count}"
+
+                while HallMachine.objects.filter(uid=self.uid).exists():
+                    count += 1
+                    self.uid = f"{self.machine_id.type}_{count}"
+
+        try:
+            super().save(*args, **kwargs)
+        except IntegrityError as e:
+            print(f"Error saving HallMachine: {e}")
+            raise

@@ -201,9 +201,12 @@ def test_remove_hall(mock_logger_class, mock_repo_class):
     mock_logger_class.return_value = mock_logger
     component = HallComponent(mock_repo_class.return_value, mock_logger)
 
+    mock_repo_class.return_value.delete_hall.return_value = True
+
     component.remove_hall(1, 1)
 
-    mock_logger.log_info.assert_called_with("Removing hall with ID 1 for gym ID 1")
+    mock_logger.log_info.assert_any_call("Removing hall with ID 1 for gym ID 1")
+    mock_logger.log_info.assert_any_call("Hall with ID 1 removed successfully.")
 
 
 @pytest.mark.django_db
