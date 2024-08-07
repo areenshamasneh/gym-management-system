@@ -5,12 +5,14 @@ from gym_app.components import EmployeeComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
 from gym_app.models import Gym
 from gym_app.serializers import EmployeeSerializer
+from gym_app.validators import SchemaValidator
 
 
 class EmployeeViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
-        self.employee_component = EmployeeComponent()
         super().__init__(**kwargs)
+        self.employee_component = EmployeeComponent()
+        self.validator = SchemaValidator('gym_app/schemas')
 
     @staticmethod
     def get_gym(gym_id):
@@ -47,19 +49,13 @@ class EmployeeViewSet(viewsets.ViewSet):
             filter_criteria["positions__icontains"] = positions
 
         try:
-            employees = self.employee_component.fetch_all_employees(gym_pk).filter(
-                **filter_criteria
-            )
+            employees = self.employee_component.fetch_all_employees(gym_pk).filter(**filter_criteria)
             serializer = EmployeeSerializer(employees, many=True)
             return Response(serializer.data)
         except InvalidInputException as e:
             return Response({"errors": str(e)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except Exception as e:
-            print(f"Unexpected error occurred in list: {e}")
-            return Response(
-                {"detail": "An unexpected error occurred."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        except Exception:
+            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, gym_pk=None, pk=None):
         self.get_gym(gym_pk)
@@ -70,67 +66,54 @@ class EmployeeViewSet(viewsets.ViewSet):
             return Response(serializer.data)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            print(f"Unexpected error occurred in retrieve: {e}")
-            return Response(
-                {"detail": "An unexpected error occurred."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        except Exception:
+            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, gym_pk=None):
         self.get_gym(gym_pk)
 
         data = request.data.copy()
-        data['gym'] = gym_pk
+        data['gym_id'] = gym_pk
+
+        validation_error = self.validator.validate_data('employee_schema.json', data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = EmployeeSerializer(data=data)
         if serializer.is_valid():
             try:
-                employee = self.employee_component.add_employee(
-                    gym_pk, serializer.validated_data
-                )
-                serializer = EmployeeSerializer(employee)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                employee = self.employee_component.add_employee(gym_pk, serializer.validated_data)
+                return Response(EmployeeSerializer(employee).data, status=status.HTTP_201_CREATED)
             except InvalidInputException as e:
-                return Response(
-                    {"detail": str(e)},
-                    status=status.HTTP_422_UNPROCESSABLE_ENTITY
-                )
-            except Exception as e:
-                print(f"Unexpected error occurred in create: {e}")
-                return Response(
-                    {"detail": "An unexpected error occurred."},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-        return Response(
-            {"errors": serializer.errors},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+                return Response({"detail": str(e)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            except Exception:
+                return Response({"detail": "An unexpected error occurred."},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, gym_pk=None, pk=None):
         self.get_gym(gym_pk)
 
-        serializer = EmployeeSerializer(data=request.data, partial=True)
+        data = request.data.copy()
+        data['gym_id'] = gym_pk
+
+        validation_error = self.validator.validate_data('employee_schema.json', data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = EmployeeSerializer(data=data, partial=True)
         if serializer.is_valid():
             try:
-                employee = self.employee_component.modify_employee(
-                    gym_pk, pk, serializer.validated_data
-                )
-                serializer = EmployeeSerializer(employee)
-                return Response(serializer.data)
+                employee = self.employee_component.modify_employee(gym_pk, pk, serializer.validated_data)
+                return Response(EmployeeSerializer(employee).data)
             except ResourceNotFoundException as e:
                 return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
             except InvalidInputException as e:
                 return Response({"errors": str(e)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-            except Exception as e:
-                print(f"Unexpected error occurred in update: {e}")
-                return Response(
-                    {"detail": "An unexpected error occurred."},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-        return Response(
-            {"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST
-        )
+            except Exception:
+                return Response({"detail": "An unexpected error occurred."},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, gym_pk=None, pk=None):
         return self.update(request, gym_pk=gym_pk, pk=pk)
@@ -140,17 +123,10 @@ class EmployeeViewSet(viewsets.ViewSet):
 
         try:
             self.employee_component.remove_employee(gym_pk, pk)
-            return Response(
-                {"message": "Employee deleted successfully"},
-                status=status.HTTP_204_NO_CONTENT,
-            )
+            return Response({"message": "Employee deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except InvalidInputException as e:
             return Response({"errors": str(e)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except Exception as e:
-            print(f"Unexpected error occurred in destroy: {e}")
-            return Response(
-                {"detail": "An unexpected error occurred."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        except Exception:
+            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

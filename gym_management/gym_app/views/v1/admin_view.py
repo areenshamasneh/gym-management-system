@@ -3,14 +3,16 @@ from rest_framework.response import Response
 
 from gym_app.components.admin_component import AdminComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException, ConflictException
-from gym_app.models.system_models import Gym
+from gym_app.models import Gym
 from gym_app.serializers import AdminSerializer
+from gym_app.validators import SchemaValidator
 
 
 class AdminViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
-        self.admin_component = AdminComponent()
         super().__init__(**kwargs)
+        self.admin_component = AdminComponent()
+        self.validator = SchemaValidator('gym_app/schemas')
 
     @staticmethod
     def get_gym(gym_id):
@@ -63,13 +65,17 @@ class AdminViewSet(viewsets.ViewSet):
         data = request.data.copy()
         data["gym_id"] = gym_pk
 
+        validation_error = self.validator.validate_data('admin_schema.json', data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             admin = self.admin_component.add_admin(gym_pk, data)
             serializer = AdminSerializer(admin)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except InvalidInputException as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
+        except Exception:
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, gym_pk=None, pk=None):
@@ -77,6 +83,10 @@ class AdminViewSet(viewsets.ViewSet):
 
         data = request.data.copy()
         data["gym_id"] = gym_pk
+
+        validation_error = self.validator.validate_data('admin_schema.json', data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             admin = self.admin_component.modify_admin(gym_pk, pk, data)
@@ -86,7 +96,7 @@ class AdminViewSet(viewsets.ViewSet):
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except InvalidInputException as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
+        except Exception:
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def partial_update(self, request, gym_pk=None, pk=None):
@@ -100,5 +110,5 @@ class AdminViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
+        except Exception:
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -1,16 +1,17 @@
-from django.core.exceptions import ValidationError
 from rest_framework import viewsets, status
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 
 from gym_app.components import HallComponent
 from gym_app.models import Gym
 from gym_app.serializers import HallSerializer
+from gym_app.validators import SchemaValidator
 
 
 class HallViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         self.hall_component = HallComponent()
+        self.validator = SchemaValidator('gym_app/schemas')
         super().__init__(**kwargs)
 
     @staticmethod
@@ -48,6 +49,11 @@ class HallViewSet(viewsets.ViewSet):
     def create(self, request, gym_pk=None):
         self.get_gym(gym_pk)
 
+        request.data['gym_id'] = gym_pk
+        validation_error = self.validator.validate_data('hall_schema.json', request.data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = HallSerializer(data=request.data)
         if serializer.is_valid():
             try:
@@ -63,6 +69,11 @@ class HallViewSet(viewsets.ViewSet):
 
     def update(self, request, gym_pk=None, pk=None):
         self.get_gym(gym_pk)
+
+        request.data['gym_id'] = gym_pk
+        validation_error = self.validator.validate_data('hall_schema.json', request.data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = HallSerializer(data=request.data, partial=True)
         if serializer.is_valid():

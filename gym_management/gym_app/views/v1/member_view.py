@@ -5,11 +5,13 @@ from gym_app.components import MemberComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
 from gym_app.models import Gym
 from gym_app.serializers import MemberSerializer
+from gym_app.validators import SchemaValidator
 
 
 class MemberViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         self.member_component = MemberComponent()
+        self.validator = SchemaValidator('gym_app/schemas')
         super().__init__(**kwargs)
 
     @staticmethod
@@ -21,7 +23,6 @@ class MemberViewSet(viewsets.ViewSet):
 
     def list(self, request, gym_pk=None):
         self.get_gym(gym_pk)
-
         name_filter = request.GET.get("name", None)
         try:
             all_members = self.member_component.fetch_all_members(gym_pk)
@@ -47,7 +48,6 @@ class MemberViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, gym_pk=None, pk=None):
         self.get_gym(gym_pk)
-
         try:
             member = self.member_component.fetch_member_by_id(gym_pk, pk)
             serializer = MemberSerializer(member)
@@ -63,6 +63,10 @@ class MemberViewSet(viewsets.ViewSet):
 
     def create(self, request, gym_pk=None):
         self.get_gym(gym_pk)
+        request.data['gym_id'] = gym_pk
+        validation_error = self.validator.validate_data('member_schema.json', request.data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = MemberSerializer(data=request.data)
         if serializer.is_valid():
@@ -82,6 +86,10 @@ class MemberViewSet(viewsets.ViewSet):
 
     def update(self, request, gym_pk=None, pk=None):
         self.get_gym(gym_pk)
+        request.data['gym_id'] = gym_pk
+        validation_error = self.validator.validate_data('member_schema.json', request.data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = MemberSerializer(data=request.data, partial=True)
         if serializer.is_valid():
@@ -108,7 +116,6 @@ class MemberViewSet(viewsets.ViewSet):
 
     def destroy(self, request, gym_pk=None, pk=None):
         self.get_gym(gym_pk)
-
         try:
             self.member_component.remove_member(gym_pk, pk)
             return Response(

@@ -4,11 +4,13 @@ from rest_framework.response import Response
 from gym_app.components import MachineComponent
 from gym_app.models import Machine
 from gym_app.serializers import MachineSerializer
+from gym_app.validators import SchemaValidator
 
 
 class MachineViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         self.component = MachineComponent()
+        self.validator = SchemaValidator('gym_app/schemas')
         super().__init__(**kwargs)
 
     def list(self, request, gym_pk=None, hall_pk=None):
@@ -20,6 +22,10 @@ class MachineViewSet(viewsets.ViewSet):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, gym_pk=None, hall_pk=None):
+        validation_error = self.validator.validate_data('machine_schema.json', request.data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
+
         data = request.data
         try:
             machine, created = Machine.objects.get_or_create(
@@ -64,6 +70,10 @@ class MachineViewSet(viewsets.ViewSet):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, gym_pk=None, hall_pk=None, pk=None):
+        validation_error = self.validator.validate_data('machine_schema.json', request.data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
+
         data = request.data
         try:
             machine = Machine.objects.get(pk=pk)
@@ -76,6 +86,9 @@ class MachineViewSet(viewsets.ViewSet):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def partial_update(self, request, gym_pk=None, hall_pk=None, pk=None):
+        return self.update(request, gym_pk=gym_pk, hall_pk=hall_pk, pk=pk)
 
     def destroy(self, request, gym_pk=None, hall_pk=None, pk=None):
         try:

@@ -39,21 +39,16 @@ class Machine(models.Model):
 
 
 class HallType(models.Model):
-    CODE_CHOICES = [
-        ("SAUNA", "Sauna"),
-        ("TRAINING", "Training"),
-        ("YOGA", "Yoga"),
-        ("SWIMMING", "Swimming"),
-    ]
-
-    name = models.CharField(max_length=100, choices=CODE_CHOICES, default="Training")
-    code = models.CharField(
-        max_length=20, choices=CODE_CHOICES, unique=True, default="TRAINING"
-    )
-    type_description = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=255, unique=True)
+    type_description = models.TextField()
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.code = self.code.upper()
+        super().save(*args, **kwargs)
 
 
 class Hall(models.Model):

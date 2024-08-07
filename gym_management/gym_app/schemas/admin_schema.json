@@ -1,0 +1,35 @@
+{
+  "title": "Admin",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "phone_number": {
+      "type": "string",
+      "pattern": "^[+]?[(]?[0-9]{1,4}[)]?[-s./0-9]*$",
+      "minLength": 7,
+      "maxLength": 20
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "gym_id": {
+      "type": "string",
+      "minimum": 1
+    },
+    "address_city": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "address_street": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    }
+  }
+}

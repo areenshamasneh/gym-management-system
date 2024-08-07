@@ -1,15 +1,17 @@
-from rest_framework import status  # type: ignore
-from rest_framework import viewsets  # type: ignore
-from rest_framework.response import Response  # type: ignore
+from rest_framework import status
+from rest_framework import viewsets
+from rest_framework.response import Response
 
 from gym_app.components import GymComponent
 from gym_app.serializers import GymSerializer
+from gym_app.validators import SchemaValidator
 
 
 class GymViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.gym_component = GymComponent()
+        self.validator = SchemaValidator('gym_app/schemas')
 
     def list(self, request):
         gyms = self.gym_component.fetch_all_gyms()
@@ -22,6 +24,10 @@ class GymViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
+        validation_error = self.validator.validate_data('gym_schema.json', request.data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = GymSerializer(data=request.data)
         if serializer.is_valid():
             self.gym_component.add_gym(serializer.validated_data)
@@ -29,6 +35,10 @@ class GymViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None):
+        validation_error = self.validator.validate_data('gym_schema.json', request.data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = GymSerializer(data=request.data, partial=True)
         if serializer.is_valid():
             self.gym_component.modify_gym(pk, serializer.validated_data)
