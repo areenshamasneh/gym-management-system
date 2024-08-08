@@ -10,6 +10,9 @@ from gym_app.models import (
     Member,
     HallMachine,
 )
+from pydantic import ValidationError
+
+from gym_app.models.hall_type_model import HallTypeModel
 
 
 class GymSerializer(serializers.ModelSerializer):
@@ -22,6 +25,13 @@ class HallTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = HallType
         fields = "__all__"
+
+    def validate(self, data):
+        try:
+            HallTypeModel(**data)
+        except ValidationError as e:
+            raise serializers.ValidationError(e.errors())
+        return data
 
 
 class MachineSerializer(serializers.ModelSerializer):
