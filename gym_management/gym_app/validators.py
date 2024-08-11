@@ -1,23 +1,23 @@
-import json
+import importlib
 import logging
-import os
-
 from jsonschema import validate, ValidationError
 
 logger = logging.getLogger(__name__)
 
 
 class SchemaValidator:
-    def __init__(self, schema_dir):
-        self.schema_dir = schema_dir
+    def __init__(self, schemas_module_name):
+        self.schemas_module_name = schemas_module_name
 
-    def _load_schema(self, schema_name):
-        schema_path = os.path.join(self.schema_dir, schema_name)
-        with open(schema_path) as schema_file:
-            return json.load(schema_file)
+    def _get_schema(self, schema_name):
+        schemas_module = importlib.import_module(self.schemas_module_name)
+        schema = getattr(schemas_module, schema_name, None)
+        if schema is None:
+            logger.error(f"Schema {schema_name} not found in module {self.schemas_module_name}")
+        return schema
 
     def validate_data(self, schema_name, data):
-        schema = self._load_schema(schema_name)
+        schema = self._get_schema(schema_name)
         try:
             validate(instance=data, schema=schema)
         except ValidationError as e:

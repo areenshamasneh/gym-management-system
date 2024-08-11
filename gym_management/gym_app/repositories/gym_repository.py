@@ -16,27 +16,26 @@ class GymRepository:
 
     @staticmethod
     def create_gym(data):
-        gym = Gym.objects.create(
+        return Gym.objects.create(
             name=data.get("name"),
             type=data.get("type"),
             description=data.get("description"),
             address_city=data.get("address_city"),
             address_street=data.get("address_street"),
         )
-        return gym
 
     @staticmethod
     def update_gym(pk, data):
         gym = Gym.objects.filter(pk=pk).first()
         if gym:
-            Gym.objects.filter(pk=pk).update(
-                name=data.get("name"),
-                type=data.get("type"),
-                description=data.get("description"),
-                address_city=data.get("address_city"),
-                address_street=data.get("address_street"),
-            )
-        return gym
+            fields_to_update = ['name', 'type', 'description', 'address_city', 'address_street']
+            for field in fields_to_update:
+                if field in data:
+                    setattr(gym, field, data[field])
+
+            gym.save()
+            return gym
+        return None
 
     @staticmethod
     def delete_gym(pk):

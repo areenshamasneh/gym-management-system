@@ -33,16 +33,27 @@ class EmployeeRepository:
 
     @staticmethod
     def update_employee(gym_id, employee_id, data):
-        Employee.objects.filter(pk=employee_id, gym_id=gym_id).update(
-            name=data.get("name"),
-            manager_id=data.get("manager_id"),
-            address_city=data.get("address_city"),
-            address_street=data.get("address_street"),
-            phone_number=data.get("phone_number", ""),
-            email=data.get("email"),
-            positions=data.get("positions", ""),
-        )
-        return EmployeeRepository.get_employee_by_id(gym_id, employee_id)
+        employee = Employee.objects.filter(pk=employee_id, gym_id=gym_id).first()
+        if employee is None:
+            raise ResourceNotFoundException(f"Employee with ID {employee_id} not found for gym_id {gym_id}")
+
+        if 'name' in data:
+            employee.name = data['name']
+        if 'manager_id' in data:
+            employee.manager_id = data.get('manager_id')
+        if 'address_city' in data:
+            employee.address_city = data['address_city']
+        if 'address_street' in data:
+            employee.address_street = data['address_street']
+        if 'phone_number' in data:
+            employee.phone_number = data.get('phone_number', "")
+        if 'email' in data:
+            employee.email = data['email']
+        if 'positions' in data:
+            employee.positions = data.get('positions', "")
+
+        employee.save()
+        return employee
 
     @staticmethod
     def delete_employee(gym_id, employee_id):

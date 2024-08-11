@@ -1,6 +1,6 @@
+from pydantic import ValidationError as PydanticValidationError
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from pydantic import ValidationError as PydanticValidationError
 
 from gym_app.components import HallTypeComponent
 from gym_app.models import HallType

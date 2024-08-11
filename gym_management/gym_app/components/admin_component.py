@@ -54,16 +54,10 @@ class AdminComponent:
 
     def modify_admin(self, gym_id, admin_id, admin_data):
         try:
-            admin = self.admin_repository.get_admin_by_id(gym_id, admin_id)
-        except ResourceNotFoundException as e:
-            self.logger.log_error(
-                f"Admin with ID {admin_id} not found for gym_id {gym_id}: {str(e)}"
-            )
-            raise e
+            self.admin_repository.get_admin_by_id(gym_id, admin_id)
 
-        try:
             self.logger.log_info(f"Modifying admin ID {admin_id} for gym_id: {gym_id}")
-            updated_admin = self.admin_repository.update_admin(admin, admin_data)
+            updated_admin = self.admin_repository.update_admin(gym_id, admin_id, admin_data)
             return updated_admin
         except Exception as e:
             self.logger.log_error(

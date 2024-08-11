@@ -31,16 +31,23 @@ class AdminRepository:
 
     @staticmethod
     def update_admin(gym_id, admin_id, data):
-        if not Admin.objects.filter(pk=admin_id, gym_id=gym_id).exists():
+        admin = Admin.objects.filter(pk=admin_id, gym_id=gym_id).first()
+        if admin is None:
             raise ResourceNotFoundException(f"Admin with ID {admin_id} not found for gym_id {gym_id}")
-        Admin.objects.filter(pk=admin_id, gym_id=gym_id).update(
-            name=data.get("name"),
-            phone_number=data.get("phone_number", ""),
-            email=data.get("email"),
-            address_city=data.get("address_city"),
-            address_street=data.get("address_street"),
-        )
-        return AdminRepository.get_admin_by_id(gym_id, admin_id)
+
+        if 'name' in data:
+            admin.name = data['name']
+        if 'phone_number' in data:
+            admin.phone_number = data['phone_number']
+        if 'email' in data:
+            admin.email = data['email']
+        if 'address_city' in data:
+            admin.address_city = data['address_city']
+        if 'address_street' in data:
+            admin.address_street = data['address_street']
+
+        admin.save()
+        return admin
 
     @staticmethod
     def delete_admin(gym_id, admin_id):

@@ -12,7 +12,7 @@ class AdminViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.admin_component = AdminComponent()
-        self.validator = SchemaValidator('gym_app/schemas')
+        self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.admin_schemas')
 
     @staticmethod
     def get_gym(gym_id):
@@ -65,7 +65,7 @@ class AdminViewSet(viewsets.ViewSet):
         data = request.data.copy()
         data["gym_id"] = gym_pk
 
-        validation_error = self.validator.validate_data('create_schemas/admin_schema.json', data)
+        validation_error = self.validator.validate_data('CREATE_SCHEMA', data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -84,7 +84,7 @@ class AdminViewSet(viewsets.ViewSet):
         data = request.data.copy()
         data["gym_id"] = gym_pk
 
-        validation_error = self.validator.validate_data('update_schemas/admin_schema.json', data)
+        validation_error = self.validator.validate_data('UPDATE_SCHEMA', data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 

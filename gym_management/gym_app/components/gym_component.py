@@ -54,8 +54,9 @@ class GymComponent:
     def modify_gym(self, gym_id, data):
         try:
             self.gym_repository.get_gym_by_id(gym_id)
-            self.gym_repository.update_gym(gym_id, data)
+            gym = self.gym_repository.update_gym(gym_id, data)
             self.logger.log_info(f"Modifying gym ID {gym_id}")
+            return gym
         except ResourceNotFoundException as e:
             self.logger.log_error(str(e))
             raise

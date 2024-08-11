@@ -11,39 +11,33 @@ class HallMachineViewSet(viewsets.ViewSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.component = HallMachineComponent()
-        self.validator = SchemaValidator('gym_app/schemas')
+        self.validator = SchemaValidator('gym_app.schemas.hall_machine_schemas')
 
     def list(self, request, gym_pk=None):
-        if gym_pk is not None:
+        if gym_pk:
             try:
                 machines = self.component.fetch_hall_machines_by_gym(gym_pk)
                 serializer = HallMachineSerializer(machines, many=True)
                 return Response(serializer.data)
             except ValueError as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response(
-                {"error": "Gym ID is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        return Response({"error": "Gym ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None, gym_pk=None):
-        if pk is not None:
+        if pk:
             try:
                 machine = self.component.fetch_hall_machine_by_id(pk)
                 serializer = HallMachineSerializer(machine)
                 return Response(serializer.data)
             except HallMachine.DoesNotExist:
-                return Response(
-                    {"error": "Hall machine not found"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-        else:
-            return Response(
-                {"error": "ID is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
+                return Response({"error": "Hall machine not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request, gym_pk=None):
-        validation_error = self.validator.validate_data('create_schemas/hall_machine_schema.json', request.data)
+        if gym_pk is None:
+            return Response({"error": "Gym ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        validation_error = self.validator.validate_data('CREATE_SCHEMA', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -57,14 +51,13 @@ class HallMachineViewSet(viewsets.ViewSet):
                     "uid": data["uid"]
                 },
             )
-
             serializer = HallMachineSerializer(hall_machine)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, pk=None):
-        validation_error = self.validator.validate_data('update_schemas/hall_machine_schema.json', request.data)
+        validation_error = self.validator.validate_data('UPDATE_SCHEMA', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -75,8 +68,7 @@ class HallMachineViewSet(viewsets.ViewSet):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except HallMachine.DoesNotExist:
             return Response({"error": "Hall machine not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:

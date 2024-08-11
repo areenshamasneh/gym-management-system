@@ -9,20 +9,20 @@ from gym_app.validators import SchemaValidator
 
 class MachineViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
-        self.component = MachineComponent()
-        self.validator = SchemaValidator('gym_app/schemas')
         super().__init__(**kwargs)
+        self.component = MachineComponent()
+        self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.machine_schemas')
 
     def list(self, request, gym_pk=None, hall_pk=None):
         try:
             machines = self.component.fetch_all_machines_in_hall(gym_pk, hall_pk)
             serializer = MachineSerializer([hm.machine_id for hm in machines], many=True)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, gym_pk=None, hall_pk=None):
-        validation_error = self.validator.validate_data('create_schemas/machine_schema.json', request.data)
+        validation_error = self.validator.validate_data('CREATE_SCHEMA', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -65,12 +65,12 @@ class MachineViewSet(viewsets.ViewSet):
         try:
             machine = self.component.fetch_machine_by_id_in_hall(gym_pk, hall_pk, pk)
             serializer = MachineSerializer(machine)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, gym_pk=None, hall_pk=None, pk=None):
-        validation_error = self.validator.validate_data('update_schemas/machine_schema.json', request.data)
+        validation_error = self.validator.validate_data('UPDATE_SCHEMA', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 

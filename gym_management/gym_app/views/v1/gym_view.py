@@ -1,5 +1,4 @@
-from rest_framework import status
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 
 from gym_app.components import GymComponent
@@ -11,7 +10,7 @@ class GymViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.gym_component = GymComponent()
-        self.validator = SchemaValidator('gym_app/schemas')
+        self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.gym_schemas')
 
     def list(self, request):
         gyms = self.gym_component.fetch_all_gyms()
@@ -20,34 +19,40 @@ class GymViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         gym = self.gym_component.fetch_gym_by_id(pk)
+        if not gym:
+            return Response({"error": "Gym not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = GymSerializer(gym)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
-        validation_error = self.validator.validate_data('create_schemas/gym_schema.json', request.data)
+        validation_error = self.validator.validate_data('CREATE_SCHEMA', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = GymSerializer(data=request.data)
         if serializer.is_valid():
-            self.gym_component.add_gym(serializer.validated_data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            gym = self.gym_component.add_gym(serializer.validated_data)
+            return Response(GymSerializer(gym).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None):
-        validation_error = self.validator.validate_data('update_schemas/vgym_schema.json', request.data)
+        validation_error = self.validator.validate_data('UPDATE_SCHEMA', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = GymSerializer(data=request.data, partial=True)
         if serializer.is_valid():
-            self.gym_component.modify_gym(pk, serializer.validated_data)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            updated_gym = self.gym_component.modify_gym(pk, serializer.validated_data)
+            if updated_gym:
+                return Response(GymSerializer(updated_gym).data, status=status.HTTP_200_OK)
+            return Response({"error": "Gym not found"}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk=None):
         return self.update(request, pk)
 
     def destroy(self, request, pk=None):
-        self.gym_component.remove_gym(pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        success = self.gym_component.remove_gym(pk)
+        if success:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"error": "Gym not found"}, status=status.HTTP_404_NOT_FOUND)
