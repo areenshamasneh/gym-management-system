@@ -38,7 +38,7 @@ class MemberComponent:
             self.logger.log_error(f"Unexpected error fetching member: {e}")
             raise DatabaseException("An error occurred while fetching the member by ID.")
 
-    def add_member(self, gym_id, data):
+    def create_member(self, gym_id, data):
         self.logger.log_info(f"Adding new member with data: {data}")
         try:
             return self.repo.create_member(gym_id, data)

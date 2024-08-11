@@ -23,8 +23,8 @@ class MemberRepository:
     @staticmethod
     def create_member(gym_id, data):
         try:
-            gym_instance = Gym.objects.get(pk=gym_id)
-            data["gym_id"] = gym_instance
+            gym = Gym.objects.get(pk=gym_id)
+            data["gym"] = gym
             return Member.objects.create(**data)
         except Gym.DoesNotExist:
             raise ResourceNotFoundException(f"Gym with ID {gym_id} not found")

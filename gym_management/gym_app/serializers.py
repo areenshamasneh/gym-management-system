@@ -118,14 +118,15 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
 
 class MemberSerializer(serializers.ModelSerializer):
-    gym = GymSerializer()
+    gym = GymSerializer(read_only=True)
 
     class Meta:
         model = Member
-        fields = [
-            "id",
-            "name",
-            "gym",
-            "phone_number",
-            "birth_date",
-        ]
+        fields = ['id', 'name', 'gym', 'phone_number', 'birth_date']
+
+    def create(self, validated_data):
+        gym_id = self.context['gym_id']
+        gym = Gym.objects.get(id=gym_id)
+
+        member = Member.objects.create(gym=gym, **validated_data)
+        return member

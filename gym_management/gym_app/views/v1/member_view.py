@@ -52,19 +52,21 @@ class MemberViewSet(viewsets.ViewSet):
 
     def create(self, request, gym_pk=None):
         self.get_gym(gym_pk)
-        request.data['gym_id'] = gym_pk
-        validation_error = self.validator.validate_data('CREATE_SCHEMA', request.data)
+        data = request.data.copy()
+        data["gym"] = gym_pk
+
+        validation_error = self.validator.validate_data('CREATE_SCHEMA', data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = MemberSerializer(data=request.data)
+        serializer = MemberSerializer(data=data)
         if serializer.is_valid():
             try:
-                member = self.member_component.add_member(gym_pk, serializer.validated_data)
+                member = self.member_component.create_member(gym_pk, serializer.validated_data)
                 response_serializer = MemberSerializer(member)
                 return Response(response_serializer.data, status=status.HTTP_201_CREATED)
             except InvalidInputException as e:
-                return Response({"detail": str(e)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 return Response({"detail": "An unexpected error occurred."},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -72,12 +74,14 @@ class MemberViewSet(viewsets.ViewSet):
 
     def update(self, request, gym_pk=None, pk=None):
         self.get_gym(gym_pk)
-        request.data['gym_id'] = gym_pk
-        validation_error = self.validator.validate_data('UPDATE_SCHEMA', request.data)
+        data = request.data.copy()
+        data["gym"] = gym_pk
+
+        validation_error = self.validator.validate_data('UPDATE_SCHEMA', data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = MemberSerializer(data=request.data, partial=True)
+        serializer = MemberSerializer(data=data, partial=True)
         if serializer.is_valid():
             try:
                 member = self.member_component.modify_member(gym_pk, pk, serializer.validated_data)
@@ -86,7 +90,7 @@ class MemberViewSet(viewsets.ViewSet):
             except ResourceNotFoundException as e:
                 return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
             except InvalidInputException as e:
-                return Response({"errors": str(e)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                return Response({"errors": str(e)}, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 return Response({"detail": "An unexpected error occurred."},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)

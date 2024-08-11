@@ -1,4 +1,4 @@
-from django.db import models, transaction, IntegrityError
+from django.db import models, transaction
 
 
 class Gym(models.Model):
@@ -111,6 +111,7 @@ class Member(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class HallMachine(models.Model):
     hall = models.ForeignKey(
