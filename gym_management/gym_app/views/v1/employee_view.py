@@ -1,6 +1,5 @@
 from rest_framework import status, viewsets
 from rest_framework.response import Response
-
 from gym_app.components import EmployeeComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
 from gym_app.models import Gym
@@ -64,7 +63,7 @@ class EmployeeViewSet(viewsets.ViewSet):
         self.get_gym(gym_pk)
 
         data = request.data.copy()
-        data["gym_id"] = gym_pk
+        data["gym"] = {"id": gym_pk}
 
         validation_error = self.validator.validate_data('CREATE_SCHEMA', data)
         if validation_error:
@@ -83,7 +82,7 @@ class EmployeeViewSet(viewsets.ViewSet):
         self.get_gym(gym_pk)
 
         data = request.data.copy()
-        data["gym_id"] = gym_pk
+        data["gym"] = {"id": gym_pk}
 
         validation_error = self.validator.validate_data('UPDATE_SCHEMA', data)
         if validation_error:
@@ -113,7 +112,3 @@ class EmployeeViewSet(viewsets.ViewSet):
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception:
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def handle_exception(self, e):
-        # Your custom exception handling logic here
-        return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -49,18 +49,22 @@ class MachineSerializer(serializers.ModelSerializer):
 
 
 class HallSerializer(serializers.ModelSerializer):
+    gym = GymSerializer()
+
     class Meta:
         model = Hall
-        fields = ["id", "name", "users_capacity", "hall_type_id", "gym_id"]
+        fields = ["id", "name", "users_capacity", "hall_type", "gym"]
 
 
 class HallMachineSerializer(serializers.ModelSerializer):
     class Meta:
         model = HallMachine
-        fields = ["id", "hall_id", "machine_id", "name", "uid"]
+        fields = ["id", "hall", "machine", "name", "uid"]
 
 
 class AdminSerializer(serializers.ModelSerializer):
+    gym = GymSerializer()
+
     class Meta:
         model = Admin
         fields = [
@@ -68,19 +72,23 @@ class AdminSerializer(serializers.ModelSerializer):
             "name",
             "phone_number",
             "email",
+            "gym",
             "address_city",
             "address_street",
         ]
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
+    gym = GymSerializer()
+    manager = serializers.SerializerMethodField()
+
     class Meta:
         model = Employee
         fields = [
             "id",
             "name",
-            "gym_id",
-            "manager_id",
+            "gym",
+            "manager",
             "address_city",
             "address_street",
             "phone_number",
@@ -88,12 +96,20 @@ class EmployeeSerializer(serializers.ModelSerializer):
             "positions",
         ]
 
-    def validate_email(self, value):
+    @staticmethod
+    def get_manager(obj):
+        if obj.manager:
+            return EmployeeSerializer(obj.manager).data
+        return None
+
+    @staticmethod
+    def validate_email(value):
         if Employee.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already exists")
         return value
 
-    def validate_positions(self, value):
+    @staticmethod
+    def validate_positions(value):
         positions_list = [pos.strip() for pos in value.split(",") if pos.strip()]
         valid_positions = {"cleaner", "trainer", "system_worker"}
         if not set(positions_list).issubset(valid_positions):
@@ -102,12 +118,14 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
 
 class MemberSerializer(serializers.ModelSerializer):
+    gym = GymSerializer()
+
     class Meta:
         model = Member
         fields = [
             "id",
             "name",
-            "gym_id",
+            "gym",
             "phone_number",
             "birth_date",
         ]

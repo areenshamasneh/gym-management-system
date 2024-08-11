@@ -7,12 +7,8 @@ CREATE_SCHEMA = {
             "minLength": 1,
             "maxLength": 255
         },
-        "gym_id": {
-            "type": "string",
-            "minimum": 1
-        },
-        "manager_id": {
-            "type": "string",
+        "manager": {
+            "type": "integer",
             "nullable": True
         },
         "address_city": {
@@ -43,7 +39,7 @@ CREATE_SCHEMA = {
     },
     "required": [
         "name",
-        "gym_id",
+        "gym",
         "address_city",
         "address_street",
         "email"
@@ -59,12 +55,8 @@ UPDATE_SCHEMA = {
             "minLength": 1,
             "maxLength": 255
         },
-        "gym_id": {
-            "type": "string",
-            "minimum": 1
-        },
-        "manager_id": {
-            "type": "string",
+        "manager": {
+            "type": "integer",
             "nullable": True
         },
         "address_city": {

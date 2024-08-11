@@ -17,10 +17,6 @@ CREATE_SCHEMA = {
             "type": "string",
             "format": "email"
         },
-        "gym_id": {
-            "type": "string",
-            "minimum": 1
-        },
         "address_city": {
             "type": "string",
             "minLength": 1,
@@ -59,10 +55,6 @@ UPDATE_SCHEMA = {
         "email": {
             "type": "string",
             "format": "email"
-        },
-        "gym_id": {
-            "type": "string",
-            "minimum": 1
         },
         "address_city": {
             "type": "string",
