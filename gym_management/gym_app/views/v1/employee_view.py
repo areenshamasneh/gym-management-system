@@ -75,7 +75,7 @@ class EmployeeViewSet(viewsets.ViewSet):
         data = request.data.copy()
         data['gym_id'] = gym_pk
 
-        validation_error = self.validator.validate_data('employee_schema.json', data)
+        validation_error = self.validator.validate_data('create_schemas/employee_schema.json', data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -97,7 +97,7 @@ class EmployeeViewSet(viewsets.ViewSet):
         data = request.data.copy()
         data['gym_id'] = gym_pk
 
-        validation_error = self.validator.validate_data('employee_schema.json', data)
+        validation_error = self.validator.validate_data('update_schemas/employee_schema.json', data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 

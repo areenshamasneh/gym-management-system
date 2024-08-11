@@ -64,7 +64,7 @@ class MemberViewSet(viewsets.ViewSet):
     def create(self, request, gym_pk=None):
         self.get_gym(gym_pk)
         request.data['gym_id'] = gym_pk
-        validation_error = self.validator.validate_data('member_schema.json', request.data)
+        validation_error = self.validator.validate_data('create_schemas/member_schema.json', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -87,7 +87,7 @@ class MemberViewSet(viewsets.ViewSet):
     def update(self, request, gym_pk=None, pk=None):
         self.get_gym(gym_pk)
         request.data['gym_id'] = gym_pk
-        validation_error = self.validator.validate_data('member_schema.json', request.data)
+        validation_error = self.validator.validate_data('create_schemas/vmember_schema.json', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 

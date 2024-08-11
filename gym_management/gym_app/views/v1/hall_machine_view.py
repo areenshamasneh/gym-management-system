@@ -43,7 +43,7 @@ class HallMachineViewSet(viewsets.ViewSet):
             )
 
     def create(self, request, gym_pk=None):
-        validation_error = self.validator.validate_data('hall_machine_schema.json', request.data)
+        validation_error = self.validator.validate_data('create_schemas/hall_machine_schema.json', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -64,7 +64,7 @@ class HallMachineViewSet(viewsets.ViewSet):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, pk=None):
-        validation_error = self.validator.validate_data('hall_machine_schema.json', request.data)
+        validation_error = self.validator.validate_data('update_schemas/hall_machine_schema.json', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 

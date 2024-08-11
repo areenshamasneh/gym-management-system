@@ -1,0 +1,36 @@
+{
+  "title": "HallType",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "enum": [
+        "Sauna",
+        "Training",
+        "Yoga",
+        "Swimming"
+      ],
+      "maxLength": 100
+    },
+    "code": {
+      "type": "string",
+      "enum": [
+        "SAUNA",
+        "TRAINING",
+        "YOGA",
+        "SWIMMING"
+      ],
+      "maxLength": 20
+    },
+    "type_description": {
+      "type": "string",
+      "maxLength": 255,
+      "nullable": true
+    }
+  },
+  "required": [
+    "name",
+    "code"
+  ],
+  "additionalProperties": false
+}

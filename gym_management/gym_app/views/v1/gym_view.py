@@ -24,7 +24,7 @@ class GymViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
-        validation_error = self.validator.validate_data('gym_schema.json', request.data)
+        validation_error = self.validator.validate_data('create_schemas/gym_schema.json', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -35,7 +35,7 @@ class GymViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None):
-        validation_error = self.validator.validate_data('gym_schema.json', request.data)
+        validation_error = self.validator.validate_data('update_schemas/vgym_schema.json', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -50,7 +50,7 @@ class HallViewSet(viewsets.ViewSet):
         self.get_gym(gym_pk)
 
         request.data['gym_id'] = gym_pk
-        validation_error = self.validator.validate_data('hall_schema.json', request.data)
+        validation_error = self.validator.validate_data('create_schemas/hall_schema.json', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -71,7 +71,7 @@ class HallViewSet(viewsets.ViewSet):
         self.get_gym(gym_pk)
 
         request.data['gym_id'] = gym_pk
-        validation_error = self.validator.validate_data('hall_schema.json', request.data)
+        validation_error = self.validator.validate_data('update_schemas/hall_schema.json', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
