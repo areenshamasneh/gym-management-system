@@ -49,11 +49,12 @@ class MachineSerializer(serializers.ModelSerializer):
 
 class HallSerializer(serializers.ModelSerializer):
     gym = GymSerializer(read_only=True)
-    hall_type = serializers.PrimaryKeyRelatedField(queryset=HallType.objects.all())
+    hall_type = serializers.PrimaryKeyRelatedField(queryset=HallType.objects.all(), write_only=True)
+    hall__type = HallTypeSerializer(source='hall_type', read_only=True)
 
     class Meta:
         model = Hall
-        fields = ["id", "name", "users_capacity", "hall_type", "gym"]
+        fields = ["id", "name", "users_capacity", "hall_type", "hall__type", "gym"]
 
 
 class HallMachineSerializer(serializers.ModelSerializer):
