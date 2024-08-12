@@ -58,6 +58,9 @@ class HallSerializer(serializers.ModelSerializer):
 
 
 class HallMachineSerializer(serializers.ModelSerializer):
+    hall = HallSerializer(read_only=True)
+    machine = MachineSerializer(read_only=True)
+
     class Meta:
         model = HallMachine
         fields = ["id", "hall", "machine", "name", "uid"]
