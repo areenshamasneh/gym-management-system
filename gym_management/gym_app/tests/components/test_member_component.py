@@ -72,7 +72,7 @@ def test_add_member(mock_logger, mock_repo):
         "phone_number": "123456789",
     }
 
-    member = component.add_member(1, data)
+    member = component.create_member(1, data)
 
     assert member.name == "Member 1"
     assert member.gym.id == 1
@@ -132,7 +132,7 @@ def test_add_member_with_missing_fields(mock_logger, mock_repo):
     with pytest.raises(
             DatabaseException, match="An error occurred while adding the member."
     ):
-        component.add_member(1, data)
+        component.create_member(1, data)
 
 
 @pytest.mark.django_db

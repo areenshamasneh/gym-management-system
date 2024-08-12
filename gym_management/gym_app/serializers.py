@@ -67,7 +67,7 @@ class HallMachineSerializer(serializers.ModelSerializer):
 
 
 class AdminSerializer(serializers.ModelSerializer):
-    gym = GymSerializer()
+    gym = GymSerializer(read_only=True)
 
     class Meta:
         model = Admin

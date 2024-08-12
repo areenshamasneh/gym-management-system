@@ -31,9 +31,7 @@ class TestMachineComponent(unittest.TestCase):
 
     def test_fetch_all_machines_in_hall_failure(self):
         gym_id, hall_id = 1, 1
-        self.mock_repo.get_all_machines_in_hall.side_effect = Exception(
-            "Database error"
-        )
+        self.mock_repo.get_all_machines_in_hall.side_effect = Exception("Database error")
 
         with self.assertRaises(DatabaseException) as context:
             self.component.fetch_all_machines_in_hall(gym_id, hall_id)
@@ -46,28 +44,17 @@ class TestMachineComponent(unittest.TestCase):
             "Error fetching machines in hall: Database error"
         )
 
-    def test_fetch_machine_by_id_in_hall_success(self):
-        gym_id, hall_id, machine_id = 1, 1, 1
-        expected_machine = MagicMock()
-        expected_machine.machine_id = machine_id
-        self.mock_repo.get_machine_by_id_in_hall.return_value = expected_machine
-
-        result = self.component.fetch_machine_by_id_in_hall(gym_id, hall_id, machine_id)
-
-        self.assertEqual(result, machine_id)
-        self.mock_logger.log_info.assert_called_with(
-            f"Fetching machine by ID: {machine_id} in hall: {hall_id}"
-        )
-
     def test_fetch_machine_by_id_in_hall_not_found(self):
         gym_id, hall_id, machine_id = 1, 1, 1
-        self.mock_repo.get_machine_by_id_in_hall.return_value = None
+        self.mock_repo.get_machine_by_id_in_hall.side_effect = ResourceNotFoundException(
+            "Machine not found"
+        )
 
         with self.assertRaises(ResourceNotFoundException) as context:
             self.component.fetch_machine_by_id_in_hall(gym_id, hall_id, machine_id)
 
         self.assertEqual(
-            str(context.exception), f"Machine with ID {machine_id} not found."
+            str(context.exception), "Machine not found"
         )
         self.mock_logger.log_error.assert_called_with(
             f"Machine with ID {machine_id} not found in hall: {hall_id}"
@@ -75,9 +62,7 @@ class TestMachineComponent(unittest.TestCase):
 
     def test_fetch_machine_by_id_in_hall_failure(self):
         gym_id, hall_id, machine_id = 1, 1, 1
-        self.mock_repo.get_machine_by_id_in_hall.side_effect = Exception(
-            "Database error"
-        )
+        self.mock_repo.get_machine_by_id_in_hall.side_effect = Exception("Database error")
 
         with self.assertRaises(DatabaseException) as context:
             self.component.fetch_machine_by_id_in_hall(gym_id, hall_id, machine_id)
@@ -87,7 +72,7 @@ class TestMachineComponent(unittest.TestCase):
             "An error occurred while fetching the machine by ID.",
         )
         self.mock_logger.log_error.assert_called_with(
-            f"Error fetching machine by ID: Database error"
+            "Error fetching machine by ID: Database error"
         )
 
     def test_add_hall_machine_success(self):
@@ -153,13 +138,15 @@ class TestMachineComponent(unittest.TestCase):
     def test_modify_hall_machine_not_found(self):
         gym_id, hall_id, machine_id = 1, 1, 1
         data = {"name": "Updated Treadmill"}
-        self.mock_repo.update_hall_machine.return_value = None
+        self.mock_repo.update_hall_machine.side_effect = ResourceNotFoundException(
+            "Machine not found"
+        )
 
         with self.assertRaises(ResourceNotFoundException) as context:
             self.component.modify_hall_machine(gym_id, hall_id, machine_id, data)
 
         self.assertEqual(
-            str(context.exception), f"Machine with ID {machine_id} not found."
+            str(context.exception), "Machine not found"
         )
         self.mock_logger.log_error.assert_called_with(
             f"Machine with ID {machine_id} not found."

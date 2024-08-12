@@ -94,7 +94,13 @@ def test_add_admin(mock_repo):
 
 @pytest.mark.django_db
 def test_modify_admin():
-    mock_gym = Gym.objects.create(name="Test Gym")
+    mock_gym = Gym.objects.create(
+        name="Test Gym",
+        type="Fitness",
+        description="A test gym",
+        address_city="TestCity",
+        address_street="TestStreet"
+    )
 
     admin = Admin.objects.create(
         name="OldAdminName",
@@ -102,8 +108,17 @@ def test_modify_admin():
         email="oldadmin@example.com",
         address_city="OldCity",
         address_street="OldStreet",
-        gym_id=mock_gym,
+        gym=mock_gym
     )
+
+    gym_data = {
+        "id": mock_gym.id,
+        "name": mock_gym.name,
+        "type": mock_gym.type,
+        "description": mock_gym.description,
+        "address_city": mock_gym.address_city,
+        "address_street": mock_gym.address_street
+    }
 
     data = {
         "name": "UpdatedAdminName",
@@ -111,14 +126,19 @@ def test_modify_admin():
         "email": "updatedadmin@example.com",
         "address_city": "UpdatedCity",
         "address_street": "UpdatedStreet",
-        "gym_id": mock_gym.id,
+        "gym": gym_data
     }
 
-    serializer = AdminSerializer(instance=admin, data=data)
+    serializer = AdminSerializer(instance=admin, data=data, partial=True)
     assert serializer.is_valid(), f"Serializer errors: {serializer.errors}"
     updated_admin = serializer.save()
+
     assert updated_admin.name == "UpdatedAdminName"
+    assert updated_admin.phone_number == "1234567890"
     assert updated_admin.email == "updatedadmin@example.com"
+    assert updated_admin.address_city == "UpdatedCity"
+    assert updated_admin.address_street == "UpdatedStreet"
+    assert updated_admin.gym.id == mock_gym.id
 
 
 @pytest.mark.django_db
