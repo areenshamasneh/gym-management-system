@@ -16,7 +16,7 @@ class MachineViewSet(viewsets.ViewSet):
     def list(self, request, gym_pk=None, hall_pk=None):
         try:
             machines = self.component.fetch_all_machines_in_hall(gym_pk, hall_pk)
-            serializer = MachineSerializer([hm.machine_id for hm in machines], many=True)
+            serializer = MachineSerializer([hm.machine for hm in machines], many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -47,14 +47,16 @@ class HallViewSet(viewsets.ViewSet):
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, gym_pk=None):
-        self.get_gym(gym_pk)
+        gym_instance = self.get_gym(gym_pk)
 
-        request.data['gym_id'] = gym_pk
         validation_error = self.validator.validate_data('CREATE_SCHEMA', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = HallSerializer(data=request.data)
+        data = request.data.copy()
+        data['gym'] = gym_instance.id
+
+        serializer = HallSerializer(data=data)
         if serializer.is_valid():
             try:
                 hall = self.hall_component.add_hall(gym_pk, serializer.validated_data)
@@ -69,7 +71,6 @@ class HallViewSet(viewsets.ViewSet):
     def update(self, request, gym_pk=None, pk=None):
         self.get_gym(gym_pk)
 
-        request.data['gym_id'] = gym_pk
         validation_error = self.validator.validate_data('UPDATE_SCHEMA', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)

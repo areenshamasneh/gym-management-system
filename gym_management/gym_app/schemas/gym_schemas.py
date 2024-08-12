@@ -13,7 +13,7 @@ CREATE_SCHEMA = {
             "maxLength": 100
         },
         "description": {
-            "type": "string",
+            "type": ["string", "null"],
             "maxLength": 500
         },
         "address_city": {
@@ -50,7 +50,7 @@ UPDATE_SCHEMA = {
             "maxLength": 100
         },
         "description": {
-            "type": "string",
+            "type": ["string", "null"],
             "maxLength": 500
         },
         "address_city": {

@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 from rest_framework import serializers  # type: ignore
 
 from gym_app.models import (
@@ -10,8 +11,6 @@ from gym_app.models import (
     Member,
     HallMachine,
 )
-from pydantic import ValidationError
-
 from gym_app.models.hall_type_model import HallTypeModel
 
 
@@ -49,7 +48,8 @@ class MachineSerializer(serializers.ModelSerializer):
 
 
 class HallSerializer(serializers.ModelSerializer):
-    gym = GymSerializer()
+    gym = GymSerializer(read_only=True)
+    hall_type = serializers.PrimaryKeyRelatedField(queryset=HallType.objects.all())
 
     class Meta:
         model = Hall

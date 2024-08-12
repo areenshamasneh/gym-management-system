@@ -27,7 +27,7 @@ class Machine(models.Model):
         ("stair_climber", "Stair Climber"),
     ]
 
-    serial_number = models.CharField(max_length=100)
+    serial_number = models.CharField(max_length=100, unique=True)
     type = models.CharField(max_length=100, choices=TYPE_CHOICES)
     model = models.CharField(max_length=100, blank=True, null=True)
     brand = models.CharField(max_length=100, blank=True, null=True)

@@ -10,19 +10,14 @@ CREATE_SCHEMA = {
             "type": "integer",
             "minimum": 1
         },
-        "hall_type_id": {
+        "hall_type": {
             "type": "integer"
-        },
-        "gym_id": {
-            "type": "string",
-            "minimum": 1
         }
     },
     "required": [
         "name",
         "users_capacity",
-        "hall_type_id",
-        "gym_id"
+        "hall_type"
     ]
 }
 
@@ -38,12 +33,8 @@ UPDATE_SCHEMA = {
             "type": "integer",
             "minimum": 1
         },
-        "hall_type_id": {
+        "hall_type": {
             "type": "integer"
-        },
-        "gym_id": {
-            "type": "string",
-            "minimum": 1
         }
     }
 }

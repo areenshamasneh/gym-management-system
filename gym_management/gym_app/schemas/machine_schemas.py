@@ -18,11 +18,11 @@ CREATE_SCHEMA = {
             ]
         },
         "model": {
-            "type": "string",
+            "type": ["string", "null"],
             "maxLength": 100
         },
         "brand": {
-            "type": "string",
+            "type": ["string", "null"],
             "maxLength": 100
         },
         "status": {
@@ -33,7 +33,7 @@ CREATE_SCHEMA = {
             ]
         },
         "maintenance_date": {
-            "type": "string",
+            "type": ["string", "null"],
             "format": "date"
         }
     },
@@ -64,11 +64,11 @@ UPDATE_SCHEMA = {
             ]
         },
         "model": {
-            "type": "string",
+            "type": ["string", "null"],
             "maxLength": 100
         },
         "brand": {
-            "type": "string",
+            "type": ["string", "null"],
             "maxLength": 100
         },
         "status": {
@@ -79,7 +79,7 @@ UPDATE_SCHEMA = {
             ]
         },
         "maintenance_date": {
-            "type": "string",
+            "type": ["string", "null"],
             "format": "date"
         }
     }

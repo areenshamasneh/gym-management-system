@@ -8,7 +8,7 @@ CREATE_SCHEMA = {
             "maxLength": 255
         },
         "phone_number": {
-            "type": "string",
+            "type": ["string", "null"],
             "pattern": "^[+]?[(]?[0-9]{1,4}[)]?[-s./0-9]*$",
             "minLength": 7,
             "maxLength": 20
@@ -47,7 +47,7 @@ UPDATE_SCHEMA = {
             "maxLength": 255
         },
         "phone_number": {
-            "type": "string",
+            "type": ["string", "null"],
             "pattern": "^[+]?[(]?[0-9]{1,4}[)]?[-s./0-9]*$",
             "minLength": 7,
             "maxLength": 20
