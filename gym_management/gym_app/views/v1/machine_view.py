@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 from gym_app.components import MachineComponent
+from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models import Machine
 from gym_app.serializers import MachineSerializer
 from gym_app.validators import SchemaValidator
@@ -18,8 +19,10 @@ class MachineViewSet(viewsets.ViewSet):
             machines = self.component.fetch_all_machines_in_hall(gym_pk, hall_pk)
             serializer = MachineSerializer([hm.machine for hm in machines], many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        except ResourceNotFoundException as e:  # Catch specific exception
+            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, gym_pk=None, hall_pk=None):
         validation_error = self.validator.validate_data('CREATE_SCHEMA', request.data)
@@ -66,8 +69,12 @@ class MachineViewSet(viewsets.ViewSet):
             machine = self.component.fetch_machine_by_id_in_hall(gym_pk, hall_pk, pk)
             serializer = MachineSerializer(machine)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        except ResourceNotFoundException as e:
+            self.component.logger.log_error(f"ResourceNotFoundException: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            self.component.logger.log_error(f"Unhandled exception in machine retrieve view: {e}")
+            return Response({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, gym_pk=None, hall_pk=None, pk=None):
         validation_error = self.validator.validate_data('UPDATE_SCHEMA', request.data)
@@ -80,7 +87,7 @@ class MachineViewSet(viewsets.ViewSet):
             serializer = MachineSerializer(machine, data=data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                hall_machine = self.component.modify_hall_machine(gym_pk, hall_pk, pk, data)
+                self.component.modify_hall_machine(gym_pk, hall_pk, pk, data)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

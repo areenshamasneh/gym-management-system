@@ -4,6 +4,7 @@ from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 
 from gym_app.components import HallComponent, HallMachineComponent
+from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models import Gym
 from gym_app.serializers import HallSerializer, HallMachineSerializer
 from gym_app.validators import SchemaValidator
@@ -33,7 +34,10 @@ class HallViewSet(viewsets.ViewSet):
             halls = self.hall_component.fetch_all_halls(gym_pk)
             serializer = HallSerializer(halls, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception:
+        except ResourceNotFoundException as e:
+            return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            self.hall_component.logger.log_error(f"Unhandled exception: {str(e)}")
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, gym_pk=None, pk=None):
@@ -43,9 +47,11 @@ class HallViewSet(viewsets.ViewSet):
             hall = self.hall_component.fetch_hall_by_id(gym_pk, pk)
             serializer = HallSerializer(hall)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except NotFound as e:
+        except ResourceNotFoundException as e:
+            self.hall_component.logger.log_error(f"ResourceNotFoundException: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
-        except Exception:
+        except Exception as e:
+            self.hall_component.logger.log_error(f"Unhandled exception: {str(e)}")
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, gym_pk=None):

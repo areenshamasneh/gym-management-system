@@ -1,4 +1,4 @@
-from gym_app.exceptions import ResourceNotFoundException, InvalidInputException, ConflictException
+from gym_app.exceptions import ResourceNotFoundException, DatabaseException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.admin_repository import AdminRepository
 
@@ -13,12 +13,19 @@ class AdminComponent:
         try:
             self.logger.log_info(f"Fetching all admins for gym_id: {gym_id}")
             admins = self.admin_repository.get_all_admins(gym_id)
+            if len(admins) == 0:
+                raise ResourceNotFoundException(f"There are no admins for gym_id: {gym_id}")
             return admins
+        except ResourceNotFoundException as e:
+            self.logger.log_error(
+                f"Resource not found for gym_id: {gym_id}: {str(e)}"
+            )
+            raise ResourceNotFoundException(f"Resource not found for gym_id: {gym_id}")
         except Exception as e:
             self.logger.log_error(
                 f"Error fetching all admins for gym_id: {gym_id}: {str(e)}"
             )
-            raise ConflictException(f"Error fetching all admins: {str(e)}")
+            raise DatabaseException("An error occurred while fetching all admins.")
 
     def fetch_admin_by_id(self, gym_id, admin_id):
         try:
@@ -26,17 +33,17 @@ class AdminComponent:
                 f"Fetching admin by ID {admin_id} for gym_id: {gym_id}"
             )
             admin = self.admin_repository.get_admin_by_id(gym_id, admin_id)
+            if admin is None:
+                raise ResourceNotFoundException(f"Admin with ID {admin_id} does not exist for gym_id: {gym_id}")
             return admin
         except ResourceNotFoundException as e:
-            self.logger.log_error(
-                f"Admin with ID {admin_id} not found for gym_id {gym_id}: {str(e)}"
-            )
-            raise e
+            self.logger.log_error(str(e))
+            raise ResourceNotFoundException(f"Resource not found for gym_id: {gym_id}")
         except Exception as e:
             self.logger.log_error(
                 f"Unexpected error fetching admin by ID {admin_id} for gym_id: {gym_id}: {str(e)}"
             )
-            raise ConflictException(f"Error fetching admin by ID: {str(e)}")
+            raise DatabaseException(f"Error fetching admin by ID: {str(e)}")
 
     def add_admin(self, gym_id, admin_data):
         try:
@@ -50,7 +57,7 @@ class AdminComponent:
             raise e
         except Exception as e:
             self.logger.log_error(f"Error adding admin for gym_id: {gym_id}: {str(e)}")
-            raise InvalidInputException(f"Error adding admin: {str(e)}")
+            raise DatabaseException(f"Error adding admin: {str(e)}")
 
     def modify_admin(self, gym_id, admin_id, admin_data):
         try:
@@ -63,7 +70,7 @@ class AdminComponent:
             self.logger.log_error(
                 f"Unexpected error modifying admin ID {admin_id} for gym_id: {gym_id}: {str(e)}"
             )
-            raise InvalidInputException(f"Error modifying admin: {str(e)}")
+            raise DatabaseException(f"Error modifying admin: {str(e)}")
 
     def remove_admin(self, gym_id, admin_id):
         try:
@@ -78,4 +85,4 @@ class AdminComponent:
             self.logger.log_error(
                 f"Unexpected error removing admin ID {admin_id} for gym_id: {gym_id}: {str(e)}"
             )
-            raise ConflictException(f"Error removing admin: {str(e)}")
+            raise DatabaseException(f"Error removing admin: {str(e)}")

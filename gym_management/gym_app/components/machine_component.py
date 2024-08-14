@@ -16,22 +16,31 @@ class MachineComponent:
     def fetch_all_machines_in_hall(self, gym_id, hall_id):
         self.logger.log_info(f"Fetching all machines for gym_id: {gym_id}, hall_id: {hall_id}")
         try:
-            return self.repo.get_all_machines_in_hall(gym_id, hall_id)
+            halls_machines = self.repo.get_all_machines_in_hall(gym_id, hall_id)
+            if not halls_machines:
+                raise ResourceNotFoundException(f"There are no machines in hall {hall_id} for gym_id {gym_id}.")
+            return halls_machines
+        except ResourceNotFoundException as e:
+            self.logger.log_error(str(e))
+            raise
         except Exception as e:
             self.logger.log_error(f"Error fetching machines in hall: {e}")
-            raise DatabaseException("An error occurred while fetching machines in the hall.")
+            raise DatabaseException("An error occurred while fetching machines in the hall.") from e
 
     def fetch_machine_by_id_in_hall(self, gym_id, hall_id, machine_id):
         self.logger.log_info(f"Fetching machine by ID: {machine_id} in hall: {hall_id}")
         try:
             hall_machine = self.repo.get_machine_by_id_in_hall(gym_id, hall_id, machine_id)
+            if not hall_machine:
+                raise ResourceNotFoundException(
+                    f"Machine with ID {machine_id} not found in hall: {hall_id} for gym_id {gym_id}.")
             return hall_machine.machine
-        except ResourceNotFoundException:
-            self.logger.log_error(f"Machine with ID {machine_id} not found in hall: {hall_id}")
+        except ResourceNotFoundException as e:
+            self.logger.log_error(str(e))
             raise
         except Exception as e:
             self.logger.log_error(f"Error fetching machine by ID: {e}")
-            raise DatabaseException("An error occurred while fetching the machine by ID.")
+            raise DatabaseException("An error occurred while fetching the machine by ID.") from e
 
     def add_hall_machine(self, gym_id, hall_id, data):
         self.logger.log_info(f"Adding hall machine with data: {data}")

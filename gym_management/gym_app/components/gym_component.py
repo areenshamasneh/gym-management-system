@@ -28,7 +28,7 @@ class GymComponent:
             return gym
         except ResourceNotFoundException as e:
             self.logger.log_error(str(e))
-            raise
+            raise ResourceNotFoundException(f"Resource not found for gym_id: {gym_id}")
         except Exception as e:
             self.logger.log_error(
                 f"An error occurred while fetching gym by ID {gym_id}: {e}"

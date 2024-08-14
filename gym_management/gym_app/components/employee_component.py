@@ -1,4 +1,4 @@
-from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
+from gym_app.exceptions import ResourceNotFoundException, InvalidInputException, DatabaseException
 from gym_app.logging import SimpleLogger
 from gym_app.models import Employee
 from gym_app.repositories import EmployeeRepository
@@ -13,26 +13,36 @@ class EmployeeComponent:
     def fetch_all_employees(self, gym_id):
         try:
             self.logger.log_info(f"Fetching all employees for gym_id: {gym_id}")
-            return self.employee_repository.get_all_employees(gym_id)
+            employees = self.employee_repository.get_all_employees(gym_id)
+            if len(employees) == 0:
+                raise ResourceNotFoundException(f"There are no employees for gym_id: {gym_id}")
+            return employees
+        except ResourceNotFoundException as e:
+            self.logger.log_error(
+                f"Resource not found for gym_id: {gym_id}: {str(e)}"
+            )
+            raise ResourceNotFoundException(f"Resource not found for gym_id: {gym_id}")
         except Exception as e:
             self.logger.log_error(
                 f"Error fetching all employees for gym_id: {gym_id}: {str(e)}"
             )
-            raise InvalidInputException("Error fetching employees")
+            raise DatabaseException("An error occurred while fetching all employees.")
 
     def fetch_employee_by_id(self, gym_id, employee_id):
         try:
-            employee = self.employee_repository.get_employee_by_id(gym_id, employee_id)
             self.logger.log_info(f"Fetching employee with ID {employee_id}")
+            employee = self.employee_repository.get_employee_by_id(gym_id, employee_id)
+            if employee is None:
+                raise ResourceNotFoundException(
+                    f"Employee with ID {employee_id} does not exist for gym_id: {gym_id}"
+                )
             return employee
-        except Employee.DoesNotExist:
-            self.logger.log_error(f"Employee with ID {employee_id} does not exist")
-            raise ResourceNotFoundException(
-                f"Employee with ID {employee_id} does not exist"
-            )
+        except ResourceNotFoundException as e:
+            self.logger.log_error(f"Resource not found: {str(e)}")
+            raise ResourceNotFoundException(f"Resource not found for gym_id: {gym_id}")
         except Exception as e:
             self.logger.log_error(f"Error fetching employee: {str(e)}")
-            raise InvalidInputException("Error fetching employee")
+            raise DatabaseException("Error fetching employee")
 
     def add_employee(self, gym_id, data):
         try:

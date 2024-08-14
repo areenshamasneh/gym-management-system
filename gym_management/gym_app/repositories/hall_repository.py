@@ -11,7 +11,8 @@ class HallRepository:
 
     @staticmethod
     def get_hall_by_id(gym_id, hall_id):
-        return get_object_or_404(Hall.objects.select_related('gym', 'hall_type'), pk=hall_id, gym_id=gym_id)
+        return Hall.objects.get(id=hall_id, gym_id=gym_id)
+
 
     @transaction.atomic
     def create_hall(self, gym_id, data):

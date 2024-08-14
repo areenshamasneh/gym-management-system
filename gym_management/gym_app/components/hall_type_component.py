@@ -12,7 +12,13 @@ class HallTypeComponent:
     def fetch_all_hall_types(self):
         self.logger.log_info("Fetching all hall types")
         try:
-            return self.repo.get_all_hall_types()
+            hall_types = self.repo.get_all_hall_types()
+            if not hall_types:
+                raise ResourceNotFoundException("No hall types available.")
+            return hall_types
+        except ResourceNotFoundException as e:
+            self.logger.log_error(str(e))
+            raise ResourceNotFoundException("Resource not found")
         except Exception as e:
             self.logger.log_error(f"Error fetching all hall types: {e}")
             raise DatabaseException("An error occurred while fetching all hall types.") from e
@@ -20,10 +26,13 @@ class HallTypeComponent:
     def fetch_hall_type_by_id(self, hall_type_id):
         self.logger.log_info(f"Fetching hall type with ID {hall_type_id}")
         try:
-            return self.repo.get_hall_type_by_id(hall_type_id)
+            hall_type = self.repo.get_hall_type_by_id(hall_type_id)
+            if hall_type is None:
+                raise ResourceNotFoundException(f"Hall type with ID {hall_type_id} does not exist.")
+            return hall_type
         except ResourceNotFoundException as e:
             self.logger.log_error(str(e))
-            raise
+            raise ResourceNotFoundException("Resource not found")
         except Exception as e:
             self.logger.log_error(f"Error fetching hall type with ID {hall_type_id}: {e}")
             raise DatabaseException("An error occurred while fetching the hall type.") from e

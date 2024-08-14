@@ -4,16 +4,6 @@ from gym_app.models import HallMachine, Hall, Machine
 
 
 class MachineRepository:
-    @staticmethod
-    def create_hall_machine(gym_id, hall_id, data):
-        hall = get_object_or_404(Hall, pk=hall_id, gym_id=gym_id)
-        machine = get_object_or_404(Machine, id=data.get("machine_id"))
-        return HallMachine.objects.create(
-            hall=hall,
-            machine=machine,
-            name=data.get("name"),
-            uid=data.get("uid")
-        )
 
     @staticmethod
     def get_all_machines_in_hall(gym_id, hall_id):
@@ -21,12 +11,7 @@ class MachineRepository:
 
     @staticmethod
     def get_machine_by_id_in_hall(gym_id, hall_id, machine_id):
-        return get_object_or_404(
-            HallMachine,
-            hall__id=hall_id,
-            hall__gym_id=gym_id,
-            machine__id=machine_id
-        )
+        return HallMachine.objects.filter(hall__id=hall_id, hall__gym_id=gym_id, machine__id=machine_id).first()
 
     @staticmethod
     def update_hall_machine(gym_id, hall_id, machine_id, data):
@@ -48,3 +33,14 @@ class MachineRepository:
     def delete_hall_machine(gym_id, hall_id, machine_id):
         hall_machine = MachineRepository.get_machine_by_id_in_hall(gym_id, hall_id, machine_id)
         hall_machine.delete()
+
+    @staticmethod
+    def create_hall_machine(gym_id, hall_id, data):
+        hall = get_object_or_404(Hall, pk=hall_id, gym_id=gym_id)
+        machine = get_object_or_404(Machine, id=data.get("machine_id"))
+        return HallMachine.objects.create(
+            hall=hall,
+            machine=machine,
+            name=data.get("name"),
+            uid=data.get("uid")
+        )

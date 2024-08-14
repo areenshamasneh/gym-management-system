@@ -4,6 +4,7 @@ from gym_app.exceptions import (
     DatabaseException,
 )
 from gym_app.logging import SimpleLogger
+from gym_app.models import Hall
 from gym_app.repositories import HallRepository
 
 
@@ -16,26 +17,29 @@ class HallComponent:
     def fetch_all_halls(self, gym_id):
         self.logger.log_info(f"Fetching all halls for gym ID {gym_id}")
         try:
-            return self.repo.get_all_halls(gym_id)
+            halls = self.repo.get_all_halls(gym_id)
+            if not halls:
+                raise ResourceNotFoundException(f"No halls found for gym ID {gym_id}.")
+            return halls
+        except ResourceNotFoundException as e:
+            self.logger.log_error(str(e))
+            raise
         except Exception as e:
             self.logger.log_error(f"Error fetching all halls: {str(e)}")
-            raise DatabaseException("An error occurred while fetching halls.")
+            raise DatabaseException("An error occurred while fetching halls.") from e
 
     def fetch_hall_by_id(self, gym_id, hall_id):
         self.logger.log_info(f"Fetching hall with ID {hall_id} for gym ID {gym_id}")
         try:
             hall = self.repo.get_hall_by_id(gym_id, hall_id)
-            if not hall:
-                raise ResourceNotFoundException(f"Hall with ID {hall_id} not found.")
+            if hall is None:
+                raise ResourceNotFoundException(f"No halls found for gym ID {gym_id}.")
             return hall
-        except ResourceNotFoundException:
-            self.logger.log_error(f"Hall with ID {hall_id} not found")
-            raise
+        except Hall.DoesNotExist:
+            raise ResourceNotFoundException(f"Hall with ID {hall_id} does not exist in gym ID {gym_id}")
         except Exception as e:
             self.logger.log_error(f"Error fetching hall by ID {hall_id}: {str(e)}")
-            raise DatabaseException(
-                f"An error occurred while fetching hall with ID {hall_id}."
-            )
+            raise DatabaseException(f"An error occurred while fetching hall with ID {hall_id}.{hall}") from e
 
     def add_hall(self, gym_id, data):
         self.logger.log_info(f"Adding new hall with data: {data} for gym ID {gym_id}")
