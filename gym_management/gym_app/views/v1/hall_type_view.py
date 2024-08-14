@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from gym_app.components import HallTypeComponent
 from gym_app.models import HallType
-from gym_app.models.hall_type_model import HallTypeModel
+from gym_app.models import HallTypeModel
 from gym_app.serializers import HallTypeSerializer
 
 
