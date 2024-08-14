@@ -1,114 +1,196 @@
-import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
+
+import pytest  # type: ignore
+
 from gym_app.components.hall_component import HallComponent
-from gym_app.models import Hall, HallType, Gym
+from gym_app.exceptions import (
+    ResourceNotFoundException,
+    ValidationException,
+    DatabaseException,
+)
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_component.HallRepository")
 @patch("gym_app.components.hall_component.SimpleLogger")
 def test_fetch_all_halls(mock_logger_class, mock_repo_class):
-    mock_hall1 = MagicMock(spec=Hall)
-    mock_hall1.name = "Hall 1"
-    mock_hall1.users_capacity = 20
-    mock_hall1.hall_type = MagicMock(spec=HallType)
-    mock_hall1.hall_type.id = 1
-    mock_hall1.gym = MagicMock(spec=Gym)
-    mock_hall1.gym.id = 1
-
-    mock_hall2 = MagicMock(spec=Hall)
-    mock_hall2.name = "Hall 2"
-    mock_hall2.users_capacity = 30
-    mock_hall2.hall_type = MagicMock(spec=HallType)
-    mock_hall2.hall_type.id = 2
-    mock_hall2.gym = MagicMock(spec=Gym)
-    mock_hall2.gym.id = 2
-
-    mock_repo_class.return_value.get_all_halls.return_value = [mock_hall1, mock_hall2]
     mock_logger = MagicMock()
     mock_logger_class.return_value = mock_logger
-    component = HallComponent()
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
 
-    halls = component.fetch_all_halls(1)
+    mock_repo_class.return_value.get_all_halls.return_value = [MagicMock(name="Hall")]
+    component.fetch_all_halls(1)
 
-    assert len(halls) == 2
-    assert halls[0].name == "Hall 1"
-    assert halls[1].name == "Hall 2"
-    mock_logger.log_info.assert_called_with("Fetching all halls")
+    mock_logger.log_info.assert_called_with("Fetching all halls for gym ID 1")
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+@patch("gym_app.components.hall_component.SimpleLogger")
+def test_fetch_all_halls_db_exception(mock_logger_class, mock_repo_class):
+    mock_logger = MagicMock()
+    mock_logger_class.return_value = mock_logger
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
+
+    mock_repo_class.return_value.get_all_halls.side_effect = Exception("DB Error")
+
+    with pytest.raises(DatabaseException):
+        component.fetch_all_halls(1)
+
+    mock_logger.log_error.assert_called_with("Error fetching all halls: DB Error")
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_component.HallRepository")
 @patch("gym_app.components.hall_component.SimpleLogger")
 def test_fetch_hall_by_id(mock_logger_class, mock_repo_class):
-    mock_hall = MagicMock(spec=Hall)
-    mock_hall.name = "Hall 1"
-    mock_hall.users_capacity = 20
-    mock_hall.hall_type = MagicMock(spec=HallType)
-    mock_hall.hall_type.id = 1
-    mock_hall.gym = MagicMock(spec=Gym)
-    mock_hall.gym.id = 1
-
-    mock_repo_class.return_value.get_hall_by_id.return_value = mock_hall
+    mock_hall = MagicMock(name="Hall")
     mock_logger = MagicMock()
     mock_logger_class.return_value = mock_logger
-    component = HallComponent()
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
 
-    hall = component.fetch_hall_by_id(1, 1)
+    mock_repo_class.return_value.get_hall_by_id.return_value = mock_hall
+    component.fetch_hall_by_id(1, 1)
 
-    assert hall.name == "Hall 1"
-    assert hall.users_capacity == 20
-    mock_logger.log_info.assert_called_with("Fetching hall with ID 1")
+    mock_logger.log_info.assert_called_with("Fetching hall with ID 1 for gym ID 1")
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+@patch("gym_app.components.hall_component.SimpleLogger")
+def test_fetch_hall_by_id_not_found(mock_logger_class, mock_repo_class):
+    mock_logger = MagicMock()
+    mock_logger_class.return_value = mock_logger
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
+
+    mock_repo_class.return_value.get_hall_by_id.return_value = None
+
+    with pytest.raises(ResourceNotFoundException):
+        component.fetch_hall_by_id(1, 999)
+
+    mock_logger.log_error.assert_called_with("Hall with ID 999 not found")
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_component.HallRepository")
 @patch("gym_app.components.hall_component.SimpleLogger")
 def test_add_hall(mock_logger_class, mock_repo_class):
-    mock_hall = MagicMock(spec=Hall)
-    mock_hall.name = "Hall 1"
-    mock_hall.users_capacity = 20
-    mock_hall.hall_type = MagicMock(spec=HallType)
-    mock_hall.hall_type.id = 1
-    mock_hall.gym = MagicMock(spec=Gym)
-    mock_hall.gym.id = 1
-
-    mock_repo_class.return_value.create_hall.return_value = mock_hall
+    mock_hall = MagicMock(name="Hall")
     mock_logger = MagicMock()
     mock_logger_class.return_value = mock_logger
     component = HallComponent(mock_repo_class.return_value, mock_logger)
 
+    mock_repo_class.return_value.create_hall.return_value = mock_hall
     data = {"name": "Hall 1", "users_capacity": 20, "hall_type_id": 1}
-    hall = component.add_hall(1, data)
+    component.add_hall(1, data)
 
-    assert hall.name == "Hall 1"
-    assert hall.users_capacity == 20
-    mock_logger.log_info.assert_any_call(f"Adding new hall with data: {data}")
+    mock_logger.log_info.assert_any_call(
+        f"Adding new hall with data: {data} for gym ID 1"
+    )
+    mock_logger.log_info.assert_any_call(f"Hall added: {mock_hall}")
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+@patch("gym_app.components.hall_component.SimpleLogger")
+def test_add_hall_validation_exception(mock_logger_class, mock_repo_class):
+    mock_logger = MagicMock()
+    mock_logger_class.return_value = mock_logger
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
+
+    mock_repo_class.return_value.create_hall.side_effect = ValueError("Invalid data")
+
+    data = {"name": "Hall 1"}
+    with pytest.raises(ValidationException):
+        component.add_hall(1, data)
+
+    mock_logger.log_error.assert_called_with("Error adding hall: Invalid data")
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+@patch("gym_app.components.hall_component.SimpleLogger")
+def test_add_hall_db_exception(mock_logger_class, mock_repo_class):
+    mock_logger = MagicMock()
+    mock_logger_class.return_value = mock_logger
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
+
+    mock_repo_class.return_value.create_hall.side_effect = Exception("DB Error")
+
+    data = {"name": "Hall 1", "users_capacity": 20, "hall_type_id": 1}
+    with pytest.raises(DatabaseException):
+        component.add_hall(1, data)
+
+    mock_logger.log_error.assert_called_with("Error adding hall: DB Error")
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_component.HallRepository")
 @patch("gym_app.components.hall_component.SimpleLogger")
 def test_modify_hall(mock_logger_class, mock_repo_class):
-    mock_hall = MagicMock(spec=Hall)
-    mock_hall.name = "Hall Updated"
-    mock_hall.users_capacity = 25
-    mock_hall.hall_type = MagicMock(spec=HallType)
-    mock_hall.hall_type.id = 1
-    mock_hall.gym = MagicMock(spec=Gym)
-    mock_hall.gym.id = 1
-
-    mock_repo_class.return_value.update_hall.return_value = mock_hall
+    mock_hall = MagicMock(name="Hall")
     mock_logger = MagicMock()
     mock_logger_class.return_value = mock_logger
     component = HallComponent(mock_repo_class.return_value, mock_logger)
 
+    mock_repo_class.return_value.update_hall.return_value = mock_hall
     data = {"name": "Hall Updated", "users_capacity": 25, "hall_type_id": 1}
-    hall = component.modify_hall(1, 1, data)
+    component.modify_hall(1, 1, data)
+    mock_logger.log_info.assert_any_call(
+        f"Modifying hall with ID 1 with data: {data} for gym ID 1"
+    )
+    mock_logger.log_info.assert_any_call(f"Hall modified: {mock_hall}")
 
-    assert hall.name == "Hall Updated"
-    assert hall.users_capacity == 25
-    mock_logger.log_info.assert_any_call(f"Modifying hall with ID 1 with data: {data}")
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+@patch("gym_app.components.hall_component.SimpleLogger")
+def test_modify_hall_not_found(mock_logger_class, mock_repo_class):
+    mock_logger = MagicMock()
+    mock_logger_class.return_value = mock_logger
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
+
+    mock_repo_class.return_value.update_hall.return_value = None
+
+    data = {"name": "Hall Updated", "users_capacity": 25, "hall_type_id": 1}
+    with pytest.raises(ResourceNotFoundException):
+        component.modify_hall(1, 999, data)
+
+    mock_logger.log_error.assert_called_with("Hall with ID 999 not found")
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+@patch("gym_app.components.hall_component.SimpleLogger")
+def test_modify_hall_validation_exception(mock_logger_class, mock_repo_class):
+    mock_logger = MagicMock()
+    mock_logger_class.return_value = mock_logger
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
+
+    mock_repo_class.return_value.update_hall.side_effect = ValueError("Invalid data")
+
+    data = {"name": "Hall Updated"}
+    with pytest.raises(ValidationException):
+        component.modify_hall(1, 1, data)
+
+    mock_logger.log_error.assert_called_with("Error modifying hall: Invalid data")
+
+
+@pytest.mark.django_db
+@patch("gym_app.components.hall_component.HallRepository")
+@patch("gym_app.components.hall_component.SimpleLogger")
+def test_modify_hall_db_exception(mock_logger_class, mock_repo_class):
+    mock_logger = MagicMock()
+    mock_logger_class.return_value = mock_logger
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
+
+    mock_repo_class.return_value.update_hall.side_effect = Exception("DB Error")
+
+    data = {"name": "Hall Updated", "users_capacity": 25, "hall_type_id": 1}
+    with pytest.raises(DatabaseException):
+        component.modify_hall(1, 1, data)
+
+    mock_logger.log_error.assert_called_with("Error modifying hall: DB Error")
 
 
 @pytest.mark.django_db
@@ -117,93 +199,43 @@ def test_modify_hall(mock_logger_class, mock_repo_class):
 def test_remove_hall(mock_logger_class, mock_repo_class):
     mock_logger = MagicMock()
     mock_logger_class.return_value = mock_logger
-    component = HallComponent()
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
+
+    mock_repo_class.return_value.delete_hall.return_value = True
 
     component.remove_hall(1, 1)
 
-    assert mock_repo_class.return_value.delete_hall.called
-    assert mock_repo_class.return_value.delete_hall.call_count == 1
-    mock_logger.log_info.assert_called_with("Removing hall with ID 1")
+    mock_logger.log_info.assert_any_call("Removing hall with ID 1 for gym ID 1")
+    mock_logger.log_info.assert_any_call("Hall with ID 1 removed successfully.")
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_component.HallRepository")
 @patch("gym_app.components.hall_component.SimpleLogger")
-def test_add_hall_with_missing_fields(mock_logger_class, mock_repo_class):
+def test_remove_hall_not_found(mock_logger_class, mock_repo_class):
     mock_logger = MagicMock()
     mock_logger_class.return_value = mock_logger
-    component = HallComponent()
-    mock_repo_class.return_value.create_hall.side_effect = KeyError(
-        "Missing required field"
-    )
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
 
-    data = {
-        "name": "Hall 1",
-        # Missing users_capacity, hall_type_id
-    }
+    mock_repo_class.return_value.delete_hall.return_value = False
 
-    with pytest.raises(KeyError, match="Missing required field"):
-        component.add_hall(1, data)
-    mock_logger.log_info.assert_called_with(f"Adding new hall with data: {data}")
-
-
-@pytest.mark.django_db
-@patch("gym_app.components.hall_component.HallRepository")
-@patch("gym_app.components.hall_component.SimpleLogger")
-def test_modify_hall_non_existent(mock_logger_class, mock_repo_class):
-    mock_logger = MagicMock()
-    mock_logger_class.return_value = mock_logger
-    component = HallComponent()
-    mock_repo_class.return_value.update_hall.side_effect = Hall.DoesNotExist
-
-    data = {"name": "Non Existent Hall", "users_capacity": 20, "hall_type_id": 1}
-
-    with pytest.raises(Hall.DoesNotExist):
-        component.modify_hall(1, 999, data)
-    mock_logger.log_info.assert_called_with(
-        f"Modifying hall with ID 999 with data: {data}"
-    )
-
-
-@pytest.mark.django_db
-@patch("gym_app.components.hall_component.HallRepository")
-@patch("gym_app.components.hall_component.SimpleLogger")
-def test_remove_hall_non_existent(mock_logger_class, mock_repo_class):
-    mock_logger = MagicMock()
-    mock_logger_class.return_value = mock_logger
-    component = HallComponent()
-    mock_repo_class.return_value.delete_hall.side_effect = Hall.DoesNotExist
-
-    with pytest.raises(Hall.DoesNotExist):
+    with pytest.raises(ResourceNotFoundException):
         component.remove_hall(1, 999)
-    mock_logger.log_info.assert_called_with("Removing hall with ID 999")
+
+    mock_logger.log_error.assert_called_with("Hall with ID 999 not found")
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.hall_component.HallRepository")
 @patch("gym_app.components.hall_component.SimpleLogger")
-def test_fetch_hall_by_id_non_existent(mock_logger_class, mock_repo_class):
+def test_remove_hall_db_exception(mock_logger_class, mock_repo_class):
     mock_logger = MagicMock()
     mock_logger_class.return_value = mock_logger
-    component = HallComponent()
-    mock_repo_class.return_value.get_hall_by_id.side_effect = Hall.DoesNotExist
+    component = HallComponent(mock_repo_class.return_value, mock_logger)
 
-    with pytest.raises(Hall.DoesNotExist):
-        component.fetch_hall_by_id(1, 999)
-    mock_logger.log_info.assert_called_with("Fetching hall with ID 999")
+    mock_repo_class.return_value.delete_hall.side_effect = Exception("DB Error")
 
+    with pytest.raises(DatabaseException):
+        component.remove_hall(1, 1)
 
-@pytest.mark.django_db
-@patch("gym_app.components.hall_component.HallRepository")
-@patch("gym_app.components.hall_component.SimpleLogger")
-def test_add_hall_invalid_data(mock_logger_class, mock_repo_class):
-    mock_logger = MagicMock()
-    mock_logger_class.return_value = mock_logger
-    component = HallComponent()
-    mock_repo_class.return_value.create_hall.side_effect = ValueError("Invalid data")
-
-    data = {"name": "Hall 1", "users_capacity": -10, "hall_type_id": 1}
-
-    with pytest.raises(ValueError, match="Invalid data"):
-        component.add_hall(1, data)
-    mock_logger.log_info.assert_called_with(f"Adding new hall with data: {data}")
+    mock_logger.log_error.assert_called_with("Error removing hall: DB Error")

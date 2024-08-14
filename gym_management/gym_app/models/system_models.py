@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 
 
 class Gym(models.Model):
@@ -27,7 +27,7 @@ class Machine(models.Model):
         ("stair_climber", "Stair Climber"),
     ]
 
-    serial_number = models.CharField(max_length=100)
+    serial_number = models.CharField(max_length=100, unique=True)
     type = models.CharField(max_length=100, choices=TYPE_CHOICES)
     model = models.CharField(max_length=100, blank=True, null=True)
     brand = models.CharField(max_length=100, blank=True, null=True)
@@ -39,30 +39,25 @@ class Machine(models.Model):
 
 
 class HallType(models.Model):
-    CODE_CHOICES = [
-        ("SAUNA", "Sauna"),
-        ("TRAINING", "Training"),
-        ("YOGA", "Yoga"),
-        ("SWIMMING", "Swimming"),
-    ]
-
-    name = models.CharField(max_length=100, choices=CODE_CHOICES, default="Training")
-    code = models.CharField(
-        max_length=20, choices=CODE_CHOICES, unique=True, default="TRAINING"
-    )
-    type_description = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=255, unique=True)
+    type_description = models.TextField()
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.code = self.code.upper()
+        super().save(*args, **kwargs)
 
 
 class Hall(models.Model):
     name = models.CharField(max_length=255)
     users_capacity = models.PositiveIntegerField(default=10)
-    hall_type_id = models.ForeignKey(
+    hall_type = models.ForeignKey(
         HallType, on_delete=models.CASCADE, related_name="halls"
     )
-    gym_id = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="halls")
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="halls")
 
     def __str__(self):
         return self.name
@@ -72,7 +67,7 @@ class Admin(models.Model):
     name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(unique=True)
-    gym_id = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="admins")
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE)
     address_city = models.CharField(max_length=255)
     address_street = models.CharField(max_length=255)
 
@@ -88,14 +83,10 @@ class Employee(models.Model):
     ]
 
     name = models.CharField(max_length=255)
-    gym_id = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="employees")
-    manager_id = models.ForeignKey(
-        "self",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="subordinates",
-    )
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="employees")
+    manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True,
+                                blank=True)
+
     address_city = models.CharField(max_length=255)
     address_street = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
@@ -113,7 +104,7 @@ class Employee(models.Model):
 
 
 class Member(models.Model):
-    gym_id = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="members")
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="members")
     name = models.CharField(max_length=255)
     birth_date = models.DateField()
     phone_number = models.CharField(max_length=20, blank=True, null=True, unique=True)
@@ -123,34 +114,34 @@ class Member(models.Model):
 
 
 class HallMachine(models.Model):
-    hall_id = models.ForeignKey(
+    hall = models.ForeignKey(
         Hall, on_delete=models.CASCADE, related_name="hall_machines"
     )
-    machine_id = models.ForeignKey(
+    machine = models.ForeignKey(
         Machine, on_delete=models.CASCADE, related_name="hall_machines"
     )
     name = models.CharField(max_length=255, blank=True, null=True)
     uid = models.CharField(max_length=100, unique=True)
 
     class Meta:
-        unique_together = ("hall_id", "machine_id")
+        unique_together = ("hall", "machine")
 
     def __str__(self):
-        return f"{self.machine_id} in {self.hall_id}"
+        return f"{self.machine} in {self.hall}"
 
     def save(self, *args, **kwargs):
-        # Generate the name based on hall and machine
-        if not self.name:
-            self.name = f"{self.hall_id.name} - {self.machine_id.type}"
-
-        # Generate the UID based on machine type and count
         if not self.uid:
-            count = (
-                HallMachine.objects.filter(
-                    hall_id=self.hall_id, machine_id=self.machine_id
-                ).count()
-                + 1
-            )
-            self.uid = f"{self.machine_id.type}_{count}"
+            if HallMachine.objects.filter(hall=self.hall, machine=self.machine).exists():
+                return
+
+            with transaction.atomic():
+                count = HallMachine.objects.filter(
+                    hall=self.hall, machine=self.machine
+                ).count() + 1
+                self.uid = f"{self.machine.type}_{count}"
+
+                while HallMachine.objects.filter(uid=self.uid).exists():
+                    count += 1
+                    self.uid = f"{self.machine.type}_{count}"
 
         super().save(*args, **kwargs)

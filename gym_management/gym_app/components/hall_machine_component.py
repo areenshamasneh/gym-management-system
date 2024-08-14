@@ -1,57 +1,52 @@
+from gym_app.exceptions import (
+    ResourceNotFoundException,
+    ValidationException,
+    DatabaseException,
+)
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.hall_machine_repository import HallMachineRepository
 
 
-class HallMachineComponents:
+class HallMachineComponent:
     def __init__(self, repo=None, logger=None):
         self.repo = repo if repo else HallMachineRepository()
         self.logger = logger if logger else SimpleLogger()
-        self.logger.log_info("HallMachineComponents initialized")
+        self.logger.log_info("HallMachineComponent initialized")
 
-    def fetch_all_machines_in_gym(self, gym_id):
-        self.logger.log_info(f"Fetching all hall machines for gym_id: {gym_id}")
-        hall_machines = self.repo.get_all_hall_machines_in_gym(gym_id)
-        return hall_machines
-
-    def fetch_all_machines_in_hall(self, gym_id, hall_id):
-        self.logger.log_info(
-            f"Fetching all machines for gym_id: {gym_id}, hall_id: {hall_id}"
-        )
-        return self.repo.get_all_machines_in_hall(gym_id, hall_id)
-
-    def fetch_machine_by_id_in_hall(self, gym_id, hall_id, machine_id):
-        self.logger.log_info(f"Fetching machine by ID: {machine_id} in hall: {hall_id}")
-        return self.repo.get_machine_by_id_in_hall(gym_id, hall_id, machine_id)
-
-    def add_hall_machine(self, gym_id, hall_id, data):
-        self.logger.log_info(f"Adding hall machine with data: {data}")
+    def fetch_hall_machines_by_gym(self, gym_id):
+        self.logger.log_info(f"Fetching hall machines for gym ID {gym_id}")
         try:
-            hall_machine = self.repo.create_hall_machine(gym_id, hall_id, data)
-            self.logger.log_info(f"Added hall machine: {hall_machine}")
-            return hall_machine
+            result = self.repo.get_hall_machines_by_gym(gym_id)
+            if result is None:
+                raise ResourceNotFoundException(
+                    f"No hall machines found for gym ID {gym_id}."
+                )
+            return result
         except ValueError as e:
-            self.logger.log_info(f"Error adding hall machine: {e}")
-            raise
+            self.logger.log_error(f"Error fetching hall machines: {e}")
+            raise ValidationException(f"Validation error: {e}")
+        except ResourceNotFoundException as e:
+            self.logger.log_error(f"Error fetching hall machines: {e}")
+            raise e
+        except Exception as e:
+            self.logger.log_error(f"Error fetching hall machines: {e}")
+            raise DatabaseException("An error occurred while fetching hall machines.")
 
-    def modify_hall_machine(self, gym_id, hall_id, machine_id, data):
-        self.logger.log_info(
-            f"Modifying hall machine with ID: {machine_id} and data: {data}"
-        )
+    def fetch_hall_machines_by_hall(self, hall_id):
+        self.logger.log_info(f"Fetching hall machines for hall ID {hall_id}")
         try:
-            hall_machine = self.repo.update_hall_machine(
-                gym_id, hall_id, machine_id, data
-            )
-            self.logger.log_info(f"Modified hall machine: {hall_machine}")
-            return hall_machine
+            result = self.repo.get_hall_machines_by_hall(hall_id)
+            if result is None:
+                raise ResourceNotFoundException(
+                    f"No hall machines found for hall ID {hall_id}."
+                )
+            return result
         except ValueError as e:
-            self.logger.log_info(f"Error modifying hall machine: {e}")
-            raise
-
-    def remove_hall_machine(self, gym_id, hall_id, machine_id):
-        self.logger.log_info(f"Removing hall machine with ID: {machine_id}")
-        try:
-            self.repo.delete_hall_machine(gym_id, hall_id, machine_id)
-            self.logger.log_info(f"Removed hall machine with ID: {machine_id}")
-        except ValueError as e:
-            self.logger.log_info(f"Error removing hall machine: {e}")
-            raise
+            self.logger.log_error(f"Error fetching hall machines: {e}")
+            raise ValidationException(f"Validation error: {e}")
+        except ResourceNotFoundException as e:
+            self.logger.log_error(f"Error fetching hall machines: {e}")
+            raise e
+        except Exception as e:
+            self.logger.log_error(f"Error fetching hall machines: {e}")
+            raise DatabaseException("An error occurred while fetching hall machines.")

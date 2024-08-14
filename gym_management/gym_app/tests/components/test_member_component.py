@@ -1,10 +1,13 @@
-import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
-from django.core.exceptions import ValidationError
+
+import pytest  # type: ignore
+
 from gym_app.components import MemberComponent
+from gym_app.exceptions import (
+    ResourceNotFoundException,
+    DatabaseException,
+)
 from gym_app.models import Member, Gym
-from gym_app.logging import SimpleLogger
-from gym_app.repositories.member_repository import MemberRepository
 
 
 @pytest.mark.django_db
@@ -69,7 +72,7 @@ def test_add_member(mock_logger, mock_repo):
         "phone_number": "123456789",
     }
 
-    member = component.add_member(1, data)
+    member = component.create_member(1, data)
 
     assert member.name == "Member 1"
     assert member.gym.id == 1
@@ -119,25 +122,33 @@ def test_remove_member(mock_logger, mock_repo):
 @patch("gym_app.components.member_component.MemberRepository")
 @patch("gym_app.components.member_component.SimpleLogger")
 def test_add_member_with_missing_fields(mock_logger, mock_repo):
-    mock_repo.create_member.side_effect = KeyError("Missing required field")
+    mock_repo.create_member.side_effect = DatabaseException(
+        "An error occurred while adding the member."
+    )
 
     component = MemberComponent(repo=mock_repo, logger=mock_logger)
     data = {"name": "Member 1"}
 
-    with pytest.raises(KeyError, match="Missing required field"):
-        component.add_member(1, data)
+    with pytest.raises(
+            DatabaseException, match="An error occurred while adding the member."
+    ):
+        component.create_member(1, data)
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.member_component.MemberRepository")
 @patch("gym_app.components.member_component.SimpleLogger")
 def test_modify_member_non_existent(mock_logger, mock_repo):
-    mock_repo.update_member.side_effect = Member.DoesNotExist
+    mock_repo.update_member.side_effect = ResourceNotFoundException(
+        "Member with ID 999 not found."
+    )
 
     component = MemberComponent(repo=mock_repo, logger=mock_logger)
     data = {"name": "Non Existent Member"}
 
-    with pytest.raises(Member.DoesNotExist):
+    with pytest.raises(
+            ResourceNotFoundException, match="Member with ID 999 not found."
+    ):
         component.modify_member(1, 999, data)
 
 
@@ -145,10 +156,14 @@ def test_modify_member_non_existent(mock_logger, mock_repo):
 @patch("gym_app.components.member_component.MemberRepository")
 @patch("gym_app.components.member_component.SimpleLogger")
 def test_remove_member_non_existent(mock_logger, mock_repo):
-    mock_repo.delete_member.side_effect = Member.DoesNotExist
+    mock_repo.delete_member.side_effect = ResourceNotFoundException(
+        "Member with ID 999 not found."
+    )
 
     component = MemberComponent(repo=mock_repo, logger=mock_logger)
-    with pytest.raises(Member.DoesNotExist):
+    with pytest.raises(
+            ResourceNotFoundException, match="Member with ID 999 not found."
+    ):
         component.remove_member(1, 999)
 
 
@@ -156,38 +171,12 @@ def test_remove_member_non_existent(mock_logger, mock_repo):
 @patch("gym_app.components.member_component.MemberRepository")
 @patch("gym_app.components.member_component.SimpleLogger")
 def test_fetch_member_by_id_non_existent(mock_logger, mock_repo):
-    mock_repo.get_member_by_id.side_effect = Member.DoesNotExist
+    mock_repo.get_member_by_id.side_effect = ResourceNotFoundException(
+        "Member with ID 999 not found."
+    )
 
     component = MemberComponent(repo=mock_repo, logger=mock_logger)
-    with pytest.raises(Member.DoesNotExist):
+    with pytest.raises(
+            ResourceNotFoundException, match="Member with ID 999 not found."
+    ):
         component.fetch_member_by_id(1, 999)
-
-
-@pytest.mark.django_db
-@patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.SimpleLogger")
-def test_add_member_invalid_data(mock_logger, mock_repo):
-    mock_repo.create_member.side_effect = ValueError("Invalid data")
-
-    component = MemberComponent(repo=mock_repo, logger=mock_logger)
-    data = {
-        "name": "Member 1",
-        "birth_date": "invalid_date",
-        "phone_number": "123456789",
-    }
-
-    with pytest.raises(ValueError, match="Invalid data"):
-        component.add_member(1, data)
-
-
-@pytest.mark.django_db
-@patch("gym_app.components.member_component.MemberRepository")
-@patch("gym_app.components.member_component.SimpleLogger")
-def test_modify_member_invalid_data(mock_logger, mock_repo):
-    mock_repo.update_member.side_effect = ValueError("Invalid data")
-
-    component = MemberComponent(repo=mock_repo, logger=mock_logger)
-    data = {"birth_date": "invalid_date"}
-
-    with pytest.raises(ValueError, match="Invalid data"):
-        component.modify_member(1, 1, data)

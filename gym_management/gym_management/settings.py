@@ -1,6 +1,7 @@
-from decouple import config  # type: ignore
-from pathlib import Path
 import os
+from pathlib import Path
+
+from decouple import config  # type: ignore
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -13,8 +14,11 @@ SECRET_KEY = config("DJANGO_SECRET_KEY")
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost").split(",")
-
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'kubernetes.docker.internal',
+]
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
@@ -27,6 +31,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -38,9 +44,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "gym_app.middlewares.req_logging.RequestLogMiddleware",
-    "gym_app.middlewares.exception_handler.ExceptionMiddleware",
 ]
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -67,6 +71,12 @@ LOGGING = {
             "filename": os.path.join(BASE_DIR, "logs", "requests_responses.log"),
             "formatter": "default",
         },
+        "sql_file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "sql_queries.log"),
+            "formatter": "default",
+        },
     },
     "loggers": {
         "custom.request": {
@@ -79,7 +89,31 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "django.db.backends": {
+            "handlers": ["sql_file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
+}
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'EXCEPTION_HANDLER': 'gym_app.utils.custom_exception_handler',
 }
 
 ROOT_URLCONF = "gym_management.urls"

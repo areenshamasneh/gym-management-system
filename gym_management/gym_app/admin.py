@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from gym_app.models import (
     Gym,
     Machine,

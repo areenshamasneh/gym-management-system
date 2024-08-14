@@ -1,15 +1,18 @@
-import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
+
+import pytest  # type: ignore
+from rest_framework.exceptions import NotFound, APIException  # type: ignore
+
 from gym_app.components import EmployeeComponent
+from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models import Employee, Gym
-from gym_app.logging import SimpleLogger
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
 @patch("gym_app.logging.SimpleLogger")
 def test_fetch_all_employees(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=SimpleLogger)
+    mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
 
     mock_employee1 = MagicMock(spec=Employee)
@@ -24,11 +27,13 @@ def test_fetch_all_employees(mock_logger, mock_repo):
     mock_employee2.email = "jane@example.com"
     mock_employee2.positions = "System Worker"
     mock_employee2.gym = MagicMock(spec=Gym)
-    mock_employee2.gym.id = 2
+    mock_employee2.gym.id = 1
 
     mock_repo.get_all_employees.return_value = [mock_employee1, mock_employee2]
 
-    component = EmployeeComponent(mock_repo, mock_logger_instance)
+    component = EmployeeComponent(
+        employee_repository=mock_repo, logger=mock_logger_instance
+    )
     employees = component.fetch_all_employees(1)
 
     assert len(employees) == 2
@@ -40,7 +45,7 @@ def test_fetch_all_employees(mock_logger, mock_repo):
 @patch("gym_app.components.employee_component.EmployeeRepository")
 @patch("gym_app.logging.SimpleLogger")
 def test_fetch_employee_by_id(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=SimpleLogger)
+    mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
 
     mock_employee = MagicMock(spec=Employee)
@@ -52,7 +57,9 @@ def test_fetch_employee_by_id(mock_logger, mock_repo):
 
     mock_repo.get_employee_by_id.return_value = mock_employee
 
-    component = EmployeeComponent(mock_repo, mock_logger_instance)
+    component = EmployeeComponent(
+        employee_repository=mock_repo, logger=mock_logger_instance
+    )
     employee = component.fetch_employee_by_id(1, 1)
 
     assert employee.name == "John Doe"
@@ -63,39 +70,43 @@ def test_fetch_employee_by_id(mock_logger, mock_repo):
 @patch("gym_app.components.employee_component.EmployeeRepository")
 @patch("gym_app.logging.SimpleLogger")
 def test_add_employee(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=SimpleLogger)
+    mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
-
-    mock_employee = MagicMock(spec=Employee)
-    mock_employee.name = "John Doe"
-    mock_employee.email = "john@example.com"
-    mock_employee.positions = "Trainer, Cleaner"
-    mock_employee.gym = MagicMock(spec=Gym)
-    mock_employee.gym.id = 1
-
-    mock_repo.create_employee.return_value = mock_employee
 
     data = {
         "name": "John Doe",
-        "email": "john@example.com",
-        "positions": "Trainer, Cleaner",
+        "email": "john.doe@example.com",
+        "positions": "cleaner, trainer",
         "gym_id": 1,
         "address_city": "New York",
         "address_street": "123 Street",
     }
 
-    component = EmployeeComponent(mock_repo, mock_logger_instance)
-    employee = component.add_employee(1, data)
+    mock_employee = MagicMock(spec=Employee)
+    mock_employee.name = data["name"]
+    mock_employee.email = data["email"]
+    mock_employee.positions = data["positions"]
+    mock_employee.gym = MagicMock(spec=Gym)
+    mock_employee.gym.id = data["gym_id"]
 
-    assert employee.name == "John Doe"
-    assert employee.email == "john@example.com"
+    mock_repo.create_employee.return_value = mock_employee
+
+    component = EmployeeComponent(
+        employee_repository=mock_repo, logger=mock_logger_instance
+    )
+    added_employee = component.add_employee(1, data)
+
+    assert added_employee.name == "John Doe"
+    assert added_employee.email == "john.doe@example.com"
+    assert "cleaner" in added_employee.positions
+    assert "trainer" in added_employee.positions
 
 
 @pytest.mark.django_db
 @patch("gym_app.components.employee_component.EmployeeRepository")
 @patch("gym_app.logging.SimpleLogger")
 def test_modify_employee(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=SimpleLogger)
+    mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
 
     mock_employee = MagicMock(spec=Employee)
@@ -116,7 +127,9 @@ def test_modify_employee(mock_logger, mock_repo):
         "address_street": "456 Avenue",
     }
 
-    component = EmployeeComponent(mock_repo, mock_logger_instance)
+    component = EmployeeComponent(
+        employee_repository=mock_repo, logger=mock_logger_instance
+    )
     employee = component.modify_employee(1, 1, data)
 
     assert employee.name == "John Updated"
@@ -127,10 +140,12 @@ def test_modify_employee(mock_logger, mock_repo):
 @patch("gym_app.components.employee_component.EmployeeRepository")
 @patch("gym_app.logging.SimpleLogger")
 def test_remove_employee(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=SimpleLogger)
+    mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
 
-    component = EmployeeComponent(mock_repo, mock_logger_instance)
+    component = EmployeeComponent(
+        employee_repository=mock_repo, logger=mock_logger_instance
+    )
     component.remove_employee(1, 1)
 
     assert mock_repo.delete_employee.called
@@ -141,10 +156,8 @@ def test_remove_employee(mock_logger, mock_repo):
 @patch("gym_app.components.employee_component.EmployeeRepository")
 @patch("gym_app.logging.SimpleLogger")
 def test_add_employee_with_missing_fields(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=SimpleLogger)
+    mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
-
-    mock_repo.create_employee.side_effect = KeyError("Missing required field")
 
     data = {
         "name": "John Doe",
@@ -152,8 +165,12 @@ def test_add_employee_with_missing_fields(mock_logger, mock_repo):
         # Missing positions, gym_id, address_city, address_street
     }
 
-    component = EmployeeComponent(mock_repo, mock_logger_instance)
-    with pytest.raises(KeyError, match="Missing required field"):
+    mock_repo.create_employee.side_effect = APIException("Invalid data")
+
+    component = EmployeeComponent(
+        employee_repository=mock_repo, logger=mock_logger_instance
+    )
+    with pytest.raises(APIException, match="Error adding employee"):
         component.add_employee(1, data)
 
 
@@ -161,10 +178,10 @@ def test_add_employee_with_missing_fields(mock_logger, mock_repo):
 @patch("gym_app.components.employee_component.EmployeeRepository")
 @patch("gym_app.logging.SimpleLogger")
 def test_modify_employee_non_existent(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=SimpleLogger)
+    mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
 
-    mock_repo.update_employee.side_effect = Employee.DoesNotExist
+    mock_repo.update_employee.side_effect = APIException("Employee not found")
 
     data = {
         "name": "Non Existent Employee",
@@ -175,8 +192,10 @@ def test_modify_employee_non_existent(mock_logger, mock_repo):
         "address_street": "No Street",
     }
 
-    component = EmployeeComponent(mock_repo, mock_logger_instance)
-    with pytest.raises(Employee.DoesNotExist):
+    component = EmployeeComponent(
+        employee_repository=mock_repo, logger=mock_logger_instance
+    )
+    with pytest.raises(APIException, match="Error modifying employee"):
         component.modify_employee(1, 999, data)
 
 
@@ -184,13 +203,15 @@ def test_modify_employee_non_existent(mock_logger, mock_repo):
 @patch("gym_app.components.employee_component.EmployeeRepository")
 @patch("gym_app.logging.SimpleLogger")
 def test_remove_employee_non_existent(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=SimpleLogger)
+    mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
 
-    mock_repo.delete_employee.side_effect = Employee.DoesNotExist
+    mock_repo.delete_employee.side_effect = APIException("Employee not found")
 
-    component = EmployeeComponent(mock_repo, mock_logger_instance)
-    with pytest.raises(Employee.DoesNotExist):
+    component = EmployeeComponent(
+        employee_repository=mock_repo, logger=mock_logger_instance
+    )
+    with pytest.raises(APIException, match="Error removing employee"):
         component.remove_employee(1, 999)
 
 
@@ -198,15 +219,17 @@ def test_remove_employee_non_existent(mock_logger, mock_repo):
 @patch("gym_app.components.employee_component.EmployeeRepository")
 @patch("gym_app.logging.SimpleLogger")
 def test_fetch_employee_by_id_non_existent(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=SimpleLogger)
+    mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
 
-    mock_repo.get_employee_by_id.side_effect = ValueError(
-        "Employee with ID 999 does not exist"
-    )
+    mock_repo.get_employee_by_id.side_effect = Employee.DoesNotExist
 
-    component = EmployeeComponent(mock_repo, mock_logger_instance)
-    with pytest.raises(ValueError, match="Employee with ID 999 does not exist"):
+    component = EmployeeComponent(
+        employee_repository=mock_repo, logger=mock_logger_instance
+    )
+    with pytest.raises(
+            ResourceNotFoundException, match="Employee with ID 999 does not exist"
+    ):
         component.fetch_employee_by_id(1, 999)
 
 
@@ -214,10 +237,8 @@ def test_fetch_employee_by_id_non_existent(mock_logger, mock_repo):
 @patch("gym_app.components.employee_component.EmployeeRepository")
 @patch("gym_app.logging.SimpleLogger")
 def test_add_employee_invalid_data(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=SimpleLogger)
+    mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
-
-    mock_repo.create_employee.side_effect = ValueError("Invalid data")
 
     data = {
         "name": "John Doe",
@@ -228,8 +249,12 @@ def test_add_employee_invalid_data(mock_logger, mock_repo):
         "address_street": "123 Street",
     }
 
-    component = EmployeeComponent(mock_repo, mock_logger_instance)
-    with pytest.raises(ValueError, match="Invalid data"):
+    mock_repo.create_employee.side_effect = APIException("Invalid data")
+
+    component = EmployeeComponent(
+        employee_repository=mock_repo, logger=mock_logger_instance
+    )
+    with pytest.raises(APIException, match="Error adding employee"):
         component.add_employee(1, data)
 
 
@@ -237,20 +262,22 @@ def test_add_employee_invalid_data(mock_logger, mock_repo):
 @patch("gym_app.components.employee_component.EmployeeRepository")
 @patch("gym_app.logging.SimpleLogger")
 def test_modify_employee_invalid_data(mock_logger, mock_repo):
-    mock_logger_instance = MagicMock(spec=SimpleLogger)
+    mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
 
-    mock_repo.update_employee.side_effect = ValueError("Invalid data")
-
     data = {
-        "name": "John Updated",
+        "name": "John Doe",
         "email": "invalid_email_format",
-        "positions": "Trainer",
+        "positions": "Trainer, Cleaner",
         "gym_id": 1,
         "address_city": "New York",
-        "address_street": "456 Avenue",
+        "address_street": "123 Street",
     }
 
-    component = EmployeeComponent(mock_repo, mock_logger_instance)
-    with pytest.raises(ValueError, match="Invalid data"):
+    mock_repo.update_employee.side_effect = APIException("Invalid data")
+
+    component = EmployeeComponent(
+        employee_repository=mock_repo, logger=mock_logger_instance
+    )
+    with pytest.raises(APIException, match="Error modifying employee"):
         component.modify_employee(1, 1, data)

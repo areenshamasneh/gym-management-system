@@ -1,7 +1,8 @@
 import os
+
 import django
-from django.conf import settings
 import pytest  # type: ignore
+from django.conf import settings
 
 # Set up Django settings
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gym_management.settings")
