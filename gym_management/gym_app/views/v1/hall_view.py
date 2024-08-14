@@ -1,10 +1,11 @@
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 
-from gym_app.components import HallComponent
+from gym_app.components import HallComponent, HallMachineComponent
 from gym_app.models import Gym
-from gym_app.serializers import HallSerializer
+from gym_app.serializers import HallSerializer, HallMachineSerializer
 from gym_app.validators import SchemaValidator
 
 
@@ -12,6 +13,7 @@ class HallViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.hall_component = HallComponent()
+        self.hall_machine_component = HallMachineComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.hall_schemas')
 
     @staticmethod
@@ -106,3 +108,19 @@ class HallViewSet(viewsets.ViewSet):
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception:
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(methods=['GET'], detail=False, url_path='machines', url_name='all-hall-machines')
+    def list_all_hall_machines(self, request, gym_pk=None):
+        if gym_pk:
+            try:
+                machines = self.hall_machine_component.fetch_hall_machines_by_gym(gym_pk)
+                serializer = HallMachineSerializer(machines, many=True)
+                return Response(serializer.data)
+            except ValueError as e:
+                self.hall_machine_component.logger.log_error(f"ValueError: {str(e)}")
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                self.hall_machine_component.logger.log_error(f"Exception: {str(e)}")
+                return Response({"error": "An unexpected error occurred."},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"error": "Gym ID is required"}, status=status.HTTP_400_BAD_REQUEST)

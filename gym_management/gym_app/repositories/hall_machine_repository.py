@@ -19,6 +19,3 @@ class HallMachineRepository:
             raise ResourceNotFoundException(f"No hall machines found for hall ID {hall_id}")
         return hall_machines
 
-    @staticmethod
-    def get_hall_machine_by_id(machine_id):
-        return HallMachine.objects.get(id=machine_id)

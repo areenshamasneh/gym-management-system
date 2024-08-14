@@ -50,24 +50,3 @@ class HallMachineComponent:
         except Exception as e:
             self.logger.log_error(f"Error fetching hall machines: {e}")
             raise DatabaseException("An error occurred while fetching hall machines.")
-
-    def fetch_hall_machine_by_id(self, machine_id):
-        self.logger.log_info(f"Fetching hall machine with ID {machine_id}")
-        try:
-            result = self.repo.get_hall_machine_by_id(machine_id)
-            if result is None:
-                raise ResourceNotFoundException(
-                    f"Hall machine with ID {machine_id} not found."
-                )
-            return result
-        except ValueError as e:
-            self.logger.log_error(f"Error fetching hall machine by ID: {e}")
-            raise ValidationException(f"Validation error: {e}")
-        except ResourceNotFoundException as e:
-            self.logger.log_error(f"Error fetching hall machine by ID: {e}")
-            raise e
-        except Exception as e:
-            self.logger.log_error(f"Error fetching hall machine by ID: {e}")
-            raise DatabaseException(
-                "An error occurred while fetching the hall machine."
-            )

@@ -66,30 +66,6 @@ class TestHallMachineComponent(unittest.TestCase):
             "Error fetching hall machines: No hall machines found for hall ID hall_id."
         )
 
-    @patch(
-        "gym_app.components.hall_machine_component.HallMachineRepository",
-        return_value=MagicMock(),
-    )
-    def test_fetch_hall_machine_by_id_success(self, MockRepo):
-        self.mock_repo.get_hall_machine_by_id.return_value = "machine"
-        result = self.component.fetch_hall_machine_by_id("machine_id")
-        self.assertEqual(result, "machine")
-        self.mock_logger.log_info.assert_called_with(
-            "Fetching hall machine with ID machine_id"
-        )
-
-    @patch(
-        "gym_app.components.hall_machine_component.HallMachineRepository",
-        return_value=MagicMock(),
-    )
-    def test_fetch_hall_machine_by_id_resource_not_found(self, MockRepo):
-        self.mock_repo.get_hall_machine_by_id.return_value = None
-        with self.assertRaises(ResourceNotFoundException):
-            self.component.fetch_hall_machine_by_id("machine_id")
-        self.mock_logger.log_error.assert_called_with(
-            "Error fetching hall machine by ID: Hall machine with ID machine_id not found."
-        )
-
 
 if __name__ == "__main__":
     unittest.main()
