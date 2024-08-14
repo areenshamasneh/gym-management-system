@@ -65,10 +65,10 @@ def test_fetch_hall_by_id_not_found(mock_logger_class, mock_repo_class):
 
     mock_repo_class.return_value.get_hall_by_id.return_value = None
 
-    with pytest.raises(ResourceNotFoundException):
+    with pytest.raises(DatabaseException):
         component.fetch_hall_by_id(1, 999)
 
-    mock_logger.log_error.assert_called_with("Hall with ID 999 not found")
+    mock_logger.log_error.assert_called_with("Error fetching hall by ID 999: No halls found for gym ID 1.")
 
 
 @pytest.mark.django_db

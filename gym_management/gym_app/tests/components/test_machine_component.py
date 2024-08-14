@@ -47,17 +47,18 @@ class TestMachineComponent(unittest.TestCase):
     def test_fetch_machine_by_id_in_hall_not_found(self):
         gym_id, hall_id, machine_id = 1, 1, 1
         self.mock_repo.get_machine_by_id_in_hall.side_effect = ResourceNotFoundException(
-            "Machine not found"
+            "Machine with ID 1 not found in hall: 1 for gym_id 1."
         )
 
         with self.assertRaises(ResourceNotFoundException) as context:
             self.component.fetch_machine_by_id_in_hall(gym_id, hall_id, machine_id)
 
         self.assertEqual(
-            str(context.exception), "Machine not found"
+            str(context.exception), "Machine with ID 1 not found in hall: 1 for gym_id 1."
         )
+
         self.mock_logger.log_error.assert_called_with(
-            f"Machine with ID {machine_id} not found in hall: {hall_id}"
+            "Machine with ID 1 not found in hall: 1 for gym_id 1."
         )
 
     def test_fetch_machine_by_id_in_hall_failure(self):

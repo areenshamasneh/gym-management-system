@@ -39,7 +39,7 @@ class HallComponent:
             raise ResourceNotFoundException(f"Hall with ID {hall_id} does not exist in gym ID {gym_id}")
         except Exception as e:
             self.logger.log_error(f"Error fetching hall by ID {hall_id}: {str(e)}")
-            raise DatabaseException(f"An error occurred while fetching hall with ID {hall_id}.{hall}") from e
+            raise DatabaseException(f"An error occurred while fetching hall with ID {hall_id}.") from e
 
     def add_hall(self, gym_id, data):
         self.logger.log_info(f"Adding new hall with data: {data} for gym ID {gym_id}")
