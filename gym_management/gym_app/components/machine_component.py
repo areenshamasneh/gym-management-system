@@ -82,3 +82,32 @@ class MachineComponent:
         except Exception as e:
             self.logger.log_error(f"Error removing hall machine: {e}")
             raise DatabaseException("An error occurred while removing the hall machine.")
+
+    def fetch_all_machines_in_gym(self, gym_id):
+        self.logger.log_info(f"Fetching all machines for gym_id: {gym_id}")
+        try:
+            gym_machines = self.repo.get_all_machines_in_gym(gym_id)
+            if not gym_machines:
+                raise ResourceNotFoundException(f"There are no machines in gym_id {gym_id}.")
+            return gym_machines
+        except ResourceNotFoundException as e:
+            self.logger.log_error(str(e))
+            raise
+        except Exception as e:
+            self.logger.log_error(f"Error fetching machines in gym: {e}")
+            raise DatabaseException("An error occurred while fetching machines in the gym.") from e
+
+    def fetch_machine_by_id_in_gym(self, gym_id, machine_id):
+        self.logger.log_info(f"Fetching machine with ID: {machine_id} for gym_id: {gym_id}")
+        try:
+            hall_machine = self.repo.get_machine_by_id_in_gym(gym_id, machine_id)
+            if not hall_machine:
+                raise ResourceNotFoundException(
+                    f"Machine with ID {machine_id} not found in any hall for gym_id {gym_id}.")
+            return hall_machine.machine
+        except ResourceNotFoundException as e:
+            self.logger.log_error(str(e))
+            raise
+        except Exception as e:
+            self.logger.log_error(f"Error fetching machine by ID: {e}")
+            raise DatabaseException("An error occurred while fetching the machine by ID.") from e

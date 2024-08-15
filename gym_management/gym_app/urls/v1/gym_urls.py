@@ -8,6 +8,7 @@ from gym_app.views import (
     HallViewSet,
     MachineViewSet,
     MemberViewSet,
+    GymMachineViewSet
 )
 
 router = routers.SimpleRouter()
@@ -18,6 +19,7 @@ gyms_router.register(r'admins', AdminViewSet, basename='gym-admins')
 gyms_router.register(r'employees', EmployeeViewSet, basename='gym-employees')
 gyms_router.register(r'halls', HallViewSet, basename='gym-halls')
 gyms_router.register(r'members', MemberViewSet, basename='gym-members')
+gyms_router.register(r'machines', GymMachineViewSet, basename='gym-machines')
 
 halls_router = routers.NestedSimpleRouter(gyms_router, r'halls', lookup='hall')
 halls_router.register(r'machines', MachineViewSet, basename='hall-machines')
