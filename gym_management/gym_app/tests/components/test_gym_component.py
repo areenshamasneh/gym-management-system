@@ -171,16 +171,22 @@ def test_remove_gym_non_existent(mock_logger, mock_repo):
 
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
-def test_fetch_gym_by_id_non_existent(mock_logger, mock_repo):
-    mock_repo.get_gym_by_id.side_effect = ResourceNotFoundException(
+def test_fetch_gym_by_id_non_existent(mock_logger_class, mock_repo_class):
+    mock_logger = MagicMock()
+    mock_logger_class.return_value = mock_logger
+
+    mock_repo_class.get_gym_by_id.side_effect = ResourceNotFoundException(
         "Gym with ID 999 does not exist"
     )
 
-    component = GymComponent(mock_repo, mock_logger)
+    component = GymComponent(mock_repo_class, mock_logger)
+
     with pytest.raises(
-            ResourceNotFoundException, match="Gym with ID 999 does not exist"
+            ResourceNotFoundException, match="Resource not found for gym_id: 999"
     ):
         component.fetch_gym_by_id(999)
+
+    mock_logger.log_error.assert_called_with("Gym with ID 999 does not exist")
 
 
 @patch("gym_app.components.gym_component.GymRepository")

@@ -1,4 +1,3 @@
-from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models import Admin, Gym
 
 
@@ -10,8 +9,6 @@ class AdminRepository:
     @staticmethod
     def get_admin_by_id(gym_id, admin_id):
         admin = Admin.objects.filter(pk=admin_id, gym_id=gym_id).first()
-        if admin is None:
-            raise ResourceNotFoundException(f"Admin with ID {admin_id} not found for gym_id {gym_id}")
         return admin
 
     @staticmethod
@@ -29,8 +26,6 @@ class AdminRepository:
     @staticmethod
     def update_admin(gym_id, admin_id, data):
         admin = Admin.objects.filter(pk=admin_id, gym__id=gym_id).first()
-        if admin is None:
-            raise ResourceNotFoundException(f"Admin with ID {admin_id} not found for gym ID {gym_id}")
 
         if 'name' in data:
             admin.name = data['name']
@@ -48,6 +43,4 @@ class AdminRepository:
 
     @staticmethod
     def delete_admin(gym_id, admin_id):
-        if not Admin.objects.filter(pk=admin_id, gym_id=gym_id).exists():
-            raise ResourceNotFoundException(f"Admin with ID {admin_id} not found for gym_id {gym_id}")
         Admin.objects.filter(pk=admin_id, gym_id=gym_id).delete()

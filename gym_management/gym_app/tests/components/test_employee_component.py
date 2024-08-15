@@ -222,15 +222,23 @@ def test_fetch_employee_by_id_non_existent(mock_logger, mock_repo):
     mock_logger_instance = MagicMock()
     mock_logger.return_value = mock_logger_instance
 
-    mock_repo.get_employee_by_id.side_effect = Employee.DoesNotExist
+    mock_repo_instance = mock_repo.return_value
+    mock_repo_instance.get_employee_by_id.return_value = None
 
     component = EmployeeComponent(
-        employee_repository=mock_repo, logger=mock_logger_instance
+        employee_repository=mock_repo_instance, logger=mock_logger_instance
     )
+
+    expected_error_message = "Resource not found for gym_id: 1"
+
     with pytest.raises(
-            ResourceNotFoundException, match="Employee with ID 999 does not exist"
+            ResourceNotFoundException, match=expected_error_message
     ):
         component.fetch_employee_by_id(1, 999)
+
+    mock_logger_instance.log_info.assert_called_with("Fetching employee with ID 999")
+    mock_logger_instance.log_error.assert_called_with(
+        f"Resource not found: Employee with ID 999 does not exist for gym_id: 1")
 
 
 @pytest.mark.django_db
