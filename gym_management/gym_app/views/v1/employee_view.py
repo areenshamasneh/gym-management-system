@@ -44,7 +44,7 @@ class EmployeeViewSet(viewsets.ViewSet):
         filter_criteria = {k: v for k, v in filter_criteria.items() if v}
 
         try:
-            employees = self.employee_component.fetch_all_employees(gym_pk)
+            employees = self.employee_component.fetch_all_employees(gym_pk).select_related('gym', 'manager')
             if filter_criteria:
                 employees = employees.filter(**filter_criteria).select_related('gym', 'manager')
 
