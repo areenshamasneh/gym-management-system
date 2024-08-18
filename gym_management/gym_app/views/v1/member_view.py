@@ -24,13 +24,18 @@ class MemberViewSet(viewsets.ViewSet):
     def list(self, request, gym_pk=None):
         self.get_gym(gym_pk)
         name_filter = request.GET.get("name", None)
+
         try:
             all_members = self.member_component.fetch_all_members(gym_pk)
-            filtered_members = [
-                member
-                for member in all_members
-                if name_filter.lower() in member.name.lower()
-            ] if name_filter else all_members
+            if name_filter:
+                name_filter_lower = name_filter.lower()
+                filtered_members = [
+                    member
+                    for member in all_members
+                    if name_filter_lower in member.name.lower()
+                ]
+            else:
+                filtered_members = all_members
 
             serializer = MemberSerializer(filtered_members, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)

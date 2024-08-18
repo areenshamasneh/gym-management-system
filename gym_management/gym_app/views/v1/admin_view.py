@@ -41,8 +41,9 @@ class AdminViewSet(viewsets.ViewSet):
 
         try:
             admins = self.admin_component.fetch_all_admins(gym_pk)
-            filtered_admins = admins.filter(**filter_criteria)
-            serializer = AdminSerializer(filtered_admins, many=True)
+            if filter_criteria:
+                admins = admins.filter(**filter_criteria)
+            serializer = AdminSerializer(admins, many=True)
             return Response(serializer.data)
         except ConflictException as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
