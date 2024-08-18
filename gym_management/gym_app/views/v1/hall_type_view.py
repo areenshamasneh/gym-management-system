@@ -30,7 +30,7 @@ class HallTypeViewSet(viewsets.ViewSet):
         request.data['code'] = request.data.get('code', '').upper()
 
         try:
-            validated_data = HallTypeModel(**request.data).dict()
+            validated_data = HallTypeModel(**request.data).model_dump()
         except PydanticValidationError as e:
             error_details = {
                 "non_field_errors": [
@@ -54,7 +54,7 @@ class HallTypeViewSet(viewsets.ViewSet):
         request.data['code'] = request.data.get('code', '').upper()
 
         try:
-            validated_data = HallTypeModel(**request.data).dict()
+            validated_data = HallTypeModel(**request.data).model_dump()
         except PydanticValidationError as e:
             return Response({"error": e.errors()}, status=status.HTTP_400_BAD_REQUEST)
 
