@@ -39,12 +39,15 @@ class EmployeeViewSet(viewsets.ViewSet):
             "address_city__icontains": address_city,
             "address_street__icontains": address_street,
             "manager_id": manager_id,
-            "positions__icontains": positions
+            "positions__icontains": positions,
         }
         filter_criteria = {k: v for k, v in filter_criteria.items() if v}
 
         try:
-            employees = self.employee_component.fetch_all_employees(gym_pk).filter(**filter_criteria)
+            employees = self.employee_component.fetch_all_employees(gym_pk)
+            if filter_criteria:
+                employees = employees.filter(**filter_criteria).select_related('gym', 'manager')
+
             serializer = EmployeeSerializer(employees, many=True)
             return Response(serializer.data)
         except Exception as e:

@@ -7,7 +7,7 @@ class MachineRepository:
 
     @staticmethod
     def get_all_machines_in_hall(gym_id, hall_id):
-        return HallMachine.objects.filter(hall__id=hall_id, hall__gym_id=gym_id)
+        return HallMachine.objects.filter(hall__id=hall_id, hall__gym_id=gym_id).select_related('hall','machine')
 
     @staticmethod
     def get_machine_by_id_in_hall(gym_id, hall_id, machine_id):
@@ -47,7 +47,7 @@ class MachineRepository:
 
     @staticmethod
     def get_all_machines_in_gym(gym_id):
-        return HallMachine.objects.filter(hall__gym_id=gym_id)
+        return HallMachine.objects.filter(hall__gym_id=gym_id).select_related('hall','machine')
 
     @staticmethod
     def get_machine_by_id_in_gym(gym_id, machine_id):

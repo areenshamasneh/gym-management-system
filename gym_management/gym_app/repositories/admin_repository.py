@@ -10,6 +10,7 @@ class AdminRepository:
     def get_admin_by_id(gym_id, admin_id):
         return Admin.objects.filter(pk=admin_id, gym_id=gym_id).select_related('gym').first()
 
+
     @staticmethod
     def create_admin(gym_id, data):
         gym = Gym.objects.get(pk=gym_id)
