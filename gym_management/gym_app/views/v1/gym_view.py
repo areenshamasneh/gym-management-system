@@ -13,9 +13,17 @@ class GymViewSet(viewsets.ViewSet):
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.gym_schemas')
 
     def list(self, request):
-        gyms = self.gym_component.fetch_all_gyms()
-        serializer = GymSerializer(gyms, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        page_number = request.GET.get('page', 1)
+        page_size = request.GET.get('page_size', 10)
+
+        pagination_response = self.gym_component.fetch_all_gyms(page_number, page_size)
+
+        serializer = GymSerializer(pagination_response.items, many=True)
+
+        return Response({
+            **pagination_response.to_dict(),
+            "items": serializer.data
+        }, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
         gym = self.gym_component.fetch_gym_by_id(pk)

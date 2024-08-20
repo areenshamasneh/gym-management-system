@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from gym_app.components import HallTypeComponent
 from gym_app.models import HallType
-from gym_app.models.hall_type_model import HallTypeModel
+from gym_app.models import HallTypeModel
 from gym_app.serializers import HallTypeSerializer
 
 
@@ -30,7 +30,7 @@ class HallTypeViewSet(viewsets.ViewSet):
         request.data['code'] = request.data.get('code', '').upper()
 
         try:
-            validated_data = HallTypeModel(**request.data).dict()
+            validated_data = HallTypeModel(**request.data).model_dump()
         except PydanticValidationError as e:
             error_details = {
                 "non_field_errors": [
@@ -54,7 +54,7 @@ class HallTypeViewSet(viewsets.ViewSet):
         request.data['code'] = request.data.get('code', '').upper()
 
         try:
-            validated_data = HallTypeModel(**request.data).dict()
+            validated_data = HallTypeModel(**request.data).model_dump()
         except PydanticValidationError as e:
             return Response({"error": e.errors()}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -13,9 +13,9 @@ class GymComponent:
         self.logger = logger or SimpleLogger()
         self.logger.log_info("GymComponent initialized")
 
-    def fetch_all_gyms(self):
+    def fetch_all_gyms(self, page_number=1, page_size=10):
         try:
-            return self.gym_repository.get_all_gyms()
+            return self.gym_repository.get_all_gyms(page_number, page_size)
         except Exception as e:
             self.logger.log_error(f"An error occurred while fetching all gyms: {e}")
             raise DatabaseException("An error occurred while fetching all gyms.")
@@ -39,7 +39,6 @@ class GymComponent:
 
     def add_gym(self, data):
         try:
-            self.gym_repository.create_gym(data)
             self.logger.log_info("Adding new gym")
         except KeyError as e:
             missing_field = str(e).strip("'")
@@ -53,10 +52,8 @@ class GymComponent:
 
     def modify_gym(self, gym_id, data):
         try:
-            self.gym_repository.get_gym_by_id(gym_id)
-            gym = self.gym_repository.update_gym(gym_id, data)
             self.logger.log_info(f"Modifying gym ID {gym_id}")
-            return gym
+            return self.gym_repository.update_gym(gym_id, data)
         except ResourceNotFoundException as e:
             self.logger.log_error(str(e))
             raise
@@ -75,9 +72,8 @@ class GymComponent:
 
     def remove_gym(self, gym_id):
         try:
-            self.gym_repository.get_gym_by_id(gym_id)
-            self.gym_repository.delete_gym(gym_id)
             self.logger.log_info(f"Removing gym ID {gym_id}")
+            return self.gym_repository.delete_gym(gym_id)
         except ResourceNotFoundException as e:
             self.logger.log_error(str(e))
             raise

@@ -113,7 +113,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'EXCEPTION_HANDLER': 'gym_app.utils.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'gym_app.utils.exception_handler.custom_exception_handler',
 }
 
 ROOT_URLCONF = "gym_management.urls"

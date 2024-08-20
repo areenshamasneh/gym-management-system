@@ -2,13 +2,25 @@ from django.core.paginator import Paginator
 
 from gym_app.models import Gym
 
+from django.core.paginator import Paginator
+from gym_app.models import Gym
+from gym_app.utils import PaginationResponse
+
 
 class GymRepository:
     @staticmethod
     def get_all_gyms(page_number=1, page_size=10):
         gyms = Gym.objects.all()
         paginator = Paginator(gyms, page_size)
-        return paginator.get_page(page_number)
+        paginated_gyms = paginator.get_page(page_number)
+
+        return PaginationResponse(
+            items=list(paginated_gyms),
+            total_items=paginator.count,
+            total_pages=paginator.num_pages,
+            current_page=paginated_gyms.number,
+            page_size=page_size
+        )
 
     @staticmethod
     def get_gym_by_id(pk):

@@ -4,12 +4,12 @@ from gym_app.models import Admin, Gym
 class AdminRepository:
     @staticmethod
     def get_all_admins(gym_id):
-        return Admin.objects.filter(gym_id=gym_id)
+        return Admin.objects.filter(gym_id=gym_id).select_related('gym')
 
     @staticmethod
     def get_admin_by_id(gym_id, admin_id):
-        admin = Admin.objects.filter(pk=admin_id, gym_id=gym_id).first()
-        return admin
+        return Admin.objects.filter(pk=admin_id, gym_id=gym_id).select_related('gym').first()
+
 
     @staticmethod
     def create_admin(gym_id, data):

@@ -3,7 +3,6 @@ from rest_framework.response import Response
 
 from gym_app.components.admin_component import AdminComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException, ConflictException
-from gym_app.models import Gym
 from gym_app.serializers import AdminSerializer
 from gym_app.validators import SchemaValidator
 
@@ -14,16 +13,7 @@ class AdminViewSet(viewsets.ViewSet):
         self.admin_component = AdminComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.admin_schemas')
 
-    @staticmethod
-    def get_gym(gym_id):
-        try:
-            return Gym.objects.get(id=gym_id)
-        except Gym.DoesNotExist:
-            raise ResourceNotFoundException(f"Gym with ID {gym_id} does not exist")
-
     def list(self, request, gym_pk=None):
-        self.get_gym(gym_pk)
-
         name = request.GET.get("name", "")
         email = request.GET.get("email", "")
         phone_number = request.GET.get("phone_number", "")
@@ -41,15 +31,14 @@ class AdminViewSet(viewsets.ViewSet):
 
         try:
             admins = self.admin_component.fetch_all_admins(gym_pk)
-            filtered_admins = admins.filter(**filter_criteria)
-            serializer = AdminSerializer(filtered_admins, many=True)
+            if filter_criteria:
+                admins = admins.filter(**filter_criteria)
+            serializer = AdminSerializer(admins, many=True)
             return Response(serializer.data)
         except ConflictException as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
-
         try:
             admin = self.admin_component.fetch_admin_by_id(gym_pk, pk)
             serializer = AdminSerializer(admin)
@@ -60,8 +49,6 @@ class AdminViewSet(viewsets.ViewSet):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, gym_pk=None):
-        self.get_gym(gym_pk)
-
         data = request.data.copy()
         data["gym_id"] = gym_pk
 
@@ -79,8 +66,6 @@ class AdminViewSet(viewsets.ViewSet):
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
-
         data = request.data.copy()
         data["gym_id"] = gym_pk
 
@@ -103,8 +88,6 @@ class AdminViewSet(viewsets.ViewSet):
         return self.update(request, gym_pk=gym_pk, pk=pk)
 
     def destroy(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
-
         try:
             self.admin_component.remove_admin(gym_pk, pk)
             return Response(status=status.HTTP_204_NO_CONTENT)

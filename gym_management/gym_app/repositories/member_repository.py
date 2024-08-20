@@ -8,10 +8,7 @@ class MemberRepository:
 
     @staticmethod
     def get_all_members(gym_id):
-        try:
-            return Member.objects.filter(gym_id=gym_id)
-        except Exception as e:
-            raise DatabaseException(f"Error fetching members: {e}")
+        return Member.objects.filter(gym_id=gym_id).select_related('gym')
 
     @staticmethod
     def get_member_by_id(gym_id, member_id):

@@ -4,12 +4,11 @@ from gym_app.models import Employee, Gym
 class EmployeeRepository:
     @staticmethod
     def get_all_employees(gym_id):
-        return Employee.objects.filter(gym_id=gym_id)
+        return Employee.objects.filter(gym_id=gym_id).select_related('gym', 'manager')
 
     @staticmethod
     def get_employee_by_id(gym_id, employee_id):
-        employee = Employee.objects.filter(pk=employee_id, gym_id=gym_id).first()
-        return employee
+        return Employee.objects.filter(pk=employee_id, gym_id=gym_id).select_related('gym', 'manager').first()
 
     @staticmethod
     def create_employee(gym_id, data):

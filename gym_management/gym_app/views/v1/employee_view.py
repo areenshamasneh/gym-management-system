@@ -3,7 +3,6 @@ from rest_framework.response import Response
 
 from gym_app.components import EmployeeComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.models import Gym
 from gym_app.serializers import EmployeeSerializer
 from gym_app.validators import SchemaValidator
 
@@ -14,15 +13,7 @@ class EmployeeViewSet(viewsets.ViewSet):
         self.employee_component = EmployeeComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.employee_schemas')
 
-    @staticmethod
-    def get_gym(gym_id):
-        try:
-            return Gym.objects.get(id=gym_id)
-        except Gym.DoesNotExist:
-            raise ResourceNotFoundException(f"Gym with ID {gym_id} does not exist")
-
     def list(self, request, gym_pk=None):
-        self.get_gym(gym_pk)
 
         name = request.GET.get("name", "")
         email = request.GET.get("email", "")
@@ -39,19 +30,21 @@ class EmployeeViewSet(viewsets.ViewSet):
             "address_city__icontains": address_city,
             "address_street__icontains": address_street,
             "manager_id": manager_id,
-            "positions__icontains": positions
+            "positions__icontains": positions,
         }
         filter_criteria = {k: v for k, v in filter_criteria.items() if v}
 
         try:
-            employees = self.employee_component.fetch_all_employees(gym_pk).filter(**filter_criteria)
+            employees = self.employee_component.fetch_all_employees(gym_pk).select_related('gym', 'manager')
+            if filter_criteria:
+                employees = employees.filter(**filter_criteria).select_related('gym', 'manager')
+
             serializer = EmployeeSerializer(employees, many=True)
             return Response(serializer.data)
         except Exception as e:
             return self.handle_exception(e)
 
     def retrieve(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
 
         try:
             employee = self.employee_component.fetch_employee_by_id(gym_pk, pk)
@@ -61,7 +54,6 @@ class EmployeeViewSet(viewsets.ViewSet):
             return self.handle_exception(e)
 
     def create(self, request, gym_pk=None):
-        self.get_gym(gym_pk)
 
         data = request.data.copy()
         data["gym"] = {"id": gym_pk}
@@ -80,7 +72,6 @@ class EmployeeViewSet(viewsets.ViewSet):
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
 
         data = request.data.copy()
         data["gym"] = {"id": gym_pk}
@@ -104,7 +95,6 @@ class EmployeeViewSet(viewsets.ViewSet):
         return self.update(request, gym_pk=gym_pk, pk=pk)
 
     def destroy(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
 
         try:
             self.employee_component.remove_employee(gym_pk, pk)
