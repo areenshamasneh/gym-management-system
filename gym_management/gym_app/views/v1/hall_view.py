@@ -5,7 +5,6 @@ from rest_framework.response import Response
 
 from gym_app.components import HallComponent, HallMachineComponent
 from gym_app.exceptions import ResourceNotFoundException
-from gym_app.models import Gym
 from gym_app.serializers import HallSerializer, HallMachineSerializer
 from gym_app.validators import SchemaValidator
 
@@ -17,18 +16,9 @@ class HallViewSet(viewsets.ViewSet):
         self.hall_machine_component = HallMachineComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.hall_schemas')
 
-    @staticmethod
-    def get_gym(gym_id):
-        try:
-            return Gym.objects.get(id=gym_id)
-        except Gym.DoesNotExist:
-            raise NotFound(f"Gym with ID {gym_id} does not exist")
-
     def list(self, request, gym_pk=None):
         if gym_pk is None:
             return Response({"detail": "Gym ID is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        self.get_gym(gym_pk)
 
         try:
             halls = self.hall_component.fetch_all_halls(gym_pk)
@@ -41,7 +31,6 @@ class HallViewSet(viewsets.ViewSet):
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
 
         try:
             hall = self.hall_component.fetch_hall_by_id(gym_pk, pk)
@@ -55,14 +44,13 @@ class HallViewSet(viewsets.ViewSet):
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, gym_pk=None):
-        gym_instance = self.get_gym(gym_pk)
 
         validation_error = self.validator.validate_data('CREATE_SCHEMA', request.data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
         data = request.data.copy()
-        data['gym'] = gym_instance.id
+        data['gym'] = gym_pk
 
         serializer = HallSerializer(data=data)
         if serializer.is_valid():
@@ -77,7 +65,6 @@ class HallViewSet(viewsets.ViewSet):
         return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
 
         validation_error = self.validator.validate_data('UPDATE_SCHEMA', request.data)
         if validation_error:
@@ -101,7 +88,6 @@ class HallViewSet(viewsets.ViewSet):
         return self.update(request, gym_pk=gym_pk, pk=pk)
 
     def destroy(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
 
         try:
             hall = self.hall_component.fetch_hall_by_id(gym_pk, pk)

@@ -3,7 +3,6 @@ from rest_framework.response import Response
 
 from gym_app.components import MemberComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.models import Gym
 from gym_app.serializers import MemberSerializer
 from gym_app.validators import SchemaValidator
 
@@ -14,15 +13,7 @@ class MemberViewSet(viewsets.ViewSet):
         self.member_component = MemberComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.member_schemas')
 
-    @staticmethod
-    def get_gym(gym_id):
-        try:
-            return Gym.objects.get(id=gym_id)
-        except Gym.DoesNotExist:
-            raise ResourceNotFoundException(f"Gym with ID {gym_id} does not exist")
-
     def list(self, request, gym_pk=None):
-        self.get_gym(gym_pk)
         name_filter = request.GET.get("name", None)
 
         try:
@@ -45,7 +36,6 @@ class MemberViewSet(viewsets.ViewSet):
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
         try:
             member = self.member_component.fetch_member_by_id(gym_pk, pk)
             serializer = MemberSerializer(member)
@@ -56,7 +46,6 @@ class MemberViewSet(viewsets.ViewSet):
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, gym_pk=None):
-        self.get_gym(gym_pk)
         data = request.data.copy()
         data["gym"] = gym_pk
 
@@ -78,7 +67,6 @@ class MemberViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
         data = request.data.copy()
         data["gym"] = gym_pk
 
@@ -105,7 +93,6 @@ class MemberViewSet(viewsets.ViewSet):
         return self.update(request, gym_pk=gym_pk, pk=pk)
 
     def destroy(self, request, gym_pk=None, pk=None):
-        self.get_gym(gym_pk)
         try:
             self.member_component.remove_member(gym_pk, pk)
             return Response({"message": "Member deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
