@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from gym_app.models import (
+from gym_app.models.system_models import (
     Gym,
     Machine,
     Hall,

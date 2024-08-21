@@ -1,7 +1,7 @@
 from pydantic import ValidationError
 from rest_framework import serializers  # type: ignore
 
-from gym_app.models import (
+from gym_app.models.system_models import (
     Gym,
     Machine,
     HallType,

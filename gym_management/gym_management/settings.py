@@ -2,6 +2,19 @@ import os
 from pathlib import Path
 
 from decouple import config  # type: ignore
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+
+DATABASE_URL = config('DATABASE_URL')
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+try:
+    with engine.connect() as connection:
+        print("Database connection successful.")
+except Exception as e:
+    print(f"Database connection error: {e}")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -113,7 +126,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'EXCEPTION_HANDLER': 'gym_app.utils.exception_handler.custom_exception_handler',
+   #'EXCEPTION_HANDLER': 'gym_app.utils.exception_handler.custom_exception_handler',
 }
 
 ROOT_URLCONF = "gym_management.urls"

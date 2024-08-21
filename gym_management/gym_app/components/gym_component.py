@@ -40,6 +40,7 @@ class GymComponent:
     def add_gym(self, data):
         try:
             self.logger.log_info("Adding new gym")
+            return self.gym_repository.create_gym(data)
         except KeyError as e:
             missing_field = str(e).strip("'")
             raise InvalidInputException(f"Missing required field: '{missing_field}'")
