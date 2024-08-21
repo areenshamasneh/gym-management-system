@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Text, Integer, ForeignKey, Date, UniqueConstraint
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import relationship, backref, declarative_base
+from sqlalchemy.orm import backref, declarative_base
 
 Base = declarative_base()
 
@@ -57,10 +57,8 @@ class Hall(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     users_capacity = Column(Integer, default=10, nullable=False)
-    hall_type_id = Column(Integer, ForeignKey('hall_type.id'), nullable=False)
-    gym_id = Column(Integer, ForeignKey('gym.id'), nullable=False)
-
-    hall_type = relationship("HallType", backref=backref("halls", cascade="all, delete-orphan"))
+    hall_type_id = Column(Integer, ForeignKey('gym_app_hall_type.id'), nullable=False)
+    gym_id = Column(Integer, ForeignKey('gym_app_gym.id'), nullable=False)
 
     def __repr__(self):
         return f"<Hall(name={self.name})>"
@@ -73,7 +71,7 @@ class Admin(Base):
     name = Column(String(255), nullable=False)
     phone_number = Column(String(20), nullable=True)
     email = Column(String(255), unique=True, nullable=False)
-    gym_id = Column(Integer, ForeignKey('gym.id'), nullable=False)
+    gym_id = Column(Integer, ForeignKey('gym_app_gym.id'), nullable=False)
     address_city = Column(String(255), nullable=False)
     address_street = Column(String(255), nullable=False)
 
@@ -86,15 +84,13 @@ class Employee(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
-    gym_id = Column(Integer, ForeignKey('gym.id'), nullable=False)
-    manager_id = Column(Integer, ForeignKey('employee.id'), nullable=True)
+    gym_id = Column(Integer, ForeignKey('gym_app_gym.id'), nullable=False)
+    manager_id = Column(Integer, ForeignKey('gym_app_employee.id'), nullable=True)
     address_city = Column(String(255), nullable=False)
     address_street = Column(String(255), nullable=False)
     phone_number = Column(String(20), nullable=True)
     email = Column(String(255), unique=True, nullable=False)
     positions = Column(Text, nullable=True, default="")
-
-    manager = relationship("Employee", remote_side="Employee.id", backref=backref("subordinates", cascade="all"))
 
     def __repr__(self):
         return f"<Employee(name={self.name})>"
@@ -112,7 +108,7 @@ class Member(Base):
     __tablename__ = 'gym_app_member'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    gym_id = Column(Integer, ForeignKey('gym.id'), nullable=False)
+    gym_id = Column(Integer, ForeignKey('gym_app_gym.id'), nullable=False)
     name = Column(String(255), nullable=False)
     birth_date = Column(Date, nullable=False)
     phone_number = Column(String(20), nullable=True, unique=True)
@@ -126,18 +122,15 @@ class HallMachine(Base):
     __tablename__ = 'gym_app_hall_machine'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    hall_id = Column(Integer, ForeignKey('hall.id'), nullable=False)
-    machine_id = Column(Integer, ForeignKey('machine.id'), nullable=False)
+    hall_id = Column(Integer, ForeignKey('gym_app_hall.id'), nullable=False)
+    machine_id = Column(Integer, ForeignKey('gym_app_machine.id'), nullable=False)
     name = Column(String(255), nullable=True)
     uid = Column(String(100), unique=True, nullable=False)
-
-    hall = relationship("Hall", backref=backref("hall_machines", cascade="all, delete-orphan"))
-    machine = relationship("Machine", backref=backref("hall_machines", cascade="all, delete-orphan"))
 
     __table_args__ = (UniqueConstraint('hall_id', 'machine_id', name='_hall_machine_uc'),)
 
     def __repr__(self):
-        return f"<HallMachine(machine={self.machine}, hall={self.hall})>"
+        return f"<HallMachine(machine={self.machine_id}, hall={self.hall_id})>"
 
     def save(self, session):
         if not self.uid:
