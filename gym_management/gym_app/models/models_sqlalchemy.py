@@ -20,7 +20,7 @@ class Gym(Base):
 
 
 class Machine(Base):
-    __tablename__ = 'machine'
+    __tablename__ = 'gym_app_machine'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     serial_number = Column(String(100), unique=True, nullable=False)
@@ -35,7 +35,7 @@ class Machine(Base):
 
 
 class HallType(Base):
-    __tablename__ = 'hall_type'
+    __tablename__ = 'gym_app_hall_type'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
@@ -52,7 +52,7 @@ class HallType(Base):
 
 
 class Hall(Base):
-    __tablename__ = 'hall'
+    __tablename__ = 'gym_app_hall'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
@@ -67,7 +67,7 @@ class Hall(Base):
 
 
 class Admin(Base):
-    __tablename__ = 'admin'
+    __tablename__ = 'gym_app_admin'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
@@ -82,7 +82,7 @@ class Admin(Base):
 
 
 class Employee(Base):
-    __tablename__ = 'employee'
+    __tablename__ = 'gym_app_employee'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
@@ -109,7 +109,7 @@ class Employee(Base):
 
 
 class Member(Base):
-    __tablename__ = 'member'
+    __tablename__ = 'gym_app_member'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     gym_id = Column(Integer, ForeignKey('gym.id'), nullable=False)
@@ -123,7 +123,7 @@ class Member(Base):
 
 
 class HallMachine(Base):
-    __tablename__ = 'hall_machine'
+    __tablename__ = 'gym_app_hall_machine'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     hall_id = Column(Integer, ForeignKey('hall.id'), nullable=False)
