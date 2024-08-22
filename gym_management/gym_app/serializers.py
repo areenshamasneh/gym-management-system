@@ -1,136 +1,86 @@
-from pydantic import ValidationError
-from rest_framework import serializers  # type: ignore
-
-from gym_app.models.system_models import (
-    Gym,
-    Machine,
-    HallType,
-    Hall,
-    Admin,
-    Employee,
-    Member,
-    HallMachine,
-)
-from gym_app.models.hall_type_model import HallTypeModel
+def serialize_gym(gym):
+    return {
+        "id": gym.id,
+        "name": gym.name,
+        "type": gym.type,
+        "description": gym.description,
+        "address_city": gym.address_city,
+        "address_street": gym.address_street
+    }
 
 
-class GymSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Gym
-        fields = ["id", "name", "type", "description", "address_city", "address_street"]
+def serialize_hall_type(hall_type):
+    return {
+        "id": hall_type.id,
+        "name": hall_type.name,
+        "code": hall_type.code,
+        "type_description": hall_type.type_description
+    }
 
 
-class HallTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = HallType
-        fields = "__all__"
-
-    def validate(self, data):
-        try:
-            HallTypeModel(**data)
-        except ValidationError as e:
-            raise serializers.ValidationError(e.errors())
-        return data
-
-
-class MachineSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Machine
-        fields = [
-            "id",
-            "serial_number",
-            "type",
-            "model",
-            "brand",
-            "status",
-            "maintenance_date",
-        ]
+def serialize_machine(machine):
+    return {
+        "id": machine.id,
+        "serial_number": machine.serial_number,
+        "type": machine.type,
+        "model": machine.model,
+        "brand": machine.brand,
+        "status": machine.status,
+        "maintenance_date": machine.maintenance_date.isoformat() if machine.maintenance_date else None
+    }
 
 
-class HallSerializer(serializers.ModelSerializer):
-    gym = GymSerializer(read_only=True)
-    hall_type = serializers.PrimaryKeyRelatedField(queryset=HallType.objects.all(), write_only=True)
-    hall__type = HallTypeSerializer(source='hall_type', read_only=True)
-
-    class Meta:
-        model = Hall
-        fields = ["id", "name", "users_capacity", "hall_type", "hall__type", "gym"]
-
-
-class HallMachineSerializer(serializers.ModelSerializer):
-    hall = HallSerializer(read_only=True)
-    machine = MachineSerializer(read_only=True)
-
-    class Meta:
-        model = HallMachine
-        fields = ["id", "hall", "machine", "name", "uid"]
+def serialize_hall(hall):
+    return {
+        "id": hall.id,
+        "name": hall.name,
+        "users_capacity": hall.users_capacity,
+        "hall_type": serialize_hall_type(hall.hall_type) if hall.hall_type else None,
+        "gym": serialize_gym(hall.gym) if hall.gym else None
+    }
 
 
-class AdminSerializer(serializers.ModelSerializer):
-    gym = GymSerializer(read_only=True)
-
-    class Meta:
-        model = Admin
-        fields = [
-            "id",
-            "name",
-            "phone_number",
-            "email",
-            "gym",
-            "address_city",
-            "address_street",
-        ]
+def serialize_hall_machine(hall_machine):
+    return {
+        "id": hall_machine.id,
+        "hall": serialize_hall(hall_machine.hall) if hall_machine.hall else None,
+        "machine": serialize_machine(hall_machine.machine) if hall_machine.machine else None,
+        "name": hall_machine.name,
+        "uid": hall_machine.uid
+    }
 
 
-class EmployeeSerializer(serializers.ModelSerializer):
-    gym = GymSerializer()
-    manager = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Employee
-        fields = [
-            "id",
-            "name",
-            "gym",
-            "manager",
-            "address_city",
-            "address_street",
-            "phone_number",
-            "email",
-            "positions",
-        ]
-
-    @staticmethod
-    def get_manager(obj):
-        if obj.manager:
-            return EmployeeSerializer(obj.manager).data
-        return None
-
-    @staticmethod
-    def validate_email(value):
-        if Employee.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Email already exists")
-        return value
-
-    @staticmethod
-    def validate_positions(value):
-        positions_list = [pos.strip() for pos in value.split(",") if pos.strip()]
-        valid_positions = {"cleaner", "trainer", "system_worker"}
-        if not set(positions_list).issubset(valid_positions):
-            raise serializers.ValidationError("Invalid position(s) provided")
-        return value
+def serialize_admin(admin):
+    return {
+        "id": admin.id,
+        "name": admin.name,
+        "phone_number": admin.phone_number,
+        "email": admin.email,
+        "gym": serialize_gym(admin.gym) if admin.gym else None,
+        "address_city": admin.address_city,
+        "address_street": admin.address_street
+    }
 
 
-class MemberSerializer(serializers.ModelSerializer):
-    gym = GymSerializer(read_only=True)
+def serialize_employee(employee):
+    return {
+        "id": employee.id,
+        "name": employee.name,
+        "gym": serialize_gym(employee.gym) if employee.gym else None,
+        "manager": serialize_employee(employee.manager) if employee.manager else None,
+        "address_city": employee.address_city,
+        "address_street": employee.address_street,
+        "phone_number": employee.phone_number,
+        "email": employee.email,
+        "positions": employee.positions
+    }
 
-    class Meta:
-        model = Member
-        fields = ['id', 'name', 'gym', 'phone_number', 'birth_date']
 
-    def create(self, validated_data):
-        gym_id = self.context['gym_id']
-        gym = Gym.objects.get(id=gym_id)
-
-        member = Member.objects.create(gym=gym, **validated_data)
-        return member
+def serialize_member(member):
+    return {
+        "id": member.id,
+        "name": member.name,
+        "gym": serialize_gym(member.gym) if member.gym else None,
+        "phone_number": member.phone_number,
+        "birth_date": member.birth_date.isoformat() if member.birth_date else None
+    }

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Text, Integer, ForeignKey, Date, UniqueConstraint
-from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import backref, declarative_base
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
@@ -15,8 +15,10 @@ class Gym(Base):
     address_city = Column(String(255), nullable=False)
     address_street = Column(String(255), nullable=False)
 
-    def __repr__(self):
-        return f"<Gym(name={self.name})>"
+    halls = relationship("Hall", back_populates="gym")
+    admins = relationship("Admin", back_populates="gym")
+    employees = relationship("Employee", back_populates="gym")
+    members = relationship("Member", back_populates="gym")
 
 
 class Machine(Base):
@@ -30,8 +32,7 @@ class Machine(Base):
     status = Column(String(20), nullable=False)
     maintenance_date = Column(Date, nullable=True)
 
-    def __repr__(self):
-        return f"<Machine(type={self.type}, serial_number={self.serial_number})>"
+    hall_machines = relationship("HallMachine", back_populates="machine")
 
 
 class HallType(Base):
@@ -42,13 +43,10 @@ class HallType(Base):
     code = Column(String(255), unique=True, nullable=False)
     type_description = Column(Text, nullable=False)
 
-    def __repr__(self):
-        return f"<HallType(name={self.name})>"
+    halls = relationship("Hall", back_populates="hall_type")
 
-    def save(self, session):
+    def save(self):
         self.code = self.code.upper()
-        session.add(self)
-        session.commit()
 
 
 class Hall(Base):
@@ -56,12 +54,13 @@ class Hall(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
-    users_capacity = Column(Integer, default=10, nullable=False)
+    users_capacity = Column(Integer, default=10)
     hall_type_id = Column(Integer, ForeignKey('gym_app_hall_type.id'), nullable=False)
     gym_id = Column(Integer, ForeignKey('gym_app_gym.id'), nullable=False)
 
-    def __repr__(self):
-        return f"<Hall(name={self.name})>"
+    hall_type = relationship("HallType", back_populates="halls")
+    gym = relationship("Gym", back_populates="halls")
+    hall_machines = relationship("HallMachine", back_populates="hall")
 
 
 class Admin(Base):
@@ -75,8 +74,7 @@ class Admin(Base):
     address_city = Column(String(255), nullable=False)
     address_street = Column(String(255), nullable=False)
 
-    def __repr__(self):
-        return f"<Admin(name={self.name})>"
+    gym = relationship("Gym", back_populates="admins")
 
 
 class Employee(Base):
@@ -86,22 +84,15 @@ class Employee(Base):
     name = Column(String(255), nullable=False)
     gym_id = Column(Integer, ForeignKey('gym_app_gym.id'), nullable=False)
     manager_id = Column(Integer, ForeignKey('gym_app_employee.id'), nullable=True)
+
     address_city = Column(String(255), nullable=False)
     address_street = Column(String(255), nullable=False)
     phone_number = Column(String(20), nullable=True)
     email = Column(String(255), unique=True, nullable=False)
     positions = Column(Text, nullable=True, default="")
 
-    def __repr__(self):
-        return f"<Employee(name={self.name})>"
-
-    @hybrid_property
-    def position_list(self):
-        return [pos.strip() for pos in self.positions.split(",") if pos.strip()]
-
-    @position_list.setter
-    def position_list(self, position_list):
-        self.positions = ", ".join(position_list)
+    gym = relationship("Gym", back_populates="employees")
+    manager = relationship('Employee', remote_side=[id], backref='subordinates')
 
 
 class Member(Base):
@@ -111,11 +102,9 @@ class Member(Base):
     gym_id = Column(Integer, ForeignKey('gym_app_gym.id'), nullable=False)
     name = Column(String(255), nullable=False)
     birth_date = Column(Date, nullable=False)
-    phone_number = Column(String(20), nullable=True, unique=True)
+    phone_number = Column(String(20), unique=True, nullable=True)
 
-
-    def __repr__(self):
-        return f"<Member(name={self.name})>"
+    gym = relationship("Gym", back_populates="members")
 
 
 class HallMachine(Base):
@@ -127,22 +116,7 @@ class HallMachine(Base):
     name = Column(String(255), nullable=True)
     uid = Column(String(100), unique=True, nullable=False)
 
+    hall = relationship("Hall", back_populates="hall_machines")
+    machine = relationship("Machine", back_populates="hall_machines")
+
     __table_args__ = (UniqueConstraint('hall_id', 'machine_id', name='_hall_machine_uc'),)
-
-    def __repr__(self):
-        return f"<HallMachine(machine={self.machine_id}, hall={self.hall_id})>"
-
-    def save(self, session):
-        if not self.uid:
-            existing = session.query(HallMachine).filter_by(hall_id=self.hall_id, machine_id=self.machine_id).first()
-            if existing:
-                return
-            count = session.query(HallMachine).filter_by(hall_id=self.hall_id, machine_id=self.machine_id).count() + 1
-            self.uid = f"{self.machine.type}_{count}"
-
-            while session.query(HallMachine).filter_by(uid=self.uid).first():
-                count += 1
-                self.uid = f"{self.machine.type}_{count}"
-
-        session.add(self)
-        session.commit()

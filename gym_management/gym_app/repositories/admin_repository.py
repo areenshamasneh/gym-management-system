@@ -1,14 +1,14 @@
 from sqlalchemy import select, delete
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import NoResultFound
 from gym_app.models.models_sqlalchemy import Admin, Gym
 from gym_management.settings import SessionLocal
-
 
 class AdminRepository:
     @staticmethod
     def get_all_admins(gym_id):
         with SessionLocal() as session:
-            query = select(Admin).filter(Admin.gym_id == gym_id)
+            query = select(Admin).filter(Admin.gym_id == gym_id).options(joinedload(Admin.gym))
             result = session.execute(query)
             return result.scalars().all()
 
@@ -16,7 +16,7 @@ class AdminRepository:
     def get_admin_by_id(gym_id, admin_id):
         with SessionLocal() as session:
             try:
-                query = select(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id)
+                query = select(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id).options(joinedload(Admin.gym))
                 result = session.execute(query)
                 return result.scalar_one()
             except NoResultFound:
@@ -28,7 +28,6 @@ class AdminRepository:
             gym = session.get(Gym, gym_id)
             if gym is None:
                 raise ValueError("Gym not found")
-
             admin = Admin(
                 name=data.get("name"),
                 phone_number=data.get("phone_number", ""),
@@ -40,6 +39,8 @@ class AdminRepository:
             session.add(admin)
             session.commit()
             session.refresh(admin)
+            session.refresh(admin, attribute_names=['gym'])
+
             return admin
 
     @staticmethod
@@ -64,6 +65,8 @@ class AdminRepository:
 
             session.commit()
             session.refresh(admin)
+            session.refresh(admin, attribute_names=['gym'])
+
             return admin
 
     @staticmethod
