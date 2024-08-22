@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from gym_app.components.admin_component import AdminComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException, ConflictException
-from gym_app.serializers import AdminSerializer
+from gym_app.serializers import serialize_admin
 from gym_app.validators import SchemaValidator
 
 
@@ -33,16 +33,16 @@ class AdminViewSet(viewsets.ViewSet):
             admins = self.admin_component.fetch_all_admins(gym_pk)
             if filter_criteria:
                 admins = admins.filter(**filter_criteria)
-            serializer = AdminSerializer(admins, many=True)
-            return Response(serializer.data)
+            serialized_admins = [serialize_admin(admin) for admin in admins]
+            return Response(serialized_admins)
         except ConflictException as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, gym_pk=None, pk=None):
         try:
             admin = self.admin_component.fetch_admin_by_id(gym_pk, pk)
-            serializer = AdminSerializer(admin)
-            return Response(serializer.data)
+            serialized_admin = serialize_admin(admin)
+            return Response(serialized_admin)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except ConflictException as e:
@@ -58,8 +58,8 @@ class AdminViewSet(viewsets.ViewSet):
 
         try:
             admin = self.admin_component.add_admin(gym_pk, data)
-            serializer = AdminSerializer(admin)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serialized_admin = serialize_admin(admin)
+            return Response(serialized_admin, status=status.HTTP_201_CREATED)
         except InvalidInputException as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
@@ -75,8 +75,8 @@ class AdminViewSet(viewsets.ViewSet):
 
         try:
             admin = self.admin_component.modify_admin(gym_pk, pk, data)
-            serializer = AdminSerializer(admin)
-            return Response(serializer.data)
+            serialized_admin = serialize_admin(admin)
+            return Response(serialized_admin)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except InvalidInputException as e:
