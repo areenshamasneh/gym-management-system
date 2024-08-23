@@ -1,8 +1,10 @@
 from sqlalchemy import select, delete
-from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import joinedload
+
 from gym_app.models.models_sqlalchemy import Admin, Gym
 from gym_management.settings import SessionLocal
+
 
 class AdminRepository:
     @staticmethod
@@ -16,7 +18,8 @@ class AdminRepository:
     def get_admin_by_id(gym_id, admin_id):
         with SessionLocal() as session:
             try:
-                query = select(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id).options(joinedload(Admin.gym))
+                query = select(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id).options(
+                    joinedload(Admin.gym))
                 result = session.execute(query)
                 return result.scalar_one()
             except NoResultFound:

@@ -46,15 +46,12 @@ class MachineComponent:
         self.logger.log_info(f"Adding machine with data: {machine_data}")
         try:
             machine = self.repo.create_machine(machine_data)
-            self.logger.log_info(f"Added machine: {machine}")
-
-            hall_machine = self.repo.create_hall_machine(
+            self.repo.create_hall_machine(
                 gym_id,
                 hall_id,
                 machine.id,
             )
-            self.logger.log_info(f"Added hall machine: {hall_machine}")
-            return hall_machine
+            return machine
         except ValueError as e:
             self.logger.log_error(f"Error adding machine and hall machine: {e}")
             raise ValidationException(f"Validation error: {str(e)}")
@@ -62,10 +59,10 @@ class MachineComponent:
             self.logger.log_error(f"Error adding machine and hall machine: {e}")
             raise DatabaseException("An error occurred while adding the machine and hall machine.")
 
-    def modify_hall_machine(self, gym_id, hall_id, machine_id, data):
+    def modify_machine_and_hall_machine(self, gym_id, hall_id, machine_id, data):
         self.logger.log_info(f"Modifying hall machine with ID: {machine_id} and data: {data}")
         try:
-            hall_machine = self.repo.update_hall_machine(gym_id, hall_id, machine_id, data)
+            hall_machine = self.repo.update_machine_and_hall_machine(gym_id, hall_id, machine_id, data)
             self.logger.log_info(f"Modified hall machine: {hall_machine}")
             return hall_machine
         except ResourceNotFoundException:

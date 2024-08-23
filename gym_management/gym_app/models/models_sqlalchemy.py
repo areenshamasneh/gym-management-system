@@ -1,10 +1,6 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint, Text, Date
-from sqlalchemy.event import listens_for
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-
-from gym_management.settings import SessionLocal
 
 Base = declarative_base()
 
@@ -126,25 +122,3 @@ class HallMachine(Base):
 
     def __repr__(self):
         return f"<HallMachine(id={self.id}, hall_id={self.hall_id}, machine_id={self.machine_id}, name={self.name}, uid={self.uid})>"
-
-
-def generate_uid(session, hall_id, machine_id):
-    count = session.query(HallMachine).filter_by(hall_id=hall_id, machine_id=machine_id).count() + 1
-    return f"{machine_id}_{count}"
-
-
-@listens_for(HallMachine, 'before_insert')
-def before_insert(mapper, connection, target):
-    session = SessionLocal()
-    try:
-        if not target.uid:
-            existing = session.query(HallMachine).filter_by(hall_id=target.hall_id,
-                                                            machine_id=target.machine_id).first()
-            if not existing:
-                target.uid = generate_uid(session, target.hall_id, target.machine_id)
-            while session.query(HallMachine).filter_by(uid=target.uid).first():
-                target.uid = generate_uid(session, target.hall_id, target.machine_id)
-    except IntegrityError:
-        session.rollback()
-    finally:
-        session.close()

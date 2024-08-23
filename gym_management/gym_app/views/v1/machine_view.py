@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from gym_app.components import MachineComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.serializers import serialize_machine, serialize_hall_machine
+from gym_app.serializers import serialize_machine
 from gym_app.validators import SchemaValidator
 
 
@@ -44,7 +44,7 @@ class MachineViewSet(viewsets.ViewSet):
                 hall_pk,
                 machine_data,
             )
-            serialized_data = serialize_hall_machine(hall_machine)
+            serialized_data = serialize_machine(hall_machine)
             return Response(serialized_data, status=status.HTTP_201_CREATED)
         except InvalidInputException as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -72,10 +72,9 @@ class MachineViewSet(viewsets.ViewSet):
             if not machine:
                 raise ResourceNotFoundException(f"Machine with ID {pk} not found.")
 
-            # Update machine attributes
             for attr, value in data.items():
                 setattr(machine, attr, value)
-            self.component.modify_hall_machine(gym_pk, hall_pk, pk, data)
+            self.component.modify_machine_and_hall_machine(gym_pk, hall_pk, pk, data)
             serialized_data = serialize_machine(machine)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
