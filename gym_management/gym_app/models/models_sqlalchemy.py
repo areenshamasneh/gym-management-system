@@ -91,7 +91,7 @@ class Employee(Base):
     manager_id = Column(Integer, ForeignKey('gym_app_employee.id'), nullable=True)
 
     gym = relationship("Gym", back_populates="employees")
-    manager = relationship('Employee', remote_side=[id], backref='subordinates')
+    manager = relationship('Employee', remote_side=[id])
 
 
 class Member(Base):
