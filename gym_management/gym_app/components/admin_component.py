@@ -75,7 +75,7 @@ class AdminComponent:
     def remove_admin(self, gym_id, admin_id):
         try:
             self.logger.log_info(f"Removing admin ID {admin_id} for gym_id: {gym_id}")
-            self.admin_repository.delete_admin(gym_id, admin_id)
+            return self.admin_repository.delete_admin(gym_id, admin_id)
         except ResourceNotFoundException as e:
             self.logger.log_error(
                 f"Admin with ID {admin_id} not found for gym_id {gym_id}: {str(e)}"

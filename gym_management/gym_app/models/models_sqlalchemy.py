@@ -1,8 +1,8 @@
+import sqlalchemy
 from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint, Text, Date
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+Base = sqlalchemy.orm.declarative_base()
 
 
 class Gym(Base):
@@ -121,4 +121,5 @@ class HallMachine(Base):
     __table_args__ = (UniqueConstraint('hall_id', 'machine_id', name='_hall_machine_uc'),)
 
     def __repr__(self):
-        return f"<HallMachine(id={self.id}, hall_id={self.hall_id}, machine_id={self.machine_id}, name={self.name}, uid={self.uid})>"
+        return (f"<HallMachine(id={self.id}, hall_id={self.hall_id}, machine_id={self.machine_id},"
+                f" name={self.name}, uid={self.uid})>")

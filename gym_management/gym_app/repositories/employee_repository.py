@@ -23,7 +23,8 @@ class EmployeeRepository:
             query = select(Employee).filter(Employee.id == employee_id, Employee.gym_id == gym_id).options(
                 joinedload(Employee.gym), joinedload(Employee.manager))
             result = session.execute(query)
-            return result.scalar_one()
+            employee = result.scalar_one_or_none()
+            return employee
 
     @staticmethod
     def create_employee(gym_id, data):

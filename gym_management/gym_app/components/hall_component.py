@@ -4,7 +4,6 @@ from gym_app.exceptions import (
     DatabaseException,
 )
 from gym_app.logging import SimpleLogger
-from gym_app.models import Hall
 from gym_app.repositories import HallRepository
 
 
@@ -35,7 +34,7 @@ class HallComponent:
             if hall is None:
                 raise ResourceNotFoundException(f"No halls found for gym ID {gym_id}.")
             return hall
-        except Hall.DoesNotExist:
+        except ResourceNotFoundException:
             raise ResourceNotFoundException(f"Hall with ID {hall_id} does not exist in gym ID {gym_id}")
         except Exception as e:
             self.logger.log_error(f"Error fetching hall by ID {hall_id}: {str(e)}")
