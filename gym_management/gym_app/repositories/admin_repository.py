@@ -8,9 +8,22 @@ from gym_management.settings import SessionLocal
 
 class AdminRepository:
     @staticmethod
-    def get_all_admins(gym_id):
+    def get_all_admins(gym_id, filter_criteria=None):
         with SessionLocal() as session:
             query = select(Admin).filter(Admin.gym_id == gym_id).options(joinedload(Admin.gym))
+
+            if filter_criteria:
+                if filter_criteria.get('name'):
+                    query = query.filter(Admin.name.ilike(f"%{filter_criteria['name']}%"))
+                if filter_criteria.get('email'):
+                    query = query.filter(Admin.email.ilike(f"%{filter_criteria['email']}%"))
+                if filter_criteria.get('phone_number'):
+                    query = query.filter(Admin.phone_number.ilike(f"%{filter_criteria['phone_number']}%"))
+                if filter_criteria.get('address_city'):
+                    query = query.filter(Admin.address_city.ilike(f"%{filter_criteria['address_city']}%"))
+                if filter_criteria.get('address_street'):
+                    query = query.filter(Admin.address_street.ilike(f"%{filter_criteria['address_street']}%"))
+
             result = session.execute(query)
             return result.scalars().all()
 

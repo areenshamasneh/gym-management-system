@@ -13,8 +13,8 @@ class GymViewSet(viewsets.ViewSet):
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.gym_schemas')
 
     def list(self, request):
-        page_number = request.GET.get('page', 1)
-        page_size = request.GET.get('page_size', 10)
+        page_number = int(request.GET.get('page_number', 1))
+        page_size = int(request.GET.get('page_size', 10))
 
         pagination_response = self.gym_component.fetch_all_gyms(page_number, page_size)
 

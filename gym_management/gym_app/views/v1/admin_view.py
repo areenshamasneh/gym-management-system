@@ -14,25 +14,15 @@ class AdminViewSet(viewsets.ViewSet):
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.admin_schemas')
 
     def list(self, request, gym_pk=None):
-        name = request.GET.get("name", "")
-        email = request.GET.get("email", "")
-        phone_number = request.GET.get("phone_number", "")
-        address_city = request.GET.get("address_city", "")
-        address_street = request.GET.get("address_street", "")
-
         filter_criteria = {
-            "name__icontains": name,
-            "email__icontains": email,
-            "phone_number__icontains": phone_number,
-            "address_city__icontains": address_city,
-            "address_street__icontains": address_street,
+            "name": request.GET.get("name", ""),
+            "email": request.GET.get("email", ""),
+            "phone_number": request.GET.get("phone_number", ""),
+            "address_city": request.GET.get("address_city", ""),
+            "address_street": request.GET.get("address_street", ""),
         }
-        filter_criteria = {k: v for k, v in filter_criteria.items() if v}
-
         try:
-            admins = self.admin_component.fetch_all_admins(gym_pk)
-            if filter_criteria:
-                admins = admins.filter(**filter_criteria)
+            admins = self.admin_component.fetch_all_admins(gym_pk, filter_criteria)
             serialized_admins = [serialize_admin(admin) for admin in admins]
             return Response(serialized_admins)
         except ConflictException as e:
