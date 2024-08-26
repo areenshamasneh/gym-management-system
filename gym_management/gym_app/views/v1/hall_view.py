@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from gym_app.components import HallComponent, HallMachineComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.serializers import serialize_hall, serialize_hall_machine
+from gym_app.serializers import HallSchema, HallMachineSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -14,6 +14,8 @@ class HallViewSet(viewsets.ViewSet):
         self.hall_component = HallComponent()
         self.hall_machine_component = HallMachineComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.hall_schemas')
+        self.hall_schema = HallSchema()
+        self.hall_machine_schema = HallMachineSchema()
 
     def list(self, request, gym_pk=None):
         if gym_pk is None:
@@ -21,7 +23,7 @@ class HallViewSet(viewsets.ViewSet):
 
         try:
             halls = self.hall_component.fetch_all_halls(gym_pk)
-            serialized_data = [serialize_hall(hall) for hall in halls]
+            serialized_data = self.hall_schema.dump(halls, many=True)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
@@ -32,7 +34,7 @@ class HallViewSet(viewsets.ViewSet):
     def retrieve(self, request, gym_pk=None, pk=None):
         try:
             hall = self.hall_component.fetch_hall_by_id(gym_pk, pk)
-            serialized_data = serialize_hall(hall)
+            serialized_data = self.hall_schema.dump(hall)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             self.hall_component.logger.log_error(f"ResourceNotFoundException: {str(e)}")
@@ -51,7 +53,7 @@ class HallViewSet(viewsets.ViewSet):
 
         try:
             hall = self.hall_component.add_hall(gym_pk, data)
-            serialized_data = serialize_hall(hall)
+            serialized_data = self.hall_schema.dump(hall)
             return Response(serialized_data, status=status.HTTP_201_CREATED)
         except InvalidInputException as e:
             self.hall_component.logger.log_error(f"InvalidInputException: {str(e)}")
@@ -67,7 +69,7 @@ class HallViewSet(viewsets.ViewSet):
 
         try:
             hall = self.hall_component.modify_hall(gym_pk, pk, request.data)
-            serialized_data = serialize_hall(hall)
+            serialized_data = self.hall_schema.dump(hall)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
@@ -97,7 +99,7 @@ class HallViewSet(viewsets.ViewSet):
         if gym_pk:
             try:
                 machines = self.hall_machine_component.fetch_hall_machines_by_gym(gym_pk)
-                serialized_data = [serialize_hall_machine(machine) for machine in machines]
+                serialized_data = self.hall_machine_schema.dump(machines, many=True)
                 return Response(serialized_data)
             except ValueError as e:
                 self.hall_machine_component.logger.log_error(f"ValueError: {str(e)}")

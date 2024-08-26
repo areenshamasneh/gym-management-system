@@ -2,7 +2,7 @@ from rest_framework import status, viewsets
 from rest_framework.response import Response
 
 from gym_app.components import GymComponent
-from gym_app.serializers import serialize_gym
+from gym_app.serializers import GymSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -11,14 +11,14 @@ class GymViewSet(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.gym_component = GymComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.gym_schemas')
+        self.gym_schema = GymSchema()
 
     def list(self, request):
         page_number = int(request.GET.get('page_number', 1))
         page_size = int(request.GET.get('page_size', 10))
 
         pagination_response = self.gym_component.fetch_all_gyms(page_number, page_size)
-
-        serialized_items = [serialize_gym(gym) for gym in pagination_response.items]
+        serialized_items = self.gym_schema.dump(pagination_response.items, many=True)
 
         return Response({
             **pagination_response.to_dict(),
@@ -29,7 +29,7 @@ class GymViewSet(viewsets.ViewSet):
         gym = self.gym_component.fetch_gym_by_id(pk)
         if not gym:
             return Response({"error": "Gym not found"}, status=status.HTTP_404_NOT_FOUND)
-        serialized_gym = serialize_gym(gym)
+        serialized_gym = self.gym_schema.dump(gym)
         return Response(serialized_gym, status=status.HTTP_200_OK)
 
     def create(self, request):
@@ -39,7 +39,7 @@ class GymViewSet(viewsets.ViewSet):
 
         gym_data = request.data
         gym = self.gym_component.add_gym(gym_data)
-        serialized_gym = serialize_gym(gym)
+        serialized_gym = self.gym_schema.dump(gym)
         return Response(serialized_gym, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk=None):
@@ -50,7 +50,7 @@ class GymViewSet(viewsets.ViewSet):
         gym_data = request.data
         updated_gym = self.gym_component.modify_gym(pk, gym_data)
         if updated_gym:
-            serialized_gym = serialize_gym(updated_gym)
+            serialized_gym = self.gym_schema.dump(updated_gym)
             return Response(serialized_gym, status=status.HTTP_200_OK)
         return Response({"error": "Gym not found"}, status=status.HTTP_404_NOT_FOUND)
 

@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from gym_app.components import MachineComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.serializers import serialize_machine
+from gym_app.serializers import MachineSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -12,11 +12,12 @@ class MachineViewSet(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.component = MachineComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.machine_schemas')
+        self.schema = MachineSchema()
 
     def list(self, request, gym_pk=None, hall_pk=None):
         try:
             machines = self.component.fetch_all_machines_in_hall(gym_pk, hall_pk)
-            serialized_data = [serialize_machine(machine) for machine in machines]
+            serialized_data = self.schema.dump(machines, many=True)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
@@ -44,7 +45,7 @@ class MachineViewSet(viewsets.ViewSet):
                 hall_pk,
                 machine_data,
             )
-            serialized_data = serialize_machine(hall_machine)
+            serialized_data = self.schema.dump(hall_machine)
             return Response(serialized_data, status=status.HTTP_201_CREATED)
         except InvalidInputException as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -54,7 +55,7 @@ class MachineViewSet(viewsets.ViewSet):
     def retrieve(self, request, gym_pk=None, hall_pk=None, pk=None):
         try:
             machine = self.component.fetch_machine_by_id_in_hall(gym_pk, hall_pk, pk)
-            serialized_data = serialize_machine(machine)
+            serialized_data = self.schema.dump(machine)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
@@ -75,7 +76,7 @@ class MachineViewSet(viewsets.ViewSet):
             for attr, value in data.items():
                 setattr(machine, attr, value)
             self.component.modify_machine_and_hall_machine(gym_pk, hall_pk, pk, data)
-            serialized_data = serialize_machine(machine)
+            serialized_data = self.schema.dump(machine)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)

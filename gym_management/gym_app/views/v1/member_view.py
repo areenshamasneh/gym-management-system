@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from gym_app.components import MemberComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.serializers import serialize_member
+from gym_app.serializers import MemberSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -12,6 +12,7 @@ class MemberViewSet(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.member_component = MemberComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.member_schemas')
+        self.schema = MemberSchema()
 
     def list(self, request, gym_pk=None):
         name_filter = request.GET.get("name", None)
@@ -28,7 +29,7 @@ class MemberViewSet(viewsets.ViewSet):
             else:
                 filtered_members = all_members
 
-            serialized_data = [serialize_member(member) for member in filtered_members]
+            serialized_data = self.schema.dump(filtered_members, many=True)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except InvalidInputException as e:
             return Response({"errors": str(e)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -39,7 +40,7 @@ class MemberViewSet(viewsets.ViewSet):
     def retrieve(self, request, gym_pk=None, pk=None):
         try:
             member = self.member_component.fetch_member_by_id(gym_pk, pk)
-            serialized_data = serialize_member(member)
+            serialized_data = self.schema.dump(member)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
@@ -56,7 +57,7 @@ class MemberViewSet(viewsets.ViewSet):
 
         try:
             member = self.member_component.create_member(gym_pk, data)
-            serialized_data = serialize_member(member)
+            serialized_data = self.schema.dump(member)
             return Response(serialized_data, status=status.HTTP_201_CREATED)
         except InvalidInputException as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -73,7 +74,7 @@ class MemberViewSet(viewsets.ViewSet):
 
         try:
             member = self.member_component.modify_member(gym_pk, pk, data)
-            serialized_data = serialize_member(member)
+            serialized_data = self.schema.dump(member)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)

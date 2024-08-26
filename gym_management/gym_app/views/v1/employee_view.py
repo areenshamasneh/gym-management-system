@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from gym_app.components import EmployeeComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.serializers import serialize_employee
+from gym_app.serializers import EmployeeSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -12,11 +12,12 @@ class EmployeeViewSet(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.employee_component = EmployeeComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.employee_schemas')
+        self.schema = EmployeeSchema()
 
     def list(self, request, gym_pk=None):
         try:
             employees = self.employee_component.fetch_all_employees(gym_pk)
-            serialized_employees = [serialize_employee(employee) for employee in employees]
+            serialized_employees = self.schema.dump(employees, many=True)
             return Response(serialized_employees)
         except Exception as e:
             return Response({"detail": f"An unexpected error occurred. {str(e)}"},
@@ -43,7 +44,7 @@ class EmployeeViewSet(viewsets.ViewSet):
 
         try:
             employee = self.employee_component.add_employee(gym_pk, data)
-            serialized_employee = serialize_employee(employee)
+            serialized_employee = self.schema.dump(employee)
             return Response(serialized_employee, status=status.HTTP_201_CREATED)
         except InvalidInputException as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -60,7 +61,7 @@ class EmployeeViewSet(viewsets.ViewSet):
 
         try:
             employee = self.employee_component.modify_employee(gym_pk, pk, data)
-            serialized_employee = serialize_employee(employee)
+            serialized_employee = self.schema.dump(employee)
             return Response(serialized_employee)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)

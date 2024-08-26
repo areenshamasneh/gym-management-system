@@ -3,18 +3,19 @@ from rest_framework.response import Response
 
 from gym_app.components import HallTypeComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.serializers import serialize_hall_type
+from gym_app.serializers import HallTypeSchema
 
 
 class HallTypeViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.component = HallTypeComponent()
+        self.schema = HallTypeSchema()
 
     def list(self, request):
         try:
             hall_types = self.component.fetch_all_hall_types()
-            serialized_data = [serialize_hall_type(ht) for ht in hall_types]
+            serialized_data = self.schema.dump(hall_types, many=True)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -24,7 +25,7 @@ class HallTypeViewSet(viewsets.ViewSet):
             hall_type = self.component.fetch_hall_type_by_id(pk)
             if hall_type is None:
                 raise ResourceNotFoundException(f"HallType with ID {pk} not found.")
-            serialized_data = serialize_hall_type(hall_type)
+            serialized_data = self.schema.dump(hall_type)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
@@ -38,7 +39,7 @@ class HallTypeViewSet(viewsets.ViewSet):
 
         try:
             hall_type = self.component.add_hall_type(data)
-            serialized_data = serialize_hall_type(hall_type)
+            serialized_data = self.schema.dump(hall_type)
             return Response(serialized_data, status=status.HTTP_201_CREATED)
         except InvalidInputException as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -52,7 +53,7 @@ class HallTypeViewSet(viewsets.ViewSet):
 
         try:
             hall_type = self.component.modify_hall_type(pk, data)
-            serialized_data = serialize_hall_type(hall_type)
+            serialized_data = self.schema.dump(hall_type)
             return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
