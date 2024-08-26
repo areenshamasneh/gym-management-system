@@ -2,8 +2,8 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 from gym_app.components import MachineComponent
-from gym_app.exceptions import ResourceNotFoundException, DatabaseException
-from gym_app.serializers import serialize_machine
+from gym_app.exceptions import ResourceNotFoundException
+from gym_app.serializers import MachineSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -12,11 +12,13 @@ class GymMachineViewSet(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.component = MachineComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.machine_schemas')
+        self.schema = MachineSchema()
 
     def list(self, request, gym_pk=None):
         try:
             machines = self.component.fetch_all_machines_in_gym(gym_pk)
-            serialized_machines = [serialize_machine(hm.machine) for hm in machines]
+            machine_objects = [hm.machine for hm in machines]
+            serialized_machines = self.schema.dump(machine_objects, many=True)
             return Response(serialized_machines, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
@@ -30,7 +32,7 @@ class GymMachineViewSet(viewsets.ViewSet):
             if not machine:
                 raise ResourceNotFoundException(f"Machine with ID {pk} not found in gym {gym_pk}.")
 
-            serialized_machine = serialize_machine(machine)
+            serialized_machine = self.schema.dump(machine)
             return Response(serialized_machine, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
