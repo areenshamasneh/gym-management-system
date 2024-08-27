@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from gym_app.components import MemberComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.serializers import MemberSchema
+from gym_app.schemas import MemberSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -11,7 +11,7 @@ class MemberViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.member_component = MemberComponent()
-        self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.member_schemas')
+        self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.member_schemas')
         self.schema = MemberSchema()
 
     def list(self, request, gym_pk=None):

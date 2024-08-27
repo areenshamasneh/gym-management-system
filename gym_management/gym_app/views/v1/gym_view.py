@@ -2,7 +2,7 @@ from rest_framework import status, viewsets
 from rest_framework.response import Response
 
 from gym_app.components import GymComponent
-from gym_app.serializers import GymSchema
+from gym_app.schemas import GymSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -10,7 +10,7 @@ class GymViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.gym_component = GymComponent()
-        self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.gym_schemas')
+        self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.gym_schemas')
         self.gym_schema = GymSchema()
 
     def list(self, request):

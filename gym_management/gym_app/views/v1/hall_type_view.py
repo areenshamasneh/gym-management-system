@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from gym_app.components import HallTypeComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.serializers import HallTypeSchema
+from gym_app.schemas import HallTypeSchema
 
 
 class HallTypeViewSet(viewsets.ViewSet):

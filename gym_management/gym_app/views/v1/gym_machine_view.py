@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from gym_app.components import MachineComponent
 from gym_app.exceptions import ResourceNotFoundException
-from gym_app.serializers import MachineSchema
+from gym_app.schemas import MachineSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -11,7 +11,7 @@ class GymMachineViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.component = MachineComponent()
-        self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.machine_schemas')
+        self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.machine_schemas')
         self.schema = MachineSchema()
 
     def list(self, request, gym_pk=None):

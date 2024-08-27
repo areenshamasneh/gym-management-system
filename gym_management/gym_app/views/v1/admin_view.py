@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from gym_app.components.admin_component import AdminComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException, ConflictException
-from gym_app.serializers import AdminSchema
+from gym_app.schemas import AdminSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -11,7 +11,7 @@ class AdminViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.admin_component = AdminComponent()
-        self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.admin_schemas')
+        self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.admin_schemas')
         self.schema = AdminSchema()
 
     def list(self, request, gym_pk=None):
