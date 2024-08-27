@@ -4,18 +4,18 @@ from rest_framework.response import Response
 
 from gym_app.components import HallComponent, HallMachineComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.schemas import HallSchema, HallMachineSchema
+from gym_app.serializers import HallSerializer, HallMachineSerializer
 from gym_app.validators import SchemaValidator
 
 
-class HallViewSet(viewsets.ViewSet):
+class HallController(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.hall_component = HallComponent()
         self.hall_machine_component = HallMachineComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.hall_schemas')
-        self.hall_schema = HallSchema()
-        self.hall_machine_schema = HallMachineSchema()
+        self.hall_schema = HallSerializer()
+        self.hall_machine_schema = HallMachineSerializer()
 
     def list(self, request, gym_pk=None):
         if gym_pk is None:

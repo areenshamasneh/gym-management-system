@@ -3,13 +3,13 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import joinedload
 
 from gym_app.models.models_sqlalchemy import Admin, Gym
-from gym_management.db_session import SessionLocal
-
+from common.database import get_db
 
 class AdminRepository:
     @staticmethod
     def get_all_admins(gym_id, filter_criteria=None):
-        with SessionLocal() as session:
+        db_session = next(get_db())
+        try:
             query = select(Admin).filter(Admin.gym_id == gym_id).options(joinedload(Admin.gym))
 
             if filter_criteria:
@@ -24,24 +24,29 @@ class AdminRepository:
                 if filter_criteria.get('address_street'):
                     query = query.filter(Admin.address_street.ilike(f"%{filter_criteria['address_street']}%"))
 
-            result = session.execute(query)
+            result = db_session.execute(query)
             return result.scalars().all()
+        finally:
+            db_session.close()
 
     @staticmethod
     def get_admin_by_id(gym_id, admin_id):
-        with SessionLocal() as session:
-            try:
-                query = select(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id).options(
-                    joinedload(Admin.gym))
-                result = session.execute(query)
-                return result.scalar_one()
-            except NoResultFound:
-                return None
+        db_session = next(get_db())
+        try:
+            query = select(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id).options(
+                joinedload(Admin.gym))
+            result = db_session.execute(query)
+            return result.scalar_one()
+        except NoResultFound:
+            return None
+        finally:
+            db_session.close()
 
     @staticmethod
     def create_admin(gym_id, data):
-        with SessionLocal() as session:
-            gym = session.get(Gym, gym_id)
+        db_session = next(get_db())
+        try:
+            gym = db_session.get(Gym, gym_id)
             if gym is None:
                 raise ValueError("Gym not found")
             admin = Admin(
@@ -52,18 +57,21 @@ class AdminRepository:
                 address_city=data.get("address_city"),
                 address_street=data.get("address_street"),
             )
-            session.add(admin)
-            session.commit()
-            session.refresh(admin)
-            session.refresh(admin, attribute_names=['gym'])
+            db_session.add(admin)
+            db_session.commit()
+            db_session.refresh(admin)
+            db_session.refresh(admin, attribute_names=['gym'])
 
             return admin
+        finally:
+            db_session.close()
 
     @staticmethod
     def update_admin(gym_id, admin_id, data):
-        with SessionLocal() as session:
+        db_session = next(get_db())
+        try:
             query = select(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id)
-            admin = session.execute(query).scalar_one_or_none()
+            admin = db_session.execute(query).scalar_one_or_none()
 
             if admin is None:
                 return None
@@ -79,16 +87,21 @@ class AdminRepository:
             if 'address_street' in data:
                 admin.address_street = data['address_street']
 
-            session.commit()
-            session.refresh(admin)
-            session.refresh(admin, attribute_names=['gym'])
+            db_session.commit()
+            db_session.refresh(admin)
+            db_session.refresh(admin, attribute_names=['gym'])
 
             return admin
+        finally:
+            db_session.close()
 
     @staticmethod
     def delete_admin(gym_id, admin_id):
-        with SessionLocal() as session:
+        db_session = next(get_db())
+        try:
             query = delete(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id)
-            result = session.execute(query)
-            session.commit()
+            result = db_session.execute(query)
+            db_session.commit()
             return result.rowcount > 0
+        finally:
+            db_session.close()

@@ -3,7 +3,7 @@ from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 from sqlalchemy.orm import joinedload
 
 from gym_app.models.models_sqlalchemy import Hall, Gym, HallType
-from gym_management.db_session import SessionLocal
+from common.database import SessionLocal
 
 
 class HallRepository:

@@ -1,51 +1,56 @@
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
-from gym_app.components import EmployeeComponent
-from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.schemas import EmployeeSchema
+from gym_app.components.admin_component import AdminComponent
+from gym_app.exceptions import ResourceNotFoundException, InvalidInputException, ConflictException
+from gym_app.serializers import AdminSerializer
 from gym_app.validators import SchemaValidator
 
 
-class EmployeeViewSet(viewsets.ViewSet):
+class AdminController(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.employee_component = EmployeeComponent()
-        self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.employee_schemas')
-        self.schema = EmployeeSchema()
+        self.admin_component = AdminComponent()
+        self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.admin_schemas')
+        self.schema = AdminSerializer()
 
     def list(self, request, gym_pk=None):
+        filter_criteria = {
+            "name": request.GET.get("name", ""),
+            "email": request.GET.get("email", ""),
+            "phone_number": request.GET.get("phone_number", ""),
+            "address_city": request.GET.get("address_city", ""),
+            "address_street": request.GET.get("address_street", ""),
+        }
         try:
-            employees = self.employee_component.fetch_all_employees(gym_pk)
-            serialized_employees = self.schema.dump(employees, many=True)
-            return Response(serialized_employees)
-        except Exception as e:
-            return Response({"detail": f"An unexpected error occurred. {str(e)}"},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            admins = self.admin_component.fetch_all_admins(gym_pk, filter_criteria)
+            serialized_admins = self.schema.dump(admins, many=True)
+            return Response(serialized_admins)
+        except ConflictException as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, gym_pk=None, pk=None):
         try:
-            employee = self.employee_component.fetch_employee_by_id(gym_pk, pk)
-            serialized_employee = serialize_employee(employee)
-            return Response(serialized_employee)
+            admin = self.admin_component.fetch_admin_by_id(gym_pk, pk)
+            serialized_admin = self.schema.dump(admin)
+            return Response(serialized_admin)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"detail": f"An unexpected error occurred."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except ConflictException as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, gym_pk=None):
         data = request.data.copy()
-        data["gym"] = {"id": gym_pk}
+        data["gym_id"] = gym_pk
 
         validation_error = self.validator.validate_data('CREATE_SCHEMA', data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            employee = self.employee_component.add_employee(gym_pk, data)
-            serialized_employee = self.schema.dump(employee)
-            return Response(serialized_employee, status=status.HTTP_201_CREATED)
+            admin = self.admin_component.add_admin(gym_pk, data)
+            serialized_admin = self.schema.dump(admin)
+            return Response(serialized_admin, status=status.HTTP_201_CREATED)
         except InvalidInputException as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
@@ -53,30 +58,29 @@ class EmployeeViewSet(viewsets.ViewSet):
 
     def update(self, request, gym_pk=None, pk=None):
         data = request.data.copy()
-        data["gym"] = {"id": gym_pk}
+        data["gym_id"] = gym_pk
 
         validation_error = self.validator.validate_data('UPDATE_SCHEMA', data)
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            employee = self.employee_component.modify_employee(gym_pk, pk, data)
-            serialized_employee = self.schema.dump(employee)
-            return Response(serialized_employee)
+            admin = self.admin_component.modify_admin(gym_pk, pk, data)
+            serialized_admin = self.schema.dump(admin)
+            return Response(serialized_admin)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except InvalidInputException as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"detail": f"An unexpected error occurred. {str(e)}"},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def partial_update(self, request, gym_pk=None, pk=None):
         return self.update(request, gym_pk=gym_pk, pk=pk)
 
     def destroy(self, request, gym_pk=None, pk=None):
         try:
-            self.employee_component.remove_employee(gym_pk, pk)
+            self.admin_component.remove_admin(gym_pk, pk)
             return Response(status=status.HTTP_204_NO_CONTENT)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)

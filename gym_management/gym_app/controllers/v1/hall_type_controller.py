@@ -3,14 +3,14 @@ from rest_framework.response import Response
 
 from gym_app.components import HallTypeComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.schemas import HallTypeSchema
+from gym_app.serializers import HallSerializer
 
 
-class HallTypeViewSet(viewsets.ViewSet):
+class HallTypeController(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.component = HallTypeComponent()
-        self.schema = HallTypeSchema()
+        self.schema = HallSerializer()
 
     def list(self, request):
         try:

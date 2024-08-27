@@ -4,13 +4,13 @@ from decouple import config
 
 DATABASE_URL = config('DATABASE_URL')
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def init_db():
+def get_db():
+    db = SessionLocal()
     try:
-        with engine.connect() as connection:
-            print("Database connection successful.")
-    except Exception as e:
-        print(f"Database connection error: {e}")
+        yield db
+    finally:
+        db.close()

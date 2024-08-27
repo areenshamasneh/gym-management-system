@@ -3,16 +3,16 @@ from rest_framework.response import Response
 
 from gym_app.components import MachineComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.schemas import MachineSchema
+from gym_app.serializers import MachineSerializer
 from gym_app.validators import SchemaValidator
 
 
-class MachineViewSet(viewsets.ViewSet):
+class MachineController(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.component = MachineComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.machine_schemas')
-        self.schema = MachineSchema()
+        self.schema = MachineSerializer()
 
     def list(self, request, gym_pk=None, hall_pk=None):
         try:
