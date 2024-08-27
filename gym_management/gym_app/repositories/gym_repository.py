@@ -2,7 +2,7 @@ from django.core.paginator import Paginator
 from sqlalchemy import select
 from gym_app.models.models_sqlalchemy import Gym
 from gym_app.utils import PaginationResponse
-from gym_management.settings import SessionLocal
+from gym_management.db_session import SessionLocal
 
 
 class GymRepository:

@@ -3,10 +3,14 @@
 import os
 import sys
 
+from gym_management.db_session import init_db
+
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gym_management.settings")
+    init_db()
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

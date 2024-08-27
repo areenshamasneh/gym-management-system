@@ -2,7 +2,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import selectinload
 
-from gym_management.settings import SessionLocal
+from gym_management.db_session import SessionLocal
 from gym_app.models.models_sqlalchemy import Hall, HallMachine
 
 

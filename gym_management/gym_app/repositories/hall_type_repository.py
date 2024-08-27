@@ -3,7 +3,7 @@ from sqlalchemy.exc import NoResultFound, IntegrityError
 
 from gym_app.exceptions import DatabaseException
 from gym_app.models.models_sqlalchemy import HallType, Hall
-from gym_management.settings import SessionLocal
+from gym_management.db_session import SessionLocal
 
 
 class HallTypeRepository:
