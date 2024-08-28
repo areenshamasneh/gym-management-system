@@ -3,6 +3,7 @@ from pathlib import Path
 
 from decouple import config  # type: ignore
 
+DATABASE_URL = config('DATABASE_URL')
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 log_dir = os.path.join(BASE_DIR, "logs")
@@ -89,7 +90,7 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
-        "django.db.backends": {
+        "sqlalchemy.engine": {
             "handlers": ["sql_file"],
             "level": "DEBUG",
             "propagate": False,
@@ -113,7 +114,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-   'EXCEPTION_HANDLER': 'gym_app.utils.exception_handler.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'gym_app.utils.exception_handler.custom_exception_handler',
 }
 
 ROOT_URLCONF = "gym_management.urls"

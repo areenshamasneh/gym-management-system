@@ -3,14 +3,14 @@ from rest_framework.response import Response
 
 from gym_app.components import HallTypeComponent
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
-from gym_app.serializers import HallSerializer
+from gym_app.serializers import HallTypeSerializer
 
 
 class HallTypeController(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.component = HallTypeComponent()
-        self.schema = HallSerializer()
+        self.schema = HallTypeSerializer()
 
     def list(self, request):
         try:
@@ -33,11 +33,8 @@ class HallTypeController(viewsets.ViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request):
-        data = request.data.copy()
-        data['code'] = data.get('code', '').upper()
-        data['name'] = data.get('name', '').capitalize()
-
         try:
+            data = self.schema.load(request.data)
             hall_type = self.component.add_hall_type(data)
             serialized_data = self.schema.dump(hall_type)
             return Response(serialized_data, status=status.HTTP_201_CREATED)
@@ -47,11 +44,8 @@ class HallTypeController(viewsets.ViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, pk=None):
-        data = request.data.copy()
-        data['code'] = data.get('code', '').upper()
-        data['name'] = data.get('name', '').capitalize()
-
         try:
+            data = self.schema.load(request.data)
             hall_type = self.component.modify_hall_type(pk, data)
             serialized_data = self.schema.dump(hall_type)
             return Response(serialized_data, status=status.HTTP_200_OK)

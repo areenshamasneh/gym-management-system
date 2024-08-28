@@ -45,9 +45,6 @@ class HallType(Base):
 
     halls = relationship("Hall", back_populates="hall_type")
 
-    def save(self):
-        self.code = self.code.upper()
-
 
 class Hall(Base):
     __tablename__ = 'gym_app_hall'

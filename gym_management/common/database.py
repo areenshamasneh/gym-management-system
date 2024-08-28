@@ -1,11 +1,15 @@
-from sqlalchemy.orm import sessionmaker
+import logging
+
 from sqlalchemy import create_engine
-from decouple import config
+from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = config('DATABASE_URL')
+from gym_management.settings import DATABASE_URL
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 
 def get_db():
