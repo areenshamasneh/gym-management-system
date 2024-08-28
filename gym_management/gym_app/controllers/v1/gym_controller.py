@@ -3,6 +3,7 @@ from rest_framework.response import Response
 
 from gym_app.components import GymComponent
 from gym_app.serializers import GymSerializer
+from gym_app.utils import PaginationResponse
 from gym_app.validators import SchemaValidator
 
 
@@ -16,14 +17,22 @@ class GymController(viewsets.ViewSet):
     def list(self, request):
         page_number = int(request.GET.get('page_number', 1))
         page_size = int(request.GET.get('page_size', 10))
+        offset = (page_number - 1) * page_size
 
-        pagination_response = self.gym_component.fetch_all_gyms(page_number, page_size)
-        serialized_items = self.gym_schema.dump(pagination_response.items, many=True)
+        gyms, total_gyms = self.gym_component.fetch_all_gyms(offset, page_size)
+        total_pages = (total_gyms + page_size - 1) // page_size
 
-        return Response({
-            **pagination_response.to_dict(),
-            "items": serialized_items
-        }, status=status.HTTP_200_OK)
+        serialized_items = self.gym_schema.dump(gyms, many=True)
+
+        pagination_response = PaginationResponse(
+            items=serialized_items,
+            total_items=total_gyms,
+            total_pages=total_pages,
+            current_page=page_number,
+            page_size=page_size
+        )
+
+        return Response(pagination_response.to_dict(), status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
         gym = self.gym_component.fetch_gym_by_id(pk)

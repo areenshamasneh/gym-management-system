@@ -1,26 +1,16 @@
-from django.core.paginator import Paginator
-from sqlalchemy import select
+from sqlalchemy import func
+
+from common import SessionLocal
 from gym_app.models.models_sqlalchemy import Gym
-from gym_app.utils import PaginationResponse
-from common.database import SessionLocal
 
 
 class GymRepository:
     @staticmethod
-    def get_all_gyms(page_number=1, page_size=10):
+    def get_all_gyms(offset=0, limit=10):
         with SessionLocal() as session:
-            query = select(Gym)
-            result = session.execute(query)
-            gyms = result.scalars().all()
-            paginator = Paginator(gyms, page_size)
-            paginated_gyms = paginator.get_page(page_number)
-            return PaginationResponse(
-                items=list(paginated_gyms),
-                total_items=paginator.count,
-                total_pages=paginator.num_pages,
-                current_page=paginated_gyms.number,
-                page_size=page_size
-            )
+            total_gyms = session.query(func.count(Gym.id)).scalar()
+            gyms = session.query(Gym).offset(offset).limit(limit).all()
+            return gyms, total_gyms
 
     @staticmethod
     def get_gym_by_id(pk):
