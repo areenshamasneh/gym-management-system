@@ -19,7 +19,12 @@ class GymController(viewsets.ViewSet):
         page_size = int(request.GET.get('page_size', 10))
         offset = (page_number - 1) * page_size
 
-        gyms, total_gyms = self.gym_component.fetch_all_gyms(offset, page_size)
+        db_session = getattr(request, 'db_session', None)
+        if db_session is None:
+            return Response({"error": "Database session is not available"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        gyms, total_gyms = self.gym_component.fetch_all_gyms(offset, page_size, db_session)
         total_pages = (total_gyms + page_size - 1) // page_size
 
         serialized_items = self.gym_schema.dump(gyms, many=True)
@@ -35,7 +40,12 @@ class GymController(viewsets.ViewSet):
         return Response(pagination_response.to_dict(), status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
-        gym = self.gym_component.fetch_gym_by_id(pk)
+        db_session = getattr(request, 'db_session', None)
+        if db_session is None:
+            return Response({"error": "Database session is not available"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        gym = self.gym_component.fetch_gym_by_id(pk, db_session)
         if not gym:
             return Response({"error": "Gym not found"}, status=status.HTTP_404_NOT_FOUND)
         serialized_gym = self.gym_schema.dump(gym)
@@ -46,8 +56,13 @@ class GymController(viewsets.ViewSet):
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
+        db_session = getattr(request, 'db_session', None)
+        if db_session is None:
+            return Response({"error": "Database session is not available"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         gym_data = request.data
-        gym = self.gym_component.add_gym(gym_data)
+        gym = self.gym_component.add_gym(gym_data, db_session)
         serialized_gym = self.gym_schema.dump(gym)
         return Response(serialized_gym, status=status.HTTP_201_CREATED)
 
@@ -56,8 +71,13 @@ class GymController(viewsets.ViewSet):
         if validation_error:
             return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
+        db_session = getattr(request, 'db_session', None)
+        if db_session is None:
+            return Response({"error": "Database session is not available"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         gym_data = request.data
-        updated_gym = self.gym_component.modify_gym(pk, gym_data)
+        updated_gym = self.gym_component.modify_gym(pk, gym_data, db_session)
         if updated_gym:
             serialized_gym = self.gym_schema.dump(updated_gym)
             return Response(serialized_gym, status=status.HTTP_200_OK)
@@ -67,7 +87,12 @@ class GymController(viewsets.ViewSet):
         return self.update(request, pk)
 
     def destroy(self, request, pk=None):
-        success = self.gym_component.remove_gym(pk)
+        db_session = getattr(request, 'db_session', None)
+        if db_session is None:
+            return Response({"error": "Database session is not available"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        success = self.gym_component.remove_gym(pk, db_session)
         if success:
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response({"error": "Gym not found"}, status=status.HTTP_404_NOT_FOUND)

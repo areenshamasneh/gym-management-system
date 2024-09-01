@@ -1,22 +1,20 @@
 from sqlalchemy import func
-from sqlalchemy.orm import Session
-
 from gym_app.models.models_sqlalchemy import Gym
 
 
 class GymRepository:
     @staticmethod
-    def get_all_gyms(session: Session, offset=0, limit=10):
+    def get_all_gyms(session, offset=0, limit=10):
         total_gyms = session.query(func.count(Gym.id)).scalar()
         gyms = session.query(Gym).offset(offset).limit(limit).all()
         return gyms, total_gyms
 
     @staticmethod
-    def get_gym_by_id(session: Session, pk):
+    def get_gym_by_id(session, pk):
         return session.query(Gym).get(pk)
 
     @staticmethod
-    def create_gym(session: Session, data):
+    def create_gym(session, data):
         gym = Gym(
             name=data.get("name"),
             type=data.get("type"),
@@ -28,7 +26,7 @@ class GymRepository:
         return gym
 
     @staticmethod
-    def update_gym(session: Session, pk, data):
+    def update_gym(session, pk, data):
         gym = session.query(Gym).get(pk)
         if gym:
             for key, value in data.items():
@@ -37,7 +35,7 @@ class GymRepository:
         return None
 
     @staticmethod
-    def delete_gym(session: Session, pk):
+    def delete_gym(session, pk):
         gym = session.query(Gym).get(pk)
         if gym:
             session.delete(gym)
