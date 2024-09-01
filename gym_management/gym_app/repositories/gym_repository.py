@@ -1,5 +1,4 @@
 from sqlalchemy import func
-
 from common import Session
 from gym_app.models.models_sqlalchemy import Gym
 
@@ -7,19 +6,17 @@ from gym_app.models.models_sqlalchemy import Gym
 class GymRepository:
     @staticmethod
     def get_all_gyms(offset=0, limit=10):
-        session = Session()
         try:
-            total_gyms = session.query(func.count(Gym.id)).scalar()
-            gyms = session.query(Gym).offset(offset).limit(limit).all()
+            total_gyms = Session.query(func.count(Gym.id)).scalar()
+            gyms = Session.query(Gym).offset(offset).limit(limit).all()
             return gyms, total_gyms
         finally:
             Session.remove()
 
     @staticmethod
     def get_gym_by_id(pk):
-        session = Session()
         try:
-            return session.get(Gym, pk)
+            return Session.get(Gym, pk)
         finally:
             Session.remove()
 
