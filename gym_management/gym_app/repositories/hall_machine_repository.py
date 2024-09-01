@@ -1,14 +1,14 @@
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from common.database import SessionLocal
+from common.database import Session
 from gym_app.models.models_sqlalchemy import Hall, HallMachine
 
 
 class HallMachineRepository:
     @staticmethod
     def get_hall_machines_by_gym(gym_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = (
                 select(HallMachine)
                 .join(Hall)
@@ -24,7 +24,7 @@ class HallMachineRepository:
 
     @staticmethod
     def get_hall_machines_by_hall(hall_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = select(HallMachine).filter(HallMachine.hall_id == hall_id)
             result = session.execute(query)
             return result.scalars().all()

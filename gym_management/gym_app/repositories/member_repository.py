@@ -4,14 +4,14 @@ from sqlalchemy.orm import joinedload
 
 from gym_app.exceptions import ResourceNotFoundException, DatabaseException
 from gym_app.models.models_sqlalchemy import Member, Gym
-from common.database import SessionLocal
+from common.database import Session
 
 
 class MemberRepository:
 
     @staticmethod
     def get_all_members(gym_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = select(Member).filter(Member.gym_id == gym_id).options(
                 joinedload(Member.gym)
             )
@@ -20,7 +20,7 @@ class MemberRepository:
 
     @staticmethod
     def get_member_by_id(gym_id, member_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = select(Member).filter(Member.id == member_id, Member.gym_id == gym_id).options(
                 joinedload(Member.gym)
             )
@@ -34,7 +34,7 @@ class MemberRepository:
 
     @staticmethod
     def create_member(gym_id, data):
-        with SessionLocal() as session:
+        with Session() as session:
             gym = session.get(Gym, gym_id)
             if gym is None:
                 raise ResourceNotFoundException(f"Gym with ID {gym_id} not found")
@@ -57,7 +57,7 @@ class MemberRepository:
 
     @staticmethod
     def update_member(gym_id, member_id, data):
-        with SessionLocal() as session:
+        with Session() as session:
             query = select(Member).filter(Member.id == member_id, Member.gym_id == gym_id)
             member = session.execute(query).scalar_one_or_none()
 
@@ -81,7 +81,7 @@ class MemberRepository:
 
     @staticmethod
     def delete_member(gym_id, member_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = delete(Member).filter(Member.id == member_id, Member.gym_id == gym_id)
             result = session.execute(query)
             session.commit()

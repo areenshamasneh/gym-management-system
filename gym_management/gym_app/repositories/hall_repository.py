@@ -3,13 +3,13 @@ from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 from sqlalchemy.orm import joinedload
 
 from gym_app.models.models_sqlalchemy import Hall, Gym, HallType
-from common.database import SessionLocal
+from common.database import Session
 
 
 class HallRepository:
     @staticmethod
     def get_all_halls(gym_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = (
                 select(Hall)
                 .filter(Hall.gym_id == gym_id)
@@ -23,7 +23,7 @@ class HallRepository:
 
     @staticmethod
     def get_hall_by_id(gym_id, hall_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = (
                 select(Hall)
                 .filter(Hall.id == hall_id, Hall.gym_id == gym_id)
@@ -40,7 +40,7 @@ class HallRepository:
 
     @staticmethod
     def create_hall(gym_id, data):
-        with SessionLocal() as session:
+        with Session() as session:
             try:
                 gym_instance = session.get(Gym, gym_id)
                 if gym_instance is None:
@@ -82,7 +82,7 @@ class HallRepository:
 
     @staticmethod
     def update_hall(gym_id, hall_id, data):
-        with SessionLocal() as session:
+        with Session() as session:
             hall = session.execute(
                 select(Hall)
                 .filter(Hall.id == hall_id, Hall.gym_id == gym_id)
@@ -117,7 +117,7 @@ class HallRepository:
 
     @staticmethod
     def delete_hall(gym_id, hall_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = delete(Hall).filter(Hall.id == hall_id, Hall.gym_id == gym_id)
             result = session.execute(query)
             session.commit()

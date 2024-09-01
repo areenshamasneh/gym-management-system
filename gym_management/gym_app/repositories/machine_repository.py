@@ -4,14 +4,14 @@ from sqlalchemy.orm import joinedload
 
 from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models.models_sqlalchemy import Hall, Machine, HallMachine
-from common.database import SessionLocal
+from common.database import Session
 
 
 class MachineRepository:
 
     @staticmethod
     def get_all_machines_in_hall(gym_id, hall_id):
-        with SessionLocal() as session:
+        with Session() as session:
             try:
                 query = (
                     select(Machine)
@@ -30,7 +30,7 @@ class MachineRepository:
 
     @staticmethod
     def get_machine_by_id_in_hall(gym_id, hall_id, machine_id):
-        with SessionLocal() as session:
+        with Session() as session:
             try:
                 query = (
                     select(HallMachine)
@@ -51,7 +51,7 @@ class MachineRepository:
 
     @staticmethod
     def create_machine(data):
-        with SessionLocal() as session:
+        with Session() as session:
             try:
                 machine = Machine(
                     serial_number=data["serial_number"],
@@ -71,7 +71,7 @@ class MachineRepository:
 
     @staticmethod
     def create_hall_machine(gym_id, hall_id, machine_id):
-        with SessionLocal() as session:
+        with Session() as session:
             try:
                 hall = session.get(Hall, hall_id)
                 machine = session.get(Machine, machine_id)
@@ -105,7 +105,7 @@ class MachineRepository:
 
     @staticmethod
     def update_machine_and_hall_machine(gym_id, hall_id, machine_id, data):
-        with SessionLocal() as session:
+        with Session() as session:
             try:
                 hall_machine_query = (
                     select(HallMachine)
@@ -156,7 +156,7 @@ class MachineRepository:
 
     @staticmethod
     def delete_hall_machine(gym_id, hall_id, machine_id):
-        with SessionLocal() as session:
+        with Session() as session:
             try:
                 hall_machine = MachineRepository.get_machine_by_id_in_hall(gym_id, hall_id, machine_id)
                 session.delete(hall_machine)
@@ -167,7 +167,7 @@ class MachineRepository:
 
     @staticmethod
     def get_all_machines_in_gym(gym_id):
-        with SessionLocal() as session:
+        with Session() as session:
             try:
                 query = (
                     select(HallMachine)
@@ -187,7 +187,7 @@ class MachineRepository:
 
     @staticmethod
     def get_machine_by_id_in_gym(gym_id, machine_id):
-        with SessionLocal() as session:
+        with Session() as session:
             try:
                 query = (
                     select(HallMachine)

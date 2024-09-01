@@ -3,12 +3,12 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import joinedload
 
 from gym_app.models.models_sqlalchemy import Admin, Gym
-from common.database import get_db
+from common.database import Session
 
 class AdminRepository:
     @staticmethod
     def get_all_admins(gym_id, filter_criteria=None):
-        db_session = next(get_db())
+        db_session = Session
         try:
             query = select(Admin).filter(Admin.gym_id == gym_id).options(joinedload(Admin.gym))
 
@@ -31,7 +31,7 @@ class AdminRepository:
 
     @staticmethod
     def get_admin_by_id(gym_id, admin_id):
-        db_session = next(get_db())
+        db_session = Session
         try:
             query = select(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id).options(
                 joinedload(Admin.gym))
@@ -44,7 +44,7 @@ class AdminRepository:
 
     @staticmethod
     def create_admin(gym_id, data):
-        db_session = next(get_db())
+        db_session = Session
         try:
             gym = db_session.get(Gym, gym_id)
             if gym is None:
@@ -68,7 +68,7 @@ class AdminRepository:
 
     @staticmethod
     def update_admin(gym_id, admin_id, data):
-        db_session = next(get_db())
+        db_session = Session
         try:
             query = select(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id)
             admin = db_session.execute(query).scalar_one_or_none()
@@ -97,7 +97,7 @@ class AdminRepository:
 
     @staticmethod
     def delete_admin(gym_id, admin_id):
-        db_session = next(get_db())
+        db_session = Session
         try:
             query = delete(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id)
             result = db_session.execute(query)

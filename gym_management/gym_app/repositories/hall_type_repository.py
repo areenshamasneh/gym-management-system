@@ -3,21 +3,21 @@ from sqlalchemy.exc import NoResultFound, IntegrityError
 
 from gym_app.exceptions import DatabaseException
 from gym_app.models.models_sqlalchemy import HallType, Hall
-from common.database import SessionLocal
+from common.database import Session
 
 
 class HallTypeRepository:
 
     @staticmethod
     def get_all_hall_types():
-        with SessionLocal() as session:
+        with Session() as session:
             query = select(HallType)
             result = session.execute(query)
             return result.scalars().all()
 
     @staticmethod
     def get_hall_type_by_id(hall_type_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = select(HallType).filter(HallType.id == hall_type_id)
             try:
                 result = session.execute(query)
@@ -27,7 +27,7 @@ class HallTypeRepository:
 
     @staticmethod
     def create_hall_type(data):
-        with SessionLocal() as session:
+        with Session() as session:
             hall_type = HallType(**data)
             try:
                 session.add(hall_type)
@@ -40,7 +40,7 @@ class HallTypeRepository:
 
     @staticmethod
     def update_hall_type(hall_type_id, data):
-        with SessionLocal() as session:
+        with Session() as session:
             query = select(HallType).filter(HallType.id == hall_type_id)
             hall_type = session.execute(query).scalar_one_or_none()
 
@@ -75,7 +75,7 @@ class HallTypeRepository:
 
     @staticmethod
     def delete_hall_type(hall_type_id):
-        with SessionLocal() as session:
+        with Session() as session:
             halls_query = select(Hall).filter(Hall.hall_type_id == hall_type_id)
             associated_halls = session.execute(halls_query).scalars().all()
 

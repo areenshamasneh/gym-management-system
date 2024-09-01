@@ -2,13 +2,13 @@ from sqlalchemy import select, delete
 from sqlalchemy.orm import joinedload
 
 from gym_app.models.models_sqlalchemy import Employee, Gym
-from common.database import SessionLocal
+from common.database import Session
 
 
 class EmployeeRepository:
     @staticmethod
     def get_all_employees(gym_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = select(Employee).filter(Employee.gym_id == gym_id).options(
                 joinedload(Employee.gym),
                 joinedload(Employee.manager)
@@ -19,7 +19,7 @@ class EmployeeRepository:
 
     @staticmethod
     def get_employee_by_id(gym_id, employee_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = select(Employee).filter(Employee.id == employee_id, Employee.gym_id == gym_id).options(
                 joinedload(Employee.gym), joinedload(Employee.manager))
             result = session.execute(query)
@@ -28,7 +28,7 @@ class EmployeeRepository:
 
     @staticmethod
     def create_employee(gym_id, data):
-        with SessionLocal() as session:
+        with Session() as session:
             gym = session.get(Gym, gym_id)
             if gym is None:
                 raise ValueError("Gym not found")
@@ -52,7 +52,7 @@ class EmployeeRepository:
 
     @staticmethod
     def update_employee(gym_id, employee_id, data):
-        with SessionLocal() as session:
+        with Session() as session:
             query = select(Employee).filter(Employee.id == employee_id, Employee.gym_id == gym_id).options(
                 joinedload(Employee.manager))
             employee = session.execute(query).scalar_one_or_none()
@@ -83,7 +83,7 @@ class EmployeeRepository:
 
     @staticmethod
     def delete_employee(gym_id, employee_id):
-        with SessionLocal() as session:
+        with Session() as session:
             query = delete(Employee).filter(Employee.id == employee_id, Employee.gym_id == gym_id)
             result = session.execute(query)
             session.commit()
