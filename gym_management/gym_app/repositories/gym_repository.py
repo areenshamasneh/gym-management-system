@@ -1,20 +1,31 @@
 from sqlalchemy import func
+
+from common import Session
 from gym_app.models.models_sqlalchemy import Gym
 
 
 class GymRepository:
     @staticmethod
-    def get_all_gyms(session, offset=0, limit=10):
-        total_gyms = session.query(func.count(Gym.id)).scalar()
-        gyms = session.query(Gym).offset(offset).limit(limit).all()
-        return gyms, total_gyms
+    def get_all_gyms(offset=0, limit=10):
+        session = Session()
+        try:
+            total_gyms = session.query(func.count(Gym.id)).scalar()
+            gyms = session.query(Gym).offset(offset).limit(limit).all()
+            return gyms, total_gyms
+        finally:
+            Session.remove()  # Clean up session
 
     @staticmethod
-    def get_gym_by_id(session, pk):
-        return session.query(Gym).get(pk)
+    def get_gym_by_id(pk):
+        session = Session()
+        try:
+            return session.get(Gym, pk)
+        finally:
+            Session.remove()  # Clean up session
 
     @staticmethod
-    def create_gym(session, data):
+    def create_gym(data):
+        session = Session()
         gym = Gym(
             name=data.get("name"),
             type=data.get("type"),
@@ -26,8 +37,9 @@ class GymRepository:
         return gym
 
     @staticmethod
-    def update_gym(session, pk, data):
-        gym = session.query(Gym).get(pk)
+    def update_gym(pk, data):
+        session = Session()
+        gym = session.get(Gym, pk)
         if gym:
             for key, value in data.items():
                 setattr(gym, key, value)
@@ -35,8 +47,9 @@ class GymRepository:
         return None
 
     @staticmethod
-    def delete_gym(session, pk):
-        gym = session.query(Gym).get(pk)
+    def delete_gym(pk):
+        session = Session()
+        gym = session.get(Gym, pk)
         if gym:
             session.delete(gym)
             return True
