@@ -13,7 +13,7 @@ class GymRepository:
             gyms = session.query(Gym).offset(offset).limit(limit).all()
             return gyms, total_gyms
         finally:
-            Session.remove()  # Clean up session
+            Session.remove()
 
     @staticmethod
     def get_gym_by_id(pk):
@@ -21,7 +21,7 @@ class GymRepository:
         try:
             return session.get(Gym, pk)
         finally:
-            Session.remove()  # Clean up session
+            Session.remove()
 
     @staticmethod
     def create_gym(data):
