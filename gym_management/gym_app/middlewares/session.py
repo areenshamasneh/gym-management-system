@@ -1,27 +1,20 @@
+import threading
+
+from django.utils.deprecation import MiddlewareMixin
 from common import Session
-import logging
+from gym_app.middlewares.req_id_correlation import RequestIDMiddleware
 
-logging.basicConfig()
-logger = logging.getLogger('sqlalchemy.engine')
+request_id_middleware = RequestIDMiddleware(None)
 
 
-class SessionMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
+class SessionMiddleware(MiddlewareMixin):
+    @staticmethod
+    def process_request(request):
+        request_id = request_id_middleware.get_request_id()
+        setattr(threading.local(), 'request_id', request_id)
+        setattr(request, 'request_id', request_id)
 
-    def __call__(self, request):
-        request.db_session = Session()
-        try:
-            response = self.get_response(request)
-            if request.db_session.is_active:
-                logger.info("Committing session")
-                request.db_session.commit()
-        except Exception:
-            if request.db_session.is_active:
-                logger.error("Rolling back session due to error")
-                request.db_session.rollback()
-            raise
-        finally:
-            logger.info("Removing session")
-            Session.remove()
+    @staticmethod
+    def process_response(request, response):
+        Session.remove()
         return response
