@@ -3,7 +3,7 @@ from sqlalchemy.exc import NoResultFound, IntegrityError
 
 from gym_app.exceptions import DatabaseException
 from gym_app.models.models_sqlalchemy import HallType, Hall
-from common.database import Session
+from common.db.database import Session
 
 
 class HallTypeRepository:

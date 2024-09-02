@@ -1,5 +1,5 @@
 from sqlalchemy import func
-from common.database import Session
+from common.db.database import Session
 from gym_app.models.models_sqlalchemy import Gym
 
 

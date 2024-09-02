@@ -2,7 +2,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.orm import joinedload
 
 from gym_app.models.models_sqlalchemy import Employee, Gym
-from common.database import Session
+from common.db.database import Session
 
 
 class EmployeeRepository:

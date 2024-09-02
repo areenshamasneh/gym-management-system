@@ -1,6 +1,5 @@
 from django.utils.deprecation import MiddlewareMixin
-from common.database import Session
-from common.thread import set_local, clear_local
+from common.threads.thread import set_local, clear_local
 import uuid
 
 
@@ -13,6 +12,5 @@ class LocalThreadMiddleware(MiddlewareMixin):
 
     @staticmethod
     def process_response(request, response):
-        Session.remove()
         clear_local()
         return response

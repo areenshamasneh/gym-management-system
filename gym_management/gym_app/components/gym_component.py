@@ -1,4 +1,4 @@
-from common.database import Session
+from common.db.database import Session
 from gym_app.exceptions import (
     InvalidInputException,
     ResourceNotFoundException,
@@ -43,6 +43,7 @@ class GymComponent:
         try:
             self.logger.log_info("Adding new gym")
             gym = self.gym_repository.create_gym(data)
+            raise Exception("Simulated exception to test rollback")
             session.commit()
             return gym
         except KeyError as e:
@@ -50,11 +51,9 @@ class GymComponent:
             raise InvalidInputException(f"Missing required field: '{missing_field}'")
         except ValueError as e:
             self.logger.log_error(f"Invalid data: {e}")
-            session.rollback()
             raise DatabaseException("An error occurred while adding the gym.")
         except Exception as e:
             self.logger.log_error(f"An error occurred while adding the gym: {e}")
-            session.rollback()
             raise DatabaseException("An error occurred while adding the gym.")
         finally:
             Session.remove()
@@ -80,7 +79,6 @@ class GymComponent:
             self.logger.log_error(
                 f"An error occurred while modifying gym ID {gym_id}: {e}"
             )
-            session.rollback()
             raise DatabaseException(
                 f"An error occurred while modifying gym ID {gym_id}."
             )
@@ -103,7 +101,6 @@ class GymComponent:
             self.logger.log_error(
                 f"An error occurred while removing gym ID {gym_id}: {e}"
             )
-            session.rollback()
             raise DatabaseException(
                 f"An error occurred while removing gym ID {gym_id}."
             )

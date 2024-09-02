@@ -45,7 +45,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "gym_app.middlewares.req_logging.RequestLogMiddleware",
-    "gym_app.middlewares.local_thread_middleware.LocalThreadMiddleware",
+    "gym_app.middlewares.local_thread.LocalThreadMiddleware",
+    "gym_app.middlewares.session_management.SessionManagementMiddleware",
 ]
 LOGGING = {
     "version": 1,

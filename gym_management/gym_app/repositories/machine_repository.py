@@ -4,7 +4,7 @@ from sqlalchemy.orm import joinedload
 
 from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models.models_sqlalchemy import Hall, Machine, HallMachine
-from common.database import Session
+from common.db.database import Session
 
 
 class MachineRepository:

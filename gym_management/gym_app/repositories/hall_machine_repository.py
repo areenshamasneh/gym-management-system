@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from common.database import Session
+from common.db.database import Session
 from gym_app.models.models_sqlalchemy import Hall, HallMachine
 
 

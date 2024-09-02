@@ -3,7 +3,8 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import joinedload
 
 from gym_app.models.models_sqlalchemy import Admin, Gym
-from common.database import Session
+from common.db.database import Session
+
 
 class AdminRepository:
     @staticmethod

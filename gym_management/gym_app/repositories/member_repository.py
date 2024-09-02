@@ -4,7 +4,7 @@ from sqlalchemy.orm import joinedload
 
 from gym_app.exceptions import ResourceNotFoundException, DatabaseException
 from gym_app.models.models_sqlalchemy import Member, Gym
-from common.database import Session
+from common.db.database import Session
 
 
 class MemberRepository:
