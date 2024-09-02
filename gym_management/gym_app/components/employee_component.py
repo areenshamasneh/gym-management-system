@@ -1,6 +1,7 @@
+from sqlalchemy.exc import NoResultFound
+
 from gym_app.exceptions import ResourceNotFoundException, InvalidInputException, DatabaseException
 from gym_app.logging import SimpleLogger
-from gym_app.models import Employee
 from gym_app.repositories import EmployeeRepository
 
 
@@ -39,7 +40,7 @@ class EmployeeComponent:
             return employee
         except ResourceNotFoundException as e:
             self.logger.log_error(f"Resource not found: {str(e)}")
-            raise ResourceNotFoundException(f"Resource not found for gym_id: {gym_id}")
+            raise ResourceNotFoundException(f"Employee with ID {employee_id} does not exist for gym_id: {gym_id}")
         except Exception as e:
             self.logger.log_error(f"Error fetching employee: {str(e)}")
             raise DatabaseException("Error fetching employee")
@@ -60,7 +61,7 @@ class EmployeeComponent:
                 f"Modifying employee ID {employee_id} for gym_id: {gym_id}"
             )
             return self.employee_repository.update_employee(gym_id, employee_id, data)
-        except Employee.DoesNotExist:
+        except NoResultFound:
             self.logger.log_error(
                 f"Employee with ID {employee_id} does not exist for gym_id: {gym_id}"
             )
@@ -79,7 +80,7 @@ class EmployeeComponent:
                 f"Removing employee ID {employee_id} for gym_id: {gym_id}"
             )
             self.employee_repository.delete_employee(gym_id, employee_id)
-        except Employee.DoesNotExist:
+        except NoResultFound:
             self.logger.log_error(
                 f"Employee with ID {employee_id} does not exist for gym_id: {gym_id}"
             )

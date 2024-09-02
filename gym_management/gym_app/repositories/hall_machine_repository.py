@@ -1,13 +1,30 @@
-from gym_app.models import HallMachine, Hall
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
+from common.database import Session
+from gym_app.models.models_sqlalchemy import Hall, HallMachine
 
 
 class HallMachineRepository:
     @staticmethod
     def get_hall_machines_by_gym(gym_id):
-        halls = Hall.objects.filter(gym_id=gym_id).select_related('gym')
-        hall_ids = halls.values_list("id", flat=True)
-        return HallMachine.objects.filter(hall_id__in=hall_ids).select_related('hall__gym', 'hall__hall_type','machine')
+        with Session() as session:
+            query = (
+                select(HallMachine)
+                .join(Hall)
+                .filter(Hall.gym_id == gym_id)
+                .options(
+                    selectinload(HallMachine.hall).selectinload(Hall.gym),
+                    selectinload(HallMachine.hall).selectinload(Hall.hall_type),
+                    selectinload(HallMachine.machine)
+                )
+            )
+            result = session.execute(query)
+            return result.scalars().all()
 
     @staticmethod
     def get_hall_machines_by_hall(hall_id):
-        return HallMachine.objects.filter(hall_id=hall_id)
+        with Session() as session:
+            query = select(HallMachine).filter(HallMachine.hall_id == hall_id)
+            result = session.execute(query)
+            return result.scalars().all()

@@ -7,20 +7,23 @@ from gym_app.serializers import MachineSerializer
 from gym_app.validators import SchemaValidator
 
 
-class GymMachineViewSet(viewsets.ViewSet):
+class GymMachineController(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.component = MachineComponent()
-        self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.machine_schemas')
+        self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.machine_schemas')
+        self.schema = MachineSerializer()
 
     def list(self, request, gym_pk=None):
         try:
             machines = self.component.fetch_all_machines_in_gym(gym_pk)
-            serializer = MachineSerializer([hm.machine for hm in machines], many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            machine_objects = [hm.machine for hm in machines]
+            serialized_machines = self.schema.dump(machine_objects, many=True)
+            return Response(serialized_machines, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            print(f"Unexpected error in list: {str(e)}")
             return Response({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, gym_pk=None, pk=None):
@@ -29,9 +32,10 @@ class GymMachineViewSet(viewsets.ViewSet):
             if not machine:
                 raise ResourceNotFoundException(f"Machine with ID {pk} not found in gym {gym_pk}.")
 
-            serializer = MachineSerializer(machine)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serialized_machine = self.schema.dump(machine)
+            return Response(serialized_machine, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            print(f"Unexpected error in retrieve: {str(e)}")
             return Response({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -2,23 +2,23 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 from gym_app.components import MachineComponent
-from gym_app.exceptions import ResourceNotFoundException
-from gym_app.models import Machine
+from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
 from gym_app.serializers import MachineSerializer
 from gym_app.validators import SchemaValidator
 
 
-class MachineViewSet(viewsets.ViewSet):
+class MachineController(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.component = MachineComponent()
-        self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.machine_schemas')
+        self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.machine_schemas')
+        self.schema = MachineSerializer()
 
     def list(self, request, gym_pk=None, hall_pk=None):
         try:
             machines = self.component.fetch_all_machines_in_hall(gym_pk, hall_pk)
-            serializer = MachineSerializer([hm.machine for hm in machines], many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serialized_data = self.schema.dump(machines, many=True)
+            return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
             return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -31,49 +31,35 @@ class MachineViewSet(viewsets.ViewSet):
 
         data = request.data
         try:
-            machine, created = Machine.objects.get_or_create(
-                serial_number=data["serial_number"],
-                defaults={
-                    "type": data.get("type"),
-                    "model": data.get("model"),
-                    "brand": data.get("brand"),
-                    "status": data.get("status"),
-                    "maintenance_date": data.get("maintenance_date"),
-                },
-            )
+            machine_data = {
+                "serial_number": data["serial_number"],
+                "type": data.get("type"),
+                "model": data.get("model"),
+                "brand": data.get("brand"),
+                "status": data.get("status"),
+                "maintenance_date": data.get("maintenance_date"),
+            }
 
-            if created:
-                self.component.logger.log_info(f"Machine created: {machine.serial_number}")
-            else:
-                self.component.logger.log_info(
-                    f"Machine already exists: {machine.serial_number}"
-                )
-
-            hall_machine = self.component.add_hall_machine(
+            hall_machine = self.component.add_machine_and_hall_machine(
                 gym_pk,
                 hall_pk,
-                {
-                    "name": data.get("name"),
-                    "uid": data.get("uid"),
-                    "machine_id": machine.id,
-                },
+                machine_data,
             )
-
-            serializer = MachineSerializer(machine)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serialized_data = self.schema.dump(hall_machine)
+            return Response(serialized_data, status=status.HTTP_201_CREATED)
+        except InvalidInputException as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, gym_pk=None, hall_pk=None, pk=None):
         try:
             machine = self.component.fetch_machine_by_id_in_hall(gym_pk, hall_pk, pk)
-            serializer = MachineSerializer(machine)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serialized_data = self.schema.dump(machine)
+            return Response(serialized_data, status=status.HTTP_200_OK)
         except ResourceNotFoundException as e:
-            self.component.logger.log_error(f"ResourceNotFoundException: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            self.component.logger.log_error(f"Unhandled exception in machine retrieve view: {e}")
             return Response({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, gym_pk=None, hall_pk=None, pk=None):
@@ -83,14 +69,19 @@ class MachineViewSet(viewsets.ViewSet):
 
         data = request.data
         try:
-            machine = Machine.objects.get(pk=pk)
-            serializer = MachineSerializer(machine, data=data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                self.component.modify_hall_machine(gym_pk, hall_pk, pk, data)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            machine = self.component.fetch_machine_by_id_in_hall(gym_pk, hall_pk, pk)
+            if not machine:
+                raise ResourceNotFoundException(f"Machine with ID {pk} not found.")
+
+            for attr, value in data.items():
+                setattr(machine, attr, value)
+            self.component.modify_machine_and_hall_machine(gym_pk, hall_pk, pk, data)
+            serialized_data = self.schema.dump(machine)
+            return Response(serialized_data, status=status.HTTP_200_OK)
+        except ResourceNotFoundException as e:
+            return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except InvalidInputException as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -99,9 +90,9 @@ class MachineViewSet(viewsets.ViewSet):
 
     def destroy(self, request, gym_pk=None, hall_pk=None, pk=None):
         try:
-            machine = Machine.objects.get(pk=pk)
             self.component.remove_hall_machine(gym_pk, hall_pk, pk)
-            machine.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+        except ResourceNotFoundException as e:
+            return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

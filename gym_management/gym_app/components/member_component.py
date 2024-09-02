@@ -16,7 +16,10 @@ class MemberComponent:
     def fetch_all_members(self, gym_id):
         self.logger.log_info("Fetching all members")
         try:
-            return self.repo.get_all_members(gym_id)
+            members = self.repo.get_all_members(gym_id)
+            if not members:
+                raise DatabaseException("No members found")
+            return members
         except DatabaseException as e:
             self.logger.log_error(f"Database error fetching members: {e}")
             raise
@@ -27,7 +30,10 @@ class MemberComponent:
     def fetch_member_by_id(self, gym_id, member_id):
         self.logger.log_info(f"Fetching member with ID {member_id}")
         try:
-            return self.repo.get_member_by_id(gym_id, member_id)
+            member = self.repo.get_member_by_id(gym_id, member_id)
+            if member is None:
+                raise ResourceNotFoundException(f"Member with ID {member_id} not found")
+            return member
         except ResourceNotFoundException as e:
             self.logger.log_error(f"Resource not found: {e}")
             raise

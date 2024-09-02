@@ -1,55 +1,53 @@
-from django.core.paginator import Paginator
-
-from gym_app.models import Gym
-
-from django.core.paginator import Paginator
-from gym_app.models import Gym
-from gym_app.utils import PaginationResponse
+from sqlalchemy import func
+from common import Session
+from gym_app.models.models_sqlalchemy import Gym
 
 
 class GymRepository:
     @staticmethod
-    def get_all_gyms(page_number=1, page_size=10):
-        gyms = Gym.objects.all()
-        paginator = Paginator(gyms, page_size)
-        paginated_gyms = paginator.get_page(page_number)
-
-        return PaginationResponse(
-            items=list(paginated_gyms),
-            total_items=paginator.count,
-            total_pages=paginator.num_pages,
-            current_page=paginated_gyms.number,
-            page_size=page_size
-        )
+    def get_all_gyms(offset=0, limit=10):
+        try:
+            total_gyms = Session.query(func.count(Gym.id)).scalar()
+            gyms = Session.query(Gym).offset(offset).limit(limit).all()
+            return gyms, total_gyms
+        finally:
+            Session.remove()
 
     @staticmethod
     def get_gym_by_id(pk):
-        return Gym.objects.filter(pk=pk).first()
+        try:
+            return Session.get(Gym, pk)
+        finally:
+            Session.remove()
 
     @staticmethod
     def create_gym(data):
-        return Gym.objects.create(
+        session = Session()
+        gym = Gym(
             name=data.get("name"),
             type=data.get("type"),
             description=data.get("description"),
             address_city=data.get("address_city"),
             address_street=data.get("address_street"),
         )
+        session.add(gym)
+        return gym
 
     @staticmethod
     def update_gym(pk, data):
-        gym = Gym.objects.filter(pk=pk).first()
+        session = Session()
+        gym = session.get(Gym, pk)
         if gym:
-            fields_to_update = ['name', 'type', 'description', 'address_city', 'address_street']
-            for field in fields_to_update:
-                if field in data:
-                    setattr(gym, field, data[field])
-
-            gym.save()
+            for key, value in data.items():
+                setattr(gym, key, value)
             return gym
         return None
 
     @staticmethod
     def delete_gym(pk):
-        deleted, _ = Gym.objects.filter(pk=pk).delete()
-        return deleted > 0
+        session = Session()
+        gym = session.get(Gym, pk)
+        if gym:
+            session.delete(gym)
+            return True
+        return False

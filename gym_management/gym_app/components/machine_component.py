@@ -42,23 +42,27 @@ class MachineComponent:
             self.logger.log_error(f"Error fetching machine by ID: {e}")
             raise DatabaseException("An error occurred while fetching the machine by ID.") from e
 
-    def add_hall_machine(self, gym_id, hall_id, data):
-        self.logger.log_info(f"Adding hall machine with data: {data}")
+    def add_machine_and_hall_machine(self, gym_id, hall_id, machine_data):
+        self.logger.log_info(f"Adding machine with data: {machine_data}")
         try:
-            hall_machine = self.repo.create_hall_machine(gym_id, hall_id, data)
-            self.logger.log_info(f"Added hall machine: {hall_machine}")
-            return hall_machine
+            machine = self.repo.create_machine(machine_data)
+            self.repo.create_hall_machine(
+                gym_id,
+                hall_id,
+                machine.id,
+            )
+            return machine
         except ValueError as e:
-            self.logger.log_error(f"Error adding hall machine: {e}")
+            self.logger.log_error(f"Error adding machine and hall machine: {e}")
             raise ValidationException(f"Validation error: {str(e)}")
         except Exception as e:
-            self.logger.log_error(f"Error adding hall machine: {e}")
-            raise DatabaseException("An error occurred while adding the hall machine.")
+            self.logger.log_error(f"Error adding machine and hall machine: {e}")
+            raise DatabaseException("An error occurred while adding the machine and hall machine.")
 
-    def modify_hall_machine(self, gym_id, hall_id, machine_id, data):
+    def modify_machine_and_hall_machine(self, gym_id, hall_id, machine_id, data):
         self.logger.log_info(f"Modifying hall machine with ID: {machine_id} and data: {data}")
         try:
-            hall_machine = self.repo.update_hall_machine(gym_id, hall_id, machine_id, data)
+            hall_machine = self.repo.update_machine_and_hall_machine(gym_id, hall_id, machine_id, data)
             self.logger.log_info(f"Modified hall machine: {hall_machine}")
             return hall_machine
         except ResourceNotFoundException:

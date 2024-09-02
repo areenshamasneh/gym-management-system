@@ -9,22 +9,18 @@ class AdminComponent:
         self.logger = logger or SimpleLogger()
         self.logger.log_info("AdminComponent initialized")
 
-    def fetch_all_admins(self, gym_id):
+    def fetch_all_admins(self, gym_id, filter_criteria):
         try:
-            self.logger.log_info(f"Fetching all admins for gym_id: {gym_id}")
-            admins = self.admin_repository.get_all_admins(gym_id)
-            if len(admins) == 0:
+            self.logger.log_info(f"Fetching all admins for gym_id: {gym_id} with filters: {filter_criteria}")
+            admins = self.admin_repository.get_all_admins(gym_id, filter_criteria)
+            if not admins:
                 raise ResourceNotFoundException(f"There are no admins for gym_id: {gym_id}")
             return admins
         except ResourceNotFoundException as e:
-            self.logger.log_error(
-                f"Resource not found for gym_id: {gym_id}: {str(e)}"
-            )
-            raise ResourceNotFoundException(f"Resource not found for gym_id: {gym_id}")
+            self.logger.log_error(f"Resource not found for gym_id: {gym_id}: {str(e)}")
+            raise e
         except Exception as e:
-            self.logger.log_error(
-                f"Error fetching all admins for gym_id: {gym_id}: {str(e)}"
-            )
+            self.logger.log_error(f"Error fetching all admins for gym_id: {gym_id}: {str(e)}")
             raise DatabaseException("An error occurred while fetching all admins.")
 
     def fetch_admin_by_id(self, gym_id, admin_id):
@@ -75,7 +71,7 @@ class AdminComponent:
     def remove_admin(self, gym_id, admin_id):
         try:
             self.logger.log_info(f"Removing admin ID {admin_id} for gym_id: {gym_id}")
-            self.admin_repository.delete_admin(gym_id, admin_id)
+            return self.admin_repository.delete_admin(gym_id, admin_id)
         except ResourceNotFoundException as e:
             self.logger.log_error(
                 f"Admin with ID {admin_id} not found for gym_id {gym_id}: {str(e)}"

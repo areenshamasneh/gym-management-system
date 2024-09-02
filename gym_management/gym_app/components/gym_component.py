@@ -4,7 +4,8 @@ from gym_app.exceptions import (
     DatabaseException,
 )
 from gym_app.logging import SimpleLogger
-from gym_app.repositories import GymRepository
+from gym_app.repositories.gym_repository import GymRepository
+from common import Session
 
 
 class GymComponent:
@@ -28,7 +29,7 @@ class GymComponent:
             return gym
         except ResourceNotFoundException as e:
             self.logger.log_error(str(e))
-            raise ResourceNotFoundException(f"Resource not found for gym_id: {gym_id}")
+            raise
         except Exception as e:
             self.logger.log_error(
                 f"An error occurred while fetching gym by ID {gym_id}: {e}"
@@ -38,22 +39,37 @@ class GymComponent:
             )
 
     def add_gym(self, data):
+        session = Session()
         try:
             self.logger.log_info("Adding new gym")
+            gym = self.gym_repository.create_gym(data)
+            session.commit()
+            session.refresh(gym)
+            return gym
         except KeyError as e:
             missing_field = str(e).strip("'")
             raise InvalidInputException(f"Missing required field: '{missing_field}'")
         except ValueError as e:
             self.logger.log_error(f"Invalid data: {e}")
+            session.rollback()
             raise DatabaseException("An error occurred while adding the gym.")
         except Exception as e:
             self.logger.log_error(f"An error occurred while adding the gym: {e}")
+            session.rollback()
             raise DatabaseException("An error occurred while adding the gym.")
+        finally:
+            Session.remove()
 
     def modify_gym(self, gym_id, data):
+        session = Session()
         try:
             self.logger.log_info(f"Modifying gym ID {gym_id}")
-            return self.gym_repository.update_gym(gym_id, data)
+            gym = self.gym_repository.update_gym(gym_id, data)
+            if gym:
+                session.commit()
+                session.refresh(gym)
+                return gym
+            return None
         except ResourceNotFoundException as e:
             self.logger.log_error(str(e))
             raise
@@ -66,14 +82,22 @@ class GymComponent:
             self.logger.log_error(
                 f"An error occurred while modifying gym ID {gym_id}: {e}"
             )
+            session.rollback()
             raise DatabaseException(
                 f"An error occurred while modifying gym ID {gym_id}."
             )
+        finally:
+            Session.remove()
 
     def remove_gym(self, gym_id):
+        session = Session()
         try:
             self.logger.log_info(f"Removing gym ID {gym_id}")
-            return self.gym_repository.delete_gym(gym_id)
+            success = self.gym_repository.delete_gym(gym_id)
+            if success:
+                session.commit()
+                return success
+            return False
         except ResourceNotFoundException as e:
             self.logger.log_error(str(e))
             raise
@@ -81,6 +105,9 @@ class GymComponent:
             self.logger.log_error(
                 f"An error occurred while removing gym ID {gym_id}: {e}"
             )
+            session.rollback()
             raise DatabaseException(
                 f"An error occurred while removing gym ID {gym_id}."
             )
+        finally:
+            Session.remove()

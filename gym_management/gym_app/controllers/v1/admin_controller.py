@@ -7,42 +7,33 @@ from gym_app.serializers import AdminSerializer
 from gym_app.validators import SchemaValidator
 
 
-class AdminViewSet(viewsets.ViewSet):
+class AdminController(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.admin_component = AdminComponent()
-        self.validator = SchemaValidator(schemas_module_name='gym_app.schemas.admin_schemas')
+        self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.admin_schemas')
+        self.schema = AdminSerializer()
 
     def list(self, request, gym_pk=None):
-        name = request.GET.get("name", "")
-        email = request.GET.get("email", "")
-        phone_number = request.GET.get("phone_number", "")
-        address_city = request.GET.get("address_city", "")
-        address_street = request.GET.get("address_street", "")
-
         filter_criteria = {
-            "name__icontains": name,
-            "email__icontains": email,
-            "phone_number__icontains": phone_number,
-            "address_city__icontains": address_city,
-            "address_street__icontains": address_street,
+            "name": request.GET.get("name", ""),
+            "email": request.GET.get("email", ""),
+            "phone_number": request.GET.get("phone_number", ""),
+            "address_city": request.GET.get("address_city", ""),
+            "address_street": request.GET.get("address_street", ""),
         }
-        filter_criteria = {k: v for k, v in filter_criteria.items() if v}
-
         try:
-            admins = self.admin_component.fetch_all_admins(gym_pk)
-            if filter_criteria:
-                admins = admins.filter(**filter_criteria)
-            serializer = AdminSerializer(admins, many=True)
-            return Response(serializer.data)
+            admins = self.admin_component.fetch_all_admins(gym_pk, filter_criteria)
+            serialized_admins = self.schema.dump(admins, many=True)
+            return Response(serialized_admins)
         except ConflictException as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, gym_pk=None, pk=None):
         try:
             admin = self.admin_component.fetch_admin_by_id(gym_pk, pk)
-            serializer = AdminSerializer(admin)
-            return Response(serializer.data)
+            serialized_admin = self.schema.dump(admin)
+            return Response(serialized_admin)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except ConflictException as e:
@@ -58,8 +49,8 @@ class AdminViewSet(viewsets.ViewSet):
 
         try:
             admin = self.admin_component.add_admin(gym_pk, data)
-            serializer = AdminSerializer(admin)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serialized_admin = self.schema.dump(admin)
+            return Response(serialized_admin, status=status.HTTP_201_CREATED)
         except InvalidInputException as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
@@ -75,8 +66,8 @@ class AdminViewSet(viewsets.ViewSet):
 
         try:
             admin = self.admin_component.modify_admin(gym_pk, pk, data)
-            serializer = AdminSerializer(admin)
-            return Response(serializer.data)
+            serialized_admin = self.schema.dump(admin)
+            return Response(serialized_admin)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except InvalidInputException as e:

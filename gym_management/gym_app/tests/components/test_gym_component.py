@@ -87,7 +87,6 @@ def test_modify_gym(mock_logger, mock_repo):
     gym = MagicMock()
     gym.id = 1
 
-    mock_repo.get_gym_by_id = MagicMock(return_value=gym)
     mock_repo.update_gym = MagicMock()
     mock_logger.log_info = MagicMock()
 
@@ -103,7 +102,6 @@ def test_modify_gym(mock_logger, mock_repo):
 
     component.modify_gym(1, mock_data)
 
-    mock_repo.get_gym_by_id.assert_called_once_with(1)
     mock_repo.update_gym.assert_called_once_with(1, mock_data)
     mock_logger.log_info.assert_called_with("Modifying gym ID 1")
 
@@ -136,7 +134,7 @@ def test_add_gym_with_missing_fields(mock_logger, mock_repo):
 @patch("gym_app.components.gym_component.GymRepository")
 @patch("gym_app.components.gym_component.SimpleLogger")
 def test_modify_gym_non_existent(mock_logger, mock_repo):
-    mock_repo.get_gym_by_id.side_effect = ResourceNotFoundException(
+    mock_repo.update_gym.side_effect = ResourceNotFoundException(
         "Gym with ID 999 does not exist"
     )
 

@@ -3,6 +3,7 @@ from pathlib import Path
 
 from decouple import config  # type: ignore
 
+DATABASE_URL = config('DATABASE_URL')
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 log_dir = os.path.join(BASE_DIR, "logs")
@@ -44,6 +45,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "gym_app.middlewares.req_logging.RequestLogMiddleware",
+    "gym_app.middlewares.session.SessionMiddleware",
+    "gym_app.middlewares.req_id_correlation.RequestIDMiddleware",
 ]
 LOGGING = {
     "version": 1,
@@ -89,7 +92,7 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
-        "django.db.backends": {
+        "sqlalchemy.engine": {
             "handlers": ["sql_file"],
             "level": "DEBUG",
             "propagate": False,
