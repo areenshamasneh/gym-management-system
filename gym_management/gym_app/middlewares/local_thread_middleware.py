@@ -1,20 +1,18 @@
-import threading
-
 from django.utils.deprecation import MiddlewareMixin
 from common.database import Session
-from gym_app.middlewares.req_id_correlation import RequestIDMiddleware
+from common.thread import set_local, clear_local
+import uuid
 
-request_id_middleware = RequestIDMiddleware(None)
 
-
-class SessionMiddleware(MiddlewareMixin):
+class LocalThreadMiddleware(MiddlewareMixin):
     @staticmethod
     def process_request(request):
-        request_id = request_id_middleware.get_request_id()
-        setattr(threading.local(), 'request_id', request_id)
+        request_id = request.META.get('HTTP_X_REQUEST_ID') or str(uuid.uuid4())
+        set_local(request_id=request_id)
         setattr(request, 'request_id', request_id)
 
     @staticmethod
     def process_response(request, response):
         Session.remove()
+        clear_local()
         return response
