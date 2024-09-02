@@ -43,7 +43,6 @@ class GymComponent:
         try:
             self.logger.log_info("Adding new gym")
             gym = self.gym_repository.create_gym(data)
-            raise Exception("Simulated exception to test rollback")
             session.commit()
             return gym
         except KeyError as e:
