@@ -1,7 +1,7 @@
 import threading
 
 from django.utils.deprecation import MiddlewareMixin
-from common import Session
+from common.database import Session
 from gym_app.middlewares.req_id_correlation import RequestIDMiddleware
 
 request_id_middleware = RequestIDMiddleware(None)

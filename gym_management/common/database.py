@@ -8,7 +8,7 @@ from gym_management.settings import DATABASE_URL
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True, echo=True)
 
-SessionFactory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionFactory = sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=False)
 
 
 Session = scoped_session(SessionFactory, scopefunc=RequestIDMiddleware.get_request_id)

@@ -1,3 +1,4 @@
+from common.database import Session
 from gym_app.exceptions import (
     InvalidInputException,
     ResourceNotFoundException,
@@ -5,7 +6,6 @@ from gym_app.exceptions import (
 )
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.gym_repository import GymRepository
-from common import Session
 
 
 class GymComponent:
@@ -44,7 +44,6 @@ class GymComponent:
             self.logger.log_info("Adding new gym")
             gym = self.gym_repository.create_gym(data)
             session.commit()
-            session.refresh(gym)
             return gym
         except KeyError as e:
             missing_field = str(e).strip("'")
@@ -67,7 +66,6 @@ class GymComponent:
             gym = self.gym_repository.update_gym(gym_id, data)
             if gym:
                 session.commit()
-                session.refresh(gym)
                 return gym
             return None
         except ResourceNotFoundException as e:
