@@ -1,6 +1,8 @@
-from django.utils.deprecation import MiddlewareMixin
-from common.threads.thread import set_local, clear_local
 import uuid
+
+from django.utils.deprecation import MiddlewareMixin
+
+from common.threads.thread import set_local, clear_local
 
 
 class LocalThreadMiddleware(MiddlewareMixin):

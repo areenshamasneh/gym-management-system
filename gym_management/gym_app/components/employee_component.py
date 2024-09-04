@@ -1,6 +1,6 @@
 from sqlalchemy.exc import NoResultFound
 
-from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
+from gym_app.exceptions import ResourceNotFoundException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories import EmployeeRepository
 

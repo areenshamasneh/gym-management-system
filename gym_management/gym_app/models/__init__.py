@@ -1,3 +1,5 @@
+from gym_app.models.hall_type_model import HallTypeModel, HallTypeCode, HallTypeName
+from gym_app.models.models_sqlalchemy import *
 from gym_app.models.system_models import (
     Gym,
     Hall,
@@ -8,6 +10,3 @@ from gym_app.models.system_models import (
     HallType,
     Admin,
 )
-from gym_app.models.hall_type_model import HallTypeModel, HallTypeCode, HallTypeName
-
-from gym_app.models.models_sqlalchemy import *

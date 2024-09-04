@@ -2,9 +2,9 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 
+from common.db.database import Session
 from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models.models_sqlalchemy import Hall, Machine, HallMachine
-from common.db.database import Session
 
 
 class MachineRepository:

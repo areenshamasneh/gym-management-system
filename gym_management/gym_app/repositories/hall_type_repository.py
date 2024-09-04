@@ -1,9 +1,9 @@
 from sqlalchemy import select, delete
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
+from common.db.database import Session
 from gym_app.exceptions import DatabaseException
 from gym_app.models.models_sqlalchemy import HallType, Hall
-from common.db.database import Session
 
 
 class HallTypeRepository:

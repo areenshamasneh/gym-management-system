@@ -2,9 +2,9 @@ from sqlalchemy import select, delete
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import joinedload
 
+from common.db.database import Session
 from gym_app.exceptions import ResourceNotFoundException, DatabaseException
 from gym_app.models.models_sqlalchemy import Member, Gym
-from common.db.database import Session
 
 
 class MemberRepository:

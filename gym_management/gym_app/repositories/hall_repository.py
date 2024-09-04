@@ -2,8 +2,8 @@ from sqlalchemy import select, delete
 from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 from sqlalchemy.orm import joinedload
 
-from gym_app.models.models_sqlalchemy import Hall, Gym, HallType
 from common.db.database import Session
+from gym_app.models.models_sqlalchemy import Hall, Gym, HallType
 
 
 class HallRepository:
