@@ -36,8 +36,6 @@ class GymController(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         gym = self.gym_component.fetch_gym_by_id(pk)
-        if not gym:
-            return Response({"error": "Gym not found"}, status=status.HTTP_404_NOT_FOUND)
         serialized_gym = self.gym_schema.dump(gym)
         return Response(serialized_gym, status=status.HTTP_200_OK)
 
@@ -58,16 +56,12 @@ class GymController(viewsets.ViewSet):
 
         gym_data = request.data
         updated_gym = self.gym_component.modify_gym(pk, gym_data)
-        if updated_gym:
-            serialized_gym = self.gym_schema.dump(updated_gym)
-            return Response(serialized_gym, status=status.HTTP_200_OK)
-        return Response({"error": "Gym not found"}, status=status.HTTP_404_NOT_FOUND)
+        serialized_gym = self.gym_schema.dump(updated_gym)
+        return Response(serialized_gym, status=status.HTTP_200_OK)
 
     def partial_update(self, request, pk=None):
         return self.update(request, pk)
 
     def destroy(self, request, pk=None):
-        success = self.gym_component.remove_gym(pk)
-        if success:
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response({"error": "Gym not found"}, status=status.HTTP_404_NOT_FOUND)
+        self.gym_component.remove_gym(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)

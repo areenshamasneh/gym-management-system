@@ -15,28 +15,12 @@ class GymComponent:
         self.logger.log_info("GymComponent initialized")
 
     def fetch_all_gyms(self, page_number=1, page_size=10):
-        try:
-            return self.gym_repository.get_all_gyms(page_number, page_size)
-        except Exception as e:
-            self.logger.log_error(f"An error occurred while fetching all gyms: {e}")
-            raise Exception("An error occurred while fetching all gyms.")
+        self.logger.log_info(f"Fetching all Gyms")
+        return self.gym_repository.get_all_gyms(page_number, page_size)
 
     def fetch_gym_by_id(self, gym_id):
-        try:
-            gym = self.gym_repository.get_gym_by_id(gym_id)
-            if gym is None:
-                raise ResourceNotFoundException(f"Gym with ID {gym_id} does not exist")
-            return gym
-        except ResourceNotFoundException as e:
-            self.logger.log_error(str(e))
-            raise
-        except Exception as e:
-            self.logger.log_error(
-                f"An error occurred while fetching gym by ID {gym_id}: {e}"
-            )
-            raise Exception(
-                f"An error occurred while fetching gym by ID {gym_id}."
-            )
+        self.logger.log_info(f"Fetching gym with id: {gym_id}")
+        return self.gym_repository.get_gym_by_id(gym_id)
 
     def add_gym(self, data):
         session = Session()
@@ -45,15 +29,6 @@ class GymComponent:
             gym = self.gym_repository.create_gym(data)
             session.commit()
             return gym
-        except KeyError as e:
-            missing_field = str(e).strip("'")
-            raise InvalidInputException(f"Missing required field: '{missing_field}'")
-        except ValueError as e:
-            self.logger.log_error(f"Invalid data: {e}")
-            raise DatabaseException("An error occurred while adding the gym.")
-        except Exception as e:
-            self.logger.log_error(f"An error occurred while adding the gym: {e}")
-            raise Exception("An error occurred while adding the gym.")
         finally:
             Session.remove()
 
@@ -66,21 +41,6 @@ class GymComponent:
                 session.commit()
                 return gym
             return None
-        except ResourceNotFoundException as e:
-            self.logger.log_error(str(e))
-            raise
-        except ValueError as e:
-            self.logger.log_error(f"Invalid data: {e}")
-            raise DatabaseException(
-                f"An error occurred while modifying gym ID {gym_id}."
-            )
-        except Exception as e:
-            self.logger.log_error(
-                f"An error occurred while modifying gym ID {gym_id}: {e}"
-            )
-            raise Exception(
-                f"An error occurred while modifying gym ID {gym_id}."
-            )
         finally:
             Session.remove()
 
@@ -93,15 +53,5 @@ class GymComponent:
                 session.commit()
                 return success
             return False
-        except ResourceNotFoundException as e:
-            self.logger.log_error(str(e))
-            raise
-        except Exception as e:
-            self.logger.log_error(
-                f"An error occurred while removing gym ID {gym_id}: {e}"
-            )
-            raise Exception(
-                f"An error occurred while removing gym ID {gym_id}."
-            )
         finally:
             Session.remove()
