@@ -26,7 +26,7 @@ class EmployeeController(viewsets.ViewSet):
     def retrieve(self, request, gym_pk=None, pk=None):
         try:
             employee = self.employee_component.fetch_employee_by_id(gym_pk, pk)
-            serialized_employee = serialize_employee(employee)
+            serialized_employee = self.schema.dump(employee)
             return Response(serialized_employee)
         except ResourceNotFoundException as e:
             return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)

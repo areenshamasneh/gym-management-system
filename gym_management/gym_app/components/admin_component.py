@@ -1,4 +1,4 @@
-from gym_app.exceptions import ResourceNotFoundException, DatabaseException
+from gym_app.exceptions import ResourceNotFoundException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.admin_repository import AdminRepository
 
@@ -21,7 +21,7 @@ class AdminComponent:
             raise e
         except Exception as e:
             self.logger.log_error(f"Error fetching all admins for gym_id: {gym_id}: {str(e)}")
-            raise DatabaseException("An error occurred while fetching all admins.")
+            raise Exception("An error occurred while fetching all admins.")
 
     def fetch_admin_by_id(self, gym_id, admin_id):
         try:
@@ -39,7 +39,7 @@ class AdminComponent:
             self.logger.log_error(
                 f"Unexpected error fetching admin by ID {admin_id} for gym_id: {gym_id}: {str(e)}"
             )
-            raise DatabaseException(f"Error fetching admin by ID: {str(e)}")
+            raise Exception(f"Error fetching admin by ID: {str(e)}")
 
     def add_admin(self, gym_id, admin_data):
         try:
@@ -53,7 +53,7 @@ class AdminComponent:
             raise e
         except Exception as e:
             self.logger.log_error(f"Error adding admin for gym_id: {gym_id}: {str(e)}")
-            raise DatabaseException(f"Error adding admin: {str(e)}")
+            raise Exception(f"Error adding admin: {str(e)}")
 
     def modify_admin(self, gym_id, admin_id, admin_data):
         try:
@@ -66,7 +66,7 @@ class AdminComponent:
             self.logger.log_error(
                 f"Unexpected error modifying admin ID {admin_id} for gym_id: {gym_id}: {str(e)}"
             )
-            raise DatabaseException(f"Error modifying admin: {str(e)}")
+            raise Exception(f"Error modifying admin: {str(e)}")
 
     def remove_admin(self, gym_id, admin_id):
         try:
@@ -81,4 +81,4 @@ class AdminComponent:
             self.logger.log_error(
                 f"Unexpected error removing admin ID {admin_id} for gym_id: {gym_id}: {str(e)}"
             )
-            raise DatabaseException(f"Error removing admin: {str(e)}")
+            raise Exception(f"Error removing admin: {str(e)}")

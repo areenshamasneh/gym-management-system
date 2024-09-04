@@ -1,7 +1,6 @@
 from gym_app.exceptions import (
     ResourceNotFoundException,
-    ValidationException,
-    DatabaseException,
+    ValidationException
 )
 from gym_app.logging import SimpleLogger
 from gym_app.repositories import HallRepository
@@ -25,7 +24,7 @@ class HallComponent:
             raise
         except Exception as e:
             self.logger.log_error(f"Error fetching all halls: {str(e)}")
-            raise DatabaseException("An error occurred while fetching halls.") from e
+            raise Exception("An error occurred while fetching halls.") from e
 
     def fetch_hall_by_id(self, gym_id, hall_id):
         self.logger.log_info(f"Fetching hall with ID {hall_id} for gym ID {gym_id}")
@@ -38,7 +37,7 @@ class HallComponent:
             raise ResourceNotFoundException(f"Hall with ID {hall_id} does not exist in gym ID {gym_id}")
         except Exception as e:
             self.logger.log_error(f"Error fetching hall by ID {hall_id}: {str(e)}")
-            raise DatabaseException(f"An error occurred while fetching hall with ID {hall_id}.") from e
+            raise Exception(f"An error occurred while fetching hall with ID {hall_id}.") from e
 
     def add_hall(self, gym_id, data):
         self.logger.log_info(f"Adding new hall with data: {data} for gym ID {gym_id}")
@@ -51,7 +50,7 @@ class HallComponent:
             raise ValidationException(f"Validation error: {str(e)}")
         except Exception as e:
             self.logger.log_error(f"Error adding hall: {str(e)}")
-            raise DatabaseException("An error occurred while adding the hall.")
+            raise Exception("An error occurred while adding the hall.")
 
     def modify_hall(self, gym_id, hall_id, data):
         self.logger.log_info(
@@ -71,7 +70,7 @@ class HallComponent:
             raise ValidationException(f"Validation error: {str(e)}")
         except Exception as e:
             self.logger.log_error(f"Error modifying hall: {str(e)}")
-            raise DatabaseException("An error occurred while modifying the hall.")
+            raise Exception("An error occurred while modifying the hall.")
 
     def remove_hall(self, gym_id, hall_id):
         self.logger.log_info(f"Removing hall with ID {hall_id} for gym ID {gym_id}")
@@ -85,4 +84,4 @@ class HallComponent:
             raise
         except Exception as e:
             self.logger.log_error(f"Error removing hall: {str(e)}")
-            raise DatabaseException("An error occurred while removing the hall.")
+            raise Exception("An error occurred while removing the hall.")

@@ -19,7 +19,7 @@ class GymComponent:
             return self.gym_repository.get_all_gyms(page_number, page_size)
         except Exception as e:
             self.logger.log_error(f"An error occurred while fetching all gyms: {e}")
-            raise DatabaseException("An error occurred while fetching all gyms.")
+            raise Exception("An error occurred while fetching all gyms.")
 
     def fetch_gym_by_id(self, gym_id):
         try:
@@ -34,7 +34,7 @@ class GymComponent:
             self.logger.log_error(
                 f"An error occurred while fetching gym by ID {gym_id}: {e}"
             )
-            raise DatabaseException(
+            raise Exception(
                 f"An error occurred while fetching gym by ID {gym_id}."
             )
 
@@ -53,7 +53,7 @@ class GymComponent:
             raise DatabaseException("An error occurred while adding the gym.")
         except Exception as e:
             self.logger.log_error(f"An error occurred while adding the gym: {e}")
-            raise DatabaseException("An error occurred while adding the gym.")
+            raise Exception("An error occurred while adding the gym.")
         finally:
             Session.remove()
 
@@ -78,7 +78,7 @@ class GymComponent:
             self.logger.log_error(
                 f"An error occurred while modifying gym ID {gym_id}: {e}"
             )
-            raise DatabaseException(
+            raise Exception(
                 f"An error occurred while modifying gym ID {gym_id}."
             )
         finally:
@@ -100,7 +100,7 @@ class GymComponent:
             self.logger.log_error(
                 f"An error occurred while removing gym ID {gym_id}: {e}"
             )
-            raise DatabaseException(
+            raise Exception(
                 f"An error occurred while removing gym ID {gym_id}."
             )
         finally:

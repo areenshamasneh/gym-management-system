@@ -21,7 +21,7 @@ class HallTypeComponent:
             raise ResourceNotFoundException("Resource not found")
         except Exception as e:
             self.logger.log_error(f"Error fetching all hall types: {e}")
-            raise DatabaseException("An error occurred while fetching all hall types.") from e
+            raise Exception("An error occurred while fetching all hall types.") from e
 
     def fetch_hall_type_by_id(self, hall_type_id):
         self.logger.log_info(f"Fetching hall type with ID {hall_type_id}")
@@ -35,7 +35,7 @@ class HallTypeComponent:
             raise ResourceNotFoundException("Resource not found")
         except Exception as e:
             self.logger.log_error(f"Error fetching hall type with ID {hall_type_id}: {e}")
-            raise DatabaseException("An error occurred while fetching the hall type.") from e
+            raise Exception("An error occurred while fetching the hall type.") from e
 
     def add_hall_type(self, data):
         self.logger.log_info(f"Adding new hall type with data: {data}")
@@ -44,6 +44,9 @@ class HallTypeComponent:
         except DatabaseException as e:
             self.logger.log_error(f"Error adding hall type: {e}")
             raise
+        except Exception as e:
+            self.logger.log_error(f"Error Adding hall type: {e}")
+            raise Exception("An error occurred while adding the hall type.") from e
 
     def modify_hall_type(self, hall_type_id, data):
         self.logger.log_info(f"Modifying hall type with ID {hall_type_id} with data: {data}")
@@ -55,6 +58,9 @@ class HallTypeComponent:
         except DatabaseException as e:
             self.logger.log_error(f"Error modifying hall type with ID {hall_type_id}: {e}")
             raise
+        except Exception as e:
+            self.logger.log_error(f"Error updating hall type: {e}")
+            raise Exception("An error occurred while updating the hall type.") from e
 
     def remove_hall_type(self, hall_type_id):
         self.logger.log_info(f"Removing hall type with ID {hall_type_id}")
@@ -66,3 +72,6 @@ class HallTypeComponent:
         except DatabaseException as e:
             self.logger.log_error(f"Error removing hall type with ID {hall_type_id}: {e}")
             raise
+        except Exception as e:
+            self.logger.log_error(f"Error removing hall type with ID {hall_type_id}: {e}")
+            raise Exception("An error occurred while removing the hall type.") from e

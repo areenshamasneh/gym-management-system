@@ -1,6 +1,6 @@
 from sqlalchemy.exc import NoResultFound
 
-from gym_app.exceptions import ResourceNotFoundException, InvalidInputException, DatabaseException
+from gym_app.exceptions import ResourceNotFoundException, InvalidInputException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories import EmployeeRepository
 
@@ -27,7 +27,7 @@ class EmployeeComponent:
             self.logger.log_error(
                 f"Error fetching all employees for gym_id: {gym_id}: {str(e)}"
             )
-            raise DatabaseException("An error occurred while fetching all employees.")
+            raise Exception("An error occurred while fetching all employees.")
 
     def fetch_employee_by_id(self, gym_id, employee_id):
         try:
@@ -43,7 +43,7 @@ class EmployeeComponent:
             raise ResourceNotFoundException(f"Employee with ID {employee_id} does not exist for gym_id: {gym_id}")
         except Exception as e:
             self.logger.log_error(f"Error fetching employee: {str(e)}")
-            raise DatabaseException("Error fetching employee")
+            raise Exception("Error fetching employee")
 
     def add_employee(self, gym_id, data):
         try:
@@ -53,7 +53,7 @@ class EmployeeComponent:
             self.logger.log_error(
                 f"Error adding employee for gym_id: {gym_id}: {str(e)}"
             )
-            raise InvalidInputException("Error adding employee")
+            raise Exception("Error adding employee")
 
     def modify_employee(self, gym_id, employee_id, data):
         try:
@@ -72,7 +72,7 @@ class EmployeeComponent:
             self.logger.log_error(
                 f"Error modifying employee ID {employee_id} for gym_id: {gym_id}: {str(e)}"
             )
-            raise InvalidInputException("Error modifying employee")
+            raise Exception("Error modifying employee")
 
     def remove_employee(self, gym_id, employee_id):
         try:
@@ -91,4 +91,4 @@ class EmployeeComponent:
             self.logger.log_error(
                 f"Error removing employee ID {employee_id} for gym_id: {gym_id}: {str(e)}"
             )
-            raise InvalidInputException("Error removing employee")
+            raise Exception("Error removing employee")

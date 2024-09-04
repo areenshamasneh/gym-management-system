@@ -1,7 +1,6 @@
 from gym_app.exceptions import (
     ResourceNotFoundException,
-    ValidationException,
-    DatabaseException,
+    ValidationException
 )
 from gym_app.logging import SimpleLogger
 from gym_app.repositories import MachineRepository
@@ -25,7 +24,7 @@ class MachineComponent:
             raise
         except Exception as e:
             self.logger.log_error(f"Error fetching machines in hall: {e}")
-            raise DatabaseException("An error occurred while fetching machines in the hall.") from e
+            raise Exception("An error occurred while fetching machines in the hall.") from e
 
     def fetch_machine_by_id_in_hall(self, gym_id, hall_id, machine_id):
         self.logger.log_info(f"Fetching machine by ID: {machine_id} in hall: {hall_id}")
@@ -40,7 +39,7 @@ class MachineComponent:
             raise
         except Exception as e:
             self.logger.log_error(f"Error fetching machine by ID: {e}")
-            raise DatabaseException("An error occurred while fetching the machine by ID.") from e
+            raise Exception("An error occurred while fetching the machine by ID.") from e
 
     def add_machine_and_hall_machine(self, gym_id, hall_id, machine_data):
         self.logger.log_info(f"Adding machine with data: {machine_data}")
@@ -57,7 +56,7 @@ class MachineComponent:
             raise ValidationException(f"Validation error: {str(e)}")
         except Exception as e:
             self.logger.log_error(f"Error adding machine and hall machine: {e}")
-            raise DatabaseException("An error occurred while adding the machine and hall machine.")
+            raise Exception("An error occurred while adding the machine and hall machine.")
 
     def modify_machine_and_hall_machine(self, gym_id, hall_id, machine_id, data):
         self.logger.log_info(f"Modifying hall machine with ID: {machine_id} and data: {data}")
@@ -73,7 +72,7 @@ class MachineComponent:
             raise ValidationException(f"Validation error: {str(e)}")
         except Exception as e:
             self.logger.log_error(f"Error modifying hall machine: {e}")
-            raise DatabaseException("An error occurred while modifying the hall machine.")
+            raise Exception("An error occurred while modifying the hall machine.")
 
     def remove_hall_machine(self, gym_id, hall_id, machine_id):
         self.logger.log_info(f"Removing hall machine with ID: {machine_id}")
@@ -85,7 +84,7 @@ class MachineComponent:
             raise ValidationException(f"Validation error: {str(e)}")
         except Exception as e:
             self.logger.log_error(f"Error removing hall machine: {e}")
-            raise DatabaseException("An error occurred while removing the hall machine.")
+            raise Exception("An error occurred while removing the hall machine.")
 
     def fetch_all_machines_in_gym(self, gym_id):
         self.logger.log_info(f"Fetching all machines for gym_id: {gym_id}")
@@ -99,7 +98,7 @@ class MachineComponent:
             raise
         except Exception as e:
             self.logger.log_error(f"Error fetching machines in gym: {e}")
-            raise DatabaseException("An error occurred while fetching machines in the gym.") from e
+            raise Exception("An error occurred while fetching machines in the gym.") from e
 
     def fetch_machine_by_id_in_gym(self, gym_id, machine_id):
         self.logger.log_info(f"Fetching machine with ID: {machine_id} for gym_id: {gym_id}")
@@ -114,4 +113,4 @@ class MachineComponent:
             raise
         except Exception as e:
             self.logger.log_error(f"Error fetching machine by ID: {e}")
-            raise DatabaseException("An error occurred while fetching the machine by ID.") from e
+            raise Exception("An error occurred while fetching the machine by ID.") from e
