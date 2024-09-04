@@ -1,9 +1,4 @@
 from common.db.database import Session
-from gym_app.exceptions import (
-    InvalidInputException,
-    ResourceNotFoundException,
-    DatabaseException,
-)
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.gym_repository import GymRepository
 
