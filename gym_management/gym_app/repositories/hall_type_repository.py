@@ -1,7 +1,6 @@
 from sqlalchemy import select, delete
 
 from common.db.database import Session
-from gym_app.exceptions import DatabaseException
 from gym_app.models.models_sqlalchemy import HallType, Hall
 
 
@@ -21,6 +20,13 @@ class HallTypeRepository:
 
     @staticmethod
     def create_hall_type(data):
+        existing_hall_type_query = (
+            select(HallType)
+            .filter(HallType.code == data['code'])
+        )
+        existing_hall_type = Session.execute(existing_hall_type_query).scalar_one_or_none()
+        if existing_hall_type:
+            return None
         hall_type = HallType(**data)
         Session.add(hall_type)
         return hall_type
@@ -42,7 +48,7 @@ class HallTypeRepository:
                 )
                 existing_hall_type = Session.execute(existing_hall_type_query).scalar_one_or_none()
                 if existing_hall_type:
-                    raise DatabaseException("Code already exists for another hall type.")
+                    return None
                 hall_type.code = data['code']
 
         if 'name' in data:
@@ -60,7 +66,7 @@ class HallTypeRepository:
         associated_halls = Session.execute(halls_query).scalars().all()
 
         if associated_halls:
-            raise DatabaseException("Cannot delete HallType because it is still in use by Halls.")
+            return None
 
         query = delete(HallType).filter(HallType.id == hall_type_id)
         result = Session.execute(query)

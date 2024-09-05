@@ -2,64 +2,47 @@ from sqlalchemy import select, delete
 from sqlalchemy.orm import joinedload
 
 from common.db.database import Session
-from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models.models_sqlalchemy import Member, Gym
 
 
 class MemberRepository:
     @staticmethod
-    def get_all_members(gym_id):
-        gym = Session.get(Gym, gym_id)
-        if not gym:
-            raise ResourceNotFoundException("Gym not found")
+    def get_gym(gym_id):
+        return Session.get(Gym, gym_id)
 
-        query = select(Member).filter(Member.gym_id == gym_id).options(
+    @staticmethod
+    def get_all_members(gym):
+        query = select(Member).filter(Member.gym_id == gym.id).options(
             joinedload(Member.gym)
         )
         result = Session.execute(query)
         return result.scalars().all()
 
     @staticmethod
-    def get_member_by_id(gym_id, member_id):
-        gym = Session.get(Gym, gym_id)
-        if not gym:
-            raise ResourceNotFoundException("Gym not found")
-
-        query = select(Member).filter(Member.id == member_id, Member.gym_id == gym_id).options(
+    def get_member_by_id(gym, member_id):
+        query = select(Member).filter(Member.id == member_id, Member.gym_id == gym.id).options(
             joinedload(Member.gym)
         )
         result = Session.execute(query)
-        member = result.scalar_one_or_none()
-
-        if not member:
-            raise ResourceNotFoundException(f"Member with ID {member_id} not found in gym with ID {gym_id}")
-
-        return member
+        return result.scalar_one_or_none()
 
     @staticmethod
-    def create_member(gym_id, data):
-        gym = Session.get(Gym, gym_id)
-        if gym is None:
-            raise ResourceNotFoundException(f"Gym with ID {gym_id} not found")
-
+    def create_member(gym, data):
         if "gym" in data:
             del data["gym"]
 
-        data["gym_id"] = gym_id
-
+        data["gym_id"] = gym.id
         member = Member(**data)
         Session.add(member)
         return member
 
     @staticmethod
-    def update_member(gym_id, member_id, data):
-        query = select(Member).filter(Member.id == member_id, Member.gym_id == gym_id)
+    def update_member(gym, member_id, data):
+        query = select(Member).filter(Member.id == member_id, Member.gym_id == gym.id)
         member = Session.execute(query).scalar_one_or_none()
 
         if member is None:
-            raise ResourceNotFoundException(
-                f"Member with ID {member_id} not found in gym with ID {gym_id}"
-            )
+            return None
 
         for key, value in data.items():
             if key != "gym" and hasattr(member, key):
@@ -68,11 +51,7 @@ class MemberRepository:
         return member
 
     @staticmethod
-    def delete_member(gym_id, member_id):
-        query = delete(Member).filter(Member.id == member_id, Member.gym_id == gym_id)
+    def delete_member(gym, member_id):
+        query = delete(Member).filter(Member.id == member_id, Member.gym_id == gym.id)
         result = Session.execute(query)
-        if result.rowcount == 0:
-            raise ResourceNotFoundException(
-                f"Member with ID {member_id} not found in gym with ID {gym_id}"
-            )
         return result.rowcount > 0

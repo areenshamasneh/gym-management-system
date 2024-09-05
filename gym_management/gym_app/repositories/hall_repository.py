@@ -8,20 +8,19 @@ from gym_app.models.models_sqlalchemy import Hall, Gym, HallType
 
 class HallRepository:
     @staticmethod
-    def get_all_halls(gym_id):
+    def get_gym(gym_id):
         gym = Session.get(Gym, gym_id)
-        if not gym:
-            raise ResourceNotFoundException("Gym not found")
-        query = select(Hall).filter(Hall.gym_id == gym_id).options(joinedload(Hall.gym))
+        return gym
+
+    @staticmethod
+    def get_all_halls(gym):
+        query = select(Hall).filter(Hall.gym_id == gym.id).options(joinedload(Hall.gym))
         result = Session.execute(query)
         return result.scalars().all()
 
     @staticmethod
-    def get_hall_by_id(gym_id, hall_id):
-        gym = Session.get(Gym, gym_id)
-        if not gym:
-            raise ResourceNotFoundException("Gym not found")
-        query = select(Hall).filter(Hall.id == hall_id, Hall.gym_id == gym_id).options(joinedload(Hall.gym))
+    def get_hall_by_id(gym, hall_id):
+        query = select(Hall).filter(Hall.id == hall_id, Hall.gym_id == gym.id).options(joinedload(Hall.gym))
         result = Session.execute(query)
         hall = result.scalar_one_or_none()
         if not hall:
@@ -29,14 +28,8 @@ class HallRepository:
         return hall
 
     @staticmethod
-    def create_hall(gym_id, data):
-        gym_instance = Session.get(Gym, gym_id)
-        if gym_instance is None:
-            raise ValueError("Gym not found")
-
+    def create_hall(gym, data):
         hall_type_id = data.get("hall_type")
-        if hall_type_id is None:
-            raise ValueError("HallType ID is required")
 
         hall_type_instance = Session.get(HallType, int(hall_type_id))
         if hall_type_instance is None:
@@ -46,7 +39,7 @@ class HallRepository:
             name=data.get("name"),
             users_capacity=data.get("users_capacity"),
             hall_type_id=hall_type_instance.id,
-            gym_id=gym_instance.id
+            gym_id=gym.id
         )
         Session.add(hall)
         return hall
