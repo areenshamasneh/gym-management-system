@@ -2,8 +2,8 @@ from sqlalchemy import select, delete
 from sqlalchemy.orm import joinedload
 
 from common.db.database import Session
-from gym_app.models.models_sqlalchemy import Member, Gym
 from gym_app.exceptions import ResourceNotFoundException
+from gym_app.models.models_sqlalchemy import Member, Gym
 
 
 class MemberRepository:
@@ -65,7 +65,7 @@ class MemberRepository:
         if member is None:
             raise ResourceNotFoundException(
                 f"Member with ID {member_id} not found in gym with ID {gym_id}"
-                )
+            )
 
         for key, value in data.items():
             if key != "gym" and hasattr(member, key):
@@ -79,6 +79,6 @@ class MemberRepository:
         result = Session.execute(query)
         if result.rowcount == 0:
             raise ResourceNotFoundException(
-                    f"Member with ID {member_id} not found in gym with ID {gym_id}"
+                f"Member with ID {member_id} not found in gym with ID {gym_id}"
             )
         return result.rowcount > 0

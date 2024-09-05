@@ -1,7 +1,8 @@
 from sqlalchemy import func
+
 from common.db.database import Session
-from gym_app.models.models_sqlalchemy import Gym
 from gym_app.exceptions import ResourceNotFoundException
+from gym_app.models.models_sqlalchemy import Gym
 
 
 class GymRepository:

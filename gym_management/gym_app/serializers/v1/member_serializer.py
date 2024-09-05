@@ -1,6 +1,8 @@
 import importlib
-from marshmallow import Schema, fields, pre_load, post_dump, ValidationError
 from datetime import datetime, date
+
+from marshmallow import Schema, fields, pre_load, post_dump, ValidationError
+
 
 class MemberSerializer(Schema):
     id = fields.Int()
