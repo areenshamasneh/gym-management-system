@@ -19,35 +19,25 @@ class AdminComponent:
 
     def add_admin(self, gym_id, data):
         session = Session()
-        try:
-            self.logger.log_info("Adding new admin")
-            admin = self.admin_repository.create_admin(gym_id, data)
-            session.commit()
-            session.refresh(admin)
-            return admin
-        finally:
-            Session.remove()
+        self.logger.log_info("Adding new admin")
+        admin = self.admin_repository.create_admin(gym_id, data)
+        session.commit()
+        return admin
 
     def modify_admin(self, gym_id, admin_id, data):
         session = Session()
-        try:
-            self.logger.log_info(f"Modifying admin ID {admin_id} for gym_id: {gym_id}")
-            admin = self.admin_repository.update_admin(admin_id, data)
-            if admin:
-                session.commit()
-                return admin
-            return None
-        finally:
-            Session.remove()
+        self.logger.log_info(f"Modifying admin ID {admin_id} for gym_id: {gym_id}")
+        admin = self.admin_repository.update_admin(admin_id, data)
+        if admin:
+            session.commit()
+            return admin
+        return None
 
     def remove_admin(self, gym_id, admin_id):
         session = Session()
-        try:
-            self.logger.log_info(f"Removing admin ID {admin_id} for gym_id: {gym_id}")
-            success = self.admin_repository.delete_admin(admin_id)
-            if success:
-                session.commit()
-                return success
-            return False
-        finally:
-            Session.remove()
+        self.logger.log_info(f"Removing admin ID {admin_id} for gym_id: {gym_id}")
+        success = self.admin_repository.delete_admin(admin_id)
+        if success:
+            session.commit()
+            return success
+        return False

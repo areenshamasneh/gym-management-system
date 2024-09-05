@@ -2,8 +2,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from common.db.database import Session
-from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models.models_sqlalchemy import Admin, Gym
+from gym_app.exceptions import ResourceNotFoundException
 
 
 class AdminRepository:
