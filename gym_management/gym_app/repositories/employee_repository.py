@@ -9,38 +9,32 @@ from gym_app.models.models_sqlalchemy import Employee, Gym
 class EmployeeRepository:
     @staticmethod
     def get_all_employees(gym_id):
-        try:
-            gym = Session.get(Gym, gym_id)
-            if not gym:
-                raise ResourceNotFoundException("Gym not found")
+        gym = Session.get(Gym, gym_id)
+        if not gym:
+            raise ResourceNotFoundException("Gym not found")
 
-            query = select(Employee).filter(Employee.gym_id == gym_id).options(
-                joinedload(Employee.gym),
-                joinedload(Employee.manager)
-            )
-            result = Session.execute(query)
-            return result.scalars().all()
-        finally:
-            Session.remove()
+        query = select(Employee).filter(Employee.gym_id == gym_id).options(
+            joinedload(Employee.gym),
+            joinedload(Employee.manager)
+        )
+        result = Session.execute(query)
+        return result.scalars().all()
 
     @staticmethod
     def get_employee_by_id(gym_id, employee_id):
-        try:
-            gym = Session.get(Gym, gym_id)
-            if not gym:
-                raise ResourceNotFoundException("Gym not found")
+        gym = Session.get(Gym, gym_id)
+        if not gym:
+            raise ResourceNotFoundException("Gym not found")
 
-            query = select(Employee).filter(Employee.id == employee_id, Employee.gym_id == gym_id).options(
-                joinedload(Employee.gym), joinedload(Employee.manager))
-            result = Session.execute(query)
-            employee = result.scalar_one_or_none()
+        query = select(Employee).filter(Employee.id == employee_id, Employee.gym_id == gym_id).options(
+            joinedload(Employee.gym), joinedload(Employee.manager))
+        result = Session.execute(query)
+        employee = result.scalar_one_or_none()
 
-            if not employee:
-                raise ResourceNotFoundException("Employee not found")
+        if not employee:
+            raise ResourceNotFoundException("Employee not found")
 
-            return employee
-        finally:
-            Session.remove()
+        return employee
 
     @staticmethod
     def create_employee(gym_id, data):

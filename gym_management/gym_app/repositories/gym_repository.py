@@ -10,18 +10,14 @@ class GymRepository:
     def get_all_gyms(offset=0, limit=10):
         total_gyms = Session.query(func.count(Gym.id)).scalar()
         gyms = Session.query(Gym).offset(offset).limit(limit).all()
-        Session.remove()
         return gyms, total_gyms
 
     @staticmethod
     def get_gym_by_id(pk):
-        try:
-            gym = Session.get(Gym, pk)
-            if not gym:
-                raise ResourceNotFoundException()
-            return gym
-        finally:
-            Session.remove()
+        gym = Session.get(Gym, pk)
+        if not gym:
+            raise ResourceNotFoundException()
+        return gym
 
     @staticmethod
     def create_gym(data):

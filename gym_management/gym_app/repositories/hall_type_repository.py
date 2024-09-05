@@ -1,6 +1,4 @@
 from sqlalchemy import select, delete
-from sqlalchemy.exc import NoResultFound, IntegrityError
-from sqlalchemy.orm import joinedload
 
 from common.db.database import Session
 from gym_app.exceptions import DatabaseException
@@ -11,21 +9,15 @@ class HallTypeRepository:
 
     @staticmethod
     def get_all_hall_types():
-        try:
-            query = select(HallType)
-            result = Session.execute(query)
-            return result.scalars().all()
-        finally:
-            Session.remove()
+        query = select(HallType)
+        result = Session.execute(query)
+        return result.scalars().all()
 
     @staticmethod
     def get_hall_type_by_id(hall_type_id):
-        try:
-            query = select(HallType).filter(HallType.id == hall_type_id)
-            result = Session.execute(query)
-            return result.scalar_one_or_none()
-        finally:
-            Session.remove()
+        query = select(HallType).filter(HallType.id == hall_type_id)
+        result = Session.execute(query)
+        return result.scalar_one_or_none()
 
     @staticmethod
     def create_hall_type(data):

@@ -9,38 +9,32 @@ from gym_app.models.models_sqlalchemy import Member, Gym
 class MemberRepository:
     @staticmethod
     def get_all_members(gym_id):
-        try:
-            gym = Session.get(Gym, gym_id)
-            if not gym:
-                raise ResourceNotFoundException("Gym not found")
+        gym = Session.get(Gym, gym_id)
+        if not gym:
+            raise ResourceNotFoundException("Gym not found")
 
-            query = select(Member).filter(Member.gym_id == gym_id).options(
-                joinedload(Member.gym)
-            )
-            result = Session.execute(query)
-            return result.scalars().all()
-        finally:
-            Session.remove()
+        query = select(Member).filter(Member.gym_id == gym_id).options(
+            joinedload(Member.gym)
+        )
+        result = Session.execute(query)
+        return result.scalars().all()
 
     @staticmethod
     def get_member_by_id(gym_id, member_id):
-        try:
-            gym = Session.get(Gym, gym_id)
-            if not gym:
-                raise ResourceNotFoundException("Gym not found")
+        gym = Session.get(Gym, gym_id)
+        if not gym:
+            raise ResourceNotFoundException("Gym not found")
 
-            query = select(Member).filter(Member.id == member_id, Member.gym_id == gym_id).options(
-                joinedload(Member.gym)
-            )
-            result = Session.execute(query)
-            member = result.scalar_one_or_none()
+        query = select(Member).filter(Member.id == member_id, Member.gym_id == gym_id).options(
+            joinedload(Member.gym)
+        )
+        result = Session.execute(query)
+        member = result.scalar_one_or_none()
 
-            if not member:
-                raise ResourceNotFoundException(f"Member with ID {member_id} not found in gym with ID {gym_id}")
+        if not member:
+            raise ResourceNotFoundException(f"Member with ID {member_id} not found in gym with ID {gym_id}")
 
-            return member
-        finally:
-            Session.remove()
+        return member
 
     @staticmethod
     def create_member(gym_id, data):
