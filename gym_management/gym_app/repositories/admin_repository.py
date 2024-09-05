@@ -1,15 +1,18 @@
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from common.db.database import Session
-from gym_app.models.models_sqlalchemy import Admin, Gym
 from gym_app.exceptions import ResourceNotFoundException
+from gym_app.models.models_sqlalchemy import Admin, Gym
 
 
 class AdminRepository:
     @staticmethod
     def get_all_admins(gym_id, filter_criteria=None):
         try:
+            gym = Session.get(Gym, gym_id)
+            if not gym:
+                raise ResourceNotFoundException("Gym not found")
             query = select(Admin).filter(Admin.gym_id == gym_id).options(joinedload(Admin.gym))
 
             if filter_criteria:
@@ -32,10 +35,18 @@ class AdminRepository:
     @staticmethod
     def get_admin_by_id(gym_id, admin_id):
         try:
+            gym = Session.get(Gym, gym_id)
+            if not gym:
+                raise ResourceNotFoundException("Gym not found")
             query = select(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym_id).options(
                 joinedload(Admin.gym))
             result = Session.execute(query)
-            return result.scalar_one()
+            admin = result.scalar_one_or_none()
+
+            if not admin:
+                raise ResourceNotFoundException("Admin not found")
+
+            return admin
         finally:
             Session.remove()
 
