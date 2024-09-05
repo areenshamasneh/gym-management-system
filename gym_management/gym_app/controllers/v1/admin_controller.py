@@ -59,4 +59,4 @@ class AdminController(viewsets.ViewSet):
 
     def destroy(self, request, gym_pk=None, pk=None):
         self.admin_component.remove_admin(gym_pk, pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Admin deleted successfully"}, status=status.HTTP_204_NO_CONTENT)

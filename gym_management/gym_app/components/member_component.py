@@ -1,3 +1,4 @@
+from common.db.database import Session
 from gym_app.exceptions import (
     ResourceNotFoundException,
     ValidationException,
@@ -15,76 +16,33 @@ class MemberComponent:
 
     def fetch_all_members(self, gym_id):
         self.logger.log_info("Fetching all members")
-        try:
-            members = self.repo.get_all_members(gym_id)
-            if not members:
-                raise DatabaseException("No members found")
-            return members
-        except DatabaseException as e:
-            self.logger.log_error(f"Database error fetching members: {e}")
-            raise
-        except Exception as e:
-            self.logger.log_error(f"Unexpected error fetching members: {e}")
-            raise DatabaseException("An error occurred while fetching all members.")
+        return self.repo.get_all_members(gym_id)
 
     def fetch_member_by_id(self, gym_id, member_id):
         self.logger.log_info(f"Fetching member with ID {member_id}")
-        try:
-            member = self.repo.get_member_by_id(gym_id, member_id)
-            if member is None:
-                raise ResourceNotFoundException(f"Member with ID {member_id} not found")
-            return member
-        except ResourceNotFoundException as e:
-            self.logger.log_error(f"Resource not found: {e}")
-            raise
-        except DatabaseException as e:
-            self.logger.log_error(f"Database error: {e}")
-            raise
-        except Exception as e:
-            self.logger.log_error(f"Unexpected error fetching member: {e}")
-            raise DatabaseException("An error occurred while fetching the member by ID.")
+        return self.repo.get_member_by_id(gym_id, member_id)
 
     def create_member(self, gym_id, data):
+        session = Session()
         self.logger.log_info(f"Adding new member with data: {data}")
-        try:
-            return self.repo.create_member(gym_id, data)
-        except ValidationException as e:
-            self.logger.log_error(f"Validation error: {e}")
-            raise
-        except DatabaseException as e:
-            self.logger.log_error(f"Database error: {e}")
-            raise
-        except Exception as e:
-            self.logger.log_error(f"Unexpected error adding member: {e}")
-            raise DatabaseException("An error occurred while adding the member.")
+        member = self.repo.create_member(gym_id, data)
+        session.commit()
+        return member
 
     def modify_member(self, gym_id, member_id, data):
+        session = Session()
         self.logger.log_info(f"Modifying member with ID {member_id} with data: {data}")
-        try:
-            return self.repo.update_member(gym_id, member_id, data)
-        except ResourceNotFoundException as e:
-            self.logger.log_error(f"Resource not found: {e}")
-            raise
-        except ValidationException as e:
-            self.logger.log_error(f"Validation error: {e}")
-            raise
-        except DatabaseException as e:
-            self.logger.log_error(f"Database error: {e}")
-            raise
-        except Exception as e:
-            self.logger.log_error(f"Unexpected error modifying member: {e}")
-            raise DatabaseException("An error occurred while modifying the member.")
+        member = self.repo.update_member(gym_id, member_id, data)
+        if member:
+            session.commit()
+            return member
+        return None
 
     def remove_member(self, gym_id, member_id):
+        session = Session()
         self.logger.log_info(f"Removing member with ID {member_id}")
-        try:
-            self.repo.delete_member(gym_id, member_id)
-        except ResourceNotFoundException as e:
-            self.logger.log_error(f"Resource not found: {e}")
-            raise
-        except DatabaseException as e:
-            self.logger.log_error(f"Database error: {e}")
-            raise
-        except Exception as e:
-            self.logger.log_error(f"Unexpected error removing member: {e}")
-            raise DatabaseException("An error occurred while removing the member.")
+        success = self.repo.delete_member(gym_id, member_id)
+        if success:
+            session.commit()
+            return success
+        return False

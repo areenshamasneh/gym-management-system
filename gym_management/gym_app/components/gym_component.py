@@ -19,34 +19,25 @@ class GymComponent:
 
     def add_gym(self, data):
         session = Session()
-        try:
-            self.logger.log_info("Adding new gym")
-            gym = self.gym_repository.create_gym(data)
-            session.commit()
-            return gym
-        finally:
-            Session.remove()
+        self.logger.log_info("Adding new gym")
+        gym = self.gym_repository.create_gym(data)
+        session.commit()
+        return gym
 
     def modify_gym(self, gym_id, data):
         session = Session()
-        try:
-            self.logger.log_info(f"Modifying gym ID {gym_id}")
-            gym = self.gym_repository.update_gym(gym_id, data)
-            if gym:
-                session.commit()
-                return gym
-            return None
-        finally:
-            Session.remove()
+        self.logger.log_info(f"Modifying gym ID {gym_id}")
+        gym = self.gym_repository.update_gym(gym_id, data)
+        if gym:
+            session.commit()
+            return gym
+        return None
 
     def remove_gym(self, gym_id):
         session = Session()
-        try:
-            self.logger.log_info(f"Removing gym ID {gym_id}")
-            success = self.gym_repository.delete_gym(gym_id)
-            if success:
-                session.commit()
-                return success
-            return False
-        finally:
-            Session.remove()
+        self.logger.log_info(f"Removing gym ID {gym_id}")
+        success = self.gym_repository.delete_gym(gym_id)
+        if success:
+            session.commit()
+            return success
+        return False
