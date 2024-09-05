@@ -64,4 +64,4 @@ class GymController(viewsets.ViewSet):
 
     def destroy(self, request, pk=None):
         self.gym_component.remove_gym(pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Gym deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
