@@ -24,7 +24,7 @@ EXCEPTION_HANDLERS = {
 }
 
 
-def custom_exception_handler(exc, context):
+def handle_exception(exc, context):
     response = drf_exception_handler(exc, context)
 
     if response is None:
