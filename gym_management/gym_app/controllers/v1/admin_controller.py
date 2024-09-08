@@ -1,8 +1,9 @@
-from rest_framework import status, viewsets
-from rest_framework.response import Response
+from rest_framework import status, viewsets  # type: ignore
+from rest_framework.response import Response  # type: ignore
 
-from gym_app.components.admin_component import AdminComponent
+from gym_app.components import AdminComponent
 from gym_app.serializers import AdminSerializer
+from gym_app.utils import PaginationResponse
 from gym_app.validators import SchemaValidator
 
 
@@ -21,9 +22,21 @@ class AdminController(viewsets.ViewSet):
             "address_city": request.GET.get("address_city", ""),
             "address_street": request.GET.get("address_street", ""),
         }
-        admins = self.admin_component.fetch_all_admins(gym_pk, filter_criteria)
-        serialized_admins = self.schema.dump(admins, many=True)
-        return Response(serialized_admins)
+
+        page_number = int(request.GET.get('page_number', 1))
+        page_size = int(request.GET.get('page_size', 10))
+        offset = (page_number - 1) * page_size
+
+        admins, total_admins = self.admin_component.fetch_all_admins(gym_pk, filter_criteria, offset, page_size)
+
+        pagination_response = PaginationResponse(
+            items=self.schema.dump(admins, many=True),
+            total_items=total_admins,
+            current_page=page_number,
+            page_size=page_size
+        )
+
+        return Response(pagination_response.to_dict(), status=status.HTTP_200_OK)
 
     def retrieve(self, request, gym_pk=None, pk=None):
         admin = self.admin_component.fetch_admin_by_id(gym_pk, pk)

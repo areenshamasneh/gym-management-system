@@ -1,5 +1,5 @@
-from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy import select, func  # type: ignore
+from sqlalchemy.orm import joinedload  # type: ignore
 
 from common.db.database import Session
 from gym_app.models.models_sqlalchemy import Admin, Gym
@@ -12,23 +12,34 @@ class AdminRepository:
         return gym
 
     @staticmethod
-    def get_all_admins(gym, filter_criteria=None):
+    def get_all_admins(gym, filter_criteria=None, offset=0, limit=10):
         query = select(Admin).filter(Admin.gym_id == gym.id).options(joinedload(Admin.gym))
 
+        filters = []
         if filter_criteria:
             if filter_criteria.get('name'):
-                query = query.filter(Admin.name.ilike(f"%{filter_criteria['name']}%"))
+                filters.append(Admin.name.ilike(f"%{filter_criteria['name']}%"))
             if filter_criteria.get('email'):
-                query = query.filter(Admin.email.ilike(f"%{filter_criteria['email']}%"))
+                filters.append(Admin.email.ilike(f"%{filter_criteria['email']}%"))
             if filter_criteria.get('phone_number'):
-                query = query.filter(Admin.phone_number.ilike(f"%{filter_criteria['phone_number']}%"))
+                filters.append(Admin.phone_number.ilike(f"%{filter_criteria['phone_number']}%"))
             if filter_criteria.get('address_city'):
-                query = query.filter(Admin.address_city.ilike(f"%{filter_criteria['address_city']}%"))
+                filters.append(Admin.address_city.ilike(f"%{filter_criteria['address_city']}%"))
             if filter_criteria.get('address_street'):
-                query = query.filter(Admin.address_street.ilike(f"%{filter_criteria['address_street']}%"))
+                filters.append(Admin.address_street.ilike(f"%{filter_criteria['address_street']}%"))
 
+        count_query = select(func.count(Admin.id)).filter(Admin.gym_id == gym.id)
+        if filters:
+            count_query = count_query.filter(*filters)
+        total_admins = Session.execute(count_query).scalar()
+
+        if filters:
+            query = query.filter(*filters)
+        query = query.offset(offset).limit(limit)
         result = Session.execute(query)
-        return result.scalars().all()
+        admins = result.scalars().all()
+
+        return admins, total_admins
 
     @staticmethod
     def get_admin_by_id(gym, admin_id):

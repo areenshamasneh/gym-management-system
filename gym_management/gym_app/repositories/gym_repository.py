@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func  # type: ignore
 
 from common.db.database import Session
 from gym_app.models.models_sqlalchemy import Gym
