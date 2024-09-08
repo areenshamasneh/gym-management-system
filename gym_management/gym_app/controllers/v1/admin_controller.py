@@ -2,7 +2,7 @@ from rest_framework import status, viewsets  # type: ignore
 from rest_framework.response import Response  # type: ignore
 
 from gym_app.components import AdminComponent
-from gym_app.serializers import AdminSerializer
+from gym_app.serializers import AdminSchema
 from gym_app.utils import PaginationResponse
 from gym_app.validators import SchemaValidator
 
@@ -12,7 +12,7 @@ class AdminController(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.admin_component = AdminComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.admin_schemas')
-        self.schema = AdminSerializer()
+        self.schema = AdminSchema()
 
     def list(self, request, gym_pk=None):
         filter_criteria = {

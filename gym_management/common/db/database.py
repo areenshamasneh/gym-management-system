@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy import create_engine # type: ignore
+from sqlalchemy.orm import sessionmaker, scoped_session # type: ignore
 
 from common.threads.thread import get_request_id
 from gym_management.settings import DATABASE_URL

@@ -1,9 +1,9 @@
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from rest_framework import viewsets, status  # type: ignore
+from rest_framework.response import Response  # type: ignore
 
 from gym_app.components import MachineComponent
 from gym_app.exceptions import ResourceNotFoundException
-from gym_app.serializers import MachineSerializer
+from gym_app.serializers import MachineSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -12,7 +12,7 @@ class MachineController(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.component = MachineComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.machine_schemas')
-        self.schema = MachineSerializer()
+        self.schema = MachineSchema()
 
     def list(self, request, gym_pk=None, hall_pk=None):
         machines = self.component.fetch_all_machines_in_hall(gym_pk, hall_pk)

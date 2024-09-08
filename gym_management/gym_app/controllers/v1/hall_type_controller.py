@@ -1,15 +1,15 @@
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from rest_framework import viewsets, status  # type: ignore
+from rest_framework.response import Response  # type: ignore
 
 from gym_app.components import HallTypeComponent
-from gym_app.serializers import HallTypeSerializer
+from gym_app.serializers import HallTypeSchema
 
 
 class HallTypeController(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.component = HallTypeComponent()
-        self.schema = HallTypeSerializer()
+        self.schema = HallTypeSchema()
 
     def list(self, request):
         hall_types = self.component.fetch_all_hall_types()

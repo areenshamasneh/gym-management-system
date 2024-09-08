@@ -1,3 +1,2 @@
-from gym_app.serializers.v1 import (AdminSerializer, EmployeeSerializer, MemberSerializer, HallSerializer,
-                                    MachineSerializer, HallMachineSerializer, GymSerializer, HallTypeSerializer)
-
+from gym_app.serializers.v1 import (AdminSchema, EmployeeSchema, MemberSchema, MachineSchema, HallMachineSchema,
+                                    HallSchema, GymSchema, HallTypeSchema)

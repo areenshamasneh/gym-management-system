@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from rest_framework import viewsets, status  # type: ignore
+from rest_framework.response import Response  # type: ignore
 
 from gym_app.components import MemberComponent
-from gym_app.serializers import MemberSerializer
+from gym_app.serializers import MemberSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -13,7 +13,7 @@ class MemberController(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.member_component = MemberComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.member_schemas')
-        self.schema = MemberSerializer()
+        self.schema = MemberSchema()
 
     def list(self, request, gym_pk=None):
         name_filter = request.GET.get("name", None)

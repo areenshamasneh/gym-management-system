@@ -1,6 +1,6 @@
-import sqlalchemy
-from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint, Text, Date
-from sqlalchemy.orm import relationship
+import sqlalchemy # type: ignore
+from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint, Text, Date # type: ignore
+from sqlalchemy.orm import relationship # type: ignore
 
 Base = sqlalchemy.orm.declarative_base()
 
