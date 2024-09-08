@@ -22,13 +22,21 @@ class HallTypeController(viewsets.ViewSet):
         return Response(serialized_data, status=status.HTTP_200_OK)
 
     def create(self, request):
-        data = self.schema.load(request.data)
+        data = request.data.copy()
+        if 'code' in data:
+            data['code'] = data['code'].upper()
+        if 'name' in data:
+            data['name'] = data['name'].capitalize()
         hall_type = self.component.add_hall_type(data)
         serialized_data = self.schema.dump(hall_type)
         return Response(serialized_data, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk=None):
-        data = self.schema.load(request.data)
+        data = request.data.copy()
+        if 'code' in data:
+            data['code'] = data['code'].upper()
+        if 'name' in data:
+            data['name'] = data['name'].capitalize()
         hall_type = self.component.modify_hall_type(pk, data)
         serialized_data = self.schema.dump(hall_type)
         return Response(serialized_data, status=status.HTTP_200_OK)

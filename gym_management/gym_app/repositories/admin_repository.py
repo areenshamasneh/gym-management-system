@@ -1,4 +1,4 @@
-from sqlalchemy import select, func  # type: ignore
+from sqlalchemy import select, func, update, delete  # type: ignore
 from sqlalchemy.orm import joinedload  # type: ignore
 
 from common.db.database import Session
@@ -65,15 +65,22 @@ class AdminRepository:
 
     @staticmethod
     def update_admin(gym, admin_id, data):
-        admin = Session.query(Admin).filter_by(id=admin_id, gym_id=gym.id).first()
-        for key, value in data.items():
-            setattr(admin, key, value)
-
-        Session.add(admin)
-        return admin
+        query = (
+            update(Admin)
+            .where(Admin.id == admin_id, Admin.gym_id == gym.id)
+            .values(**data)
+            .execution_options(synchronize_session="evaluate")
+        )
+        Session.execute(query)
+        return Session.execute(
+            select(Admin).filter(Admin.id == admin_id, Admin.gym_id == gym.id)
+        ).scalar_one_or_none()
 
     @staticmethod
     def delete_admin(gym, admin_id):
-        admin = Session.query(Admin).filter_by(id=admin_id, gym_id=gym.id).first()
-        Session.delete(admin)
+        query = (
+            delete(Admin)
+            .where(Admin.id == admin_id, Admin.gym_id == gym.id)
+        )
+        Session.execute(query)
         return True

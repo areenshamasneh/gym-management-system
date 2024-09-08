@@ -26,3 +26,6 @@ typing_extensions==4.12.2
 tzdata==2024.1
 Werkzeug==3.0.4
 marshmallow-sqlalchemy==1.1.0
+mypy==1.11.2
+mypy-extensions==1.0.0
+sqlalchemy-stubs==0.4

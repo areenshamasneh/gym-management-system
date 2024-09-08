@@ -2,30 +2,25 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from common.db.database import Session
-from gym_app.exceptions import ResourceNotFoundException
 from gym_app.models.models_sqlalchemy import Hall, Gym, HallType
 
 
 class HallRepository:
     @staticmethod
     def get_gym(gym_id):
-        gym = Session.get(Gym, gym_id)
-        return gym
+        return Session.get(Gym, gym_id)
 
     @staticmethod
     def get_all_halls(gym):
-        query = select(Hall).filter(Hall.gym_id == gym.id).options(joinedload(Hall.gym))
+        query = select(Hall).where(Hall.gym_id == gym.id).options(joinedload(Hall.gym))
         result = Session.execute(query)
         return result.scalars().all()
 
     @staticmethod
     def get_hall_by_id(gym, hall_id):
-        query = select(Hall).filter(Hall.id == hall_id, Hall.gym_id == gym.id).options(joinedload(Hall.gym))
+        query = select(Hall).where(Hall.id == hall_id, Hall.gym_id == gym.id).options(joinedload(Hall.gym))
         result = Session.execute(query)
-        hall = result.scalar_one_or_none()
-        if not hall:
-            raise ResourceNotFoundException("Hall not found")
-        return hall
+        return result.scalar_one_or_none()
 
     @staticmethod
     def create_hall(gym, data):
@@ -33,7 +28,7 @@ class HallRepository:
 
         hall_type_instance = Session.get(HallType, int(hall_type_id))
         if hall_type_instance is None:
-            raise ValueError("HallType not found")
+            return None
 
         hall = Hall(
             name=data.get("name"),
@@ -45,15 +40,16 @@ class HallRepository:
         return hall
 
     @staticmethod
-    def update_hall(gym_id, hall_id, data):
-        hall = Session.execute(
+    def update_hall(gym, hall_id, data):
+        query = (
             select(Hall)
-            .filter(Hall.id == hall_id, Hall.gym_id == gym_id)
+            .where(Hall.id == hall_id, Hall.gym_id == gym.id)
             .options(
                 joinedload(Hall.hall_type),
                 joinedload(Hall.gym)
             )
-        ).scalar_one_or_none()
+        )
+        hall = Session.execute(query).scalar_one_or_none()
 
         if hall is None:
             return None
@@ -75,9 +71,10 @@ class HallRepository:
         return hall
 
     @staticmethod
-    def delete_hall(gym_id, hall_id):
-        hall = Session.query(Hall).filter_by(id=hall_id, gym_id=gym_id).one_or_none()
+    def delete_hall(gym, hall_id):
+        query = select(Hall).where(Hall.id == hall_id, Hall.gym_id == gym.id)
+        hall = Session.execute(query).scalar_one_or_none()
         if not hall:
-            raise ResourceNotFoundException("Hall not found")
+            return False
         Session.delete(hall)
         return True

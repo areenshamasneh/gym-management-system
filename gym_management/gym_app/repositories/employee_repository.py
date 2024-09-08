@@ -1,5 +1,5 @@
-from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy import select, update, delete  # type: ignore
+from sqlalchemy.orm import joinedload  # type: ignore
 
 from common.db.database import Session
 from gym_app.models.models_sqlalchemy import Employee, Gym
@@ -45,18 +45,24 @@ class EmployeeRepository:
 
     @staticmethod
     def update_employee(gym, employee_id, data):
-        employee = Session.query(Employee).filter_by(id=employee_id, gym_id=gym.id).first()
-        if not employee:
-            return None
-        for key, value in data.items():
-            setattr(employee, key, value)
-        Session.add(employee)
-        return employee
+        update_data = {k: v for k, v in data.items() if k not in ['gym'] and v is not None}
+
+        stmt = (
+            update(Employee)
+            .where(Employee.id == employee_id, Employee.gym_id == gym.id)
+            .values(**update_data)
+            .execution_options(synchronize_session="evaluate")
+        )
+        Session.execute(stmt)
+        return Session.execute(
+            select(Employee).filter(Employee.id == employee_id, Employee.gym_id == gym.id)
+        ).scalar_one_or_none()
 
     @staticmethod
     def delete_employee(gym, employee_id):
-        employee = Session.query(Employee).filter_by(id=employee_id, gym_id=gym.id).first()
-        if not employee:
-            return False
-        Session.delete(employee)
+        stmt = (
+            delete(Employee)
+            .where(Employee.id == employee_id, Employee.gym_id == gym.id)
+        )
+        Session.execute(stmt)
         return True
