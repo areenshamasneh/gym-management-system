@@ -11,7 +11,7 @@ class SimpleLogger:
         if self.logger.hasHandlers():
             self.logger.handlers.clear()
 
-        file_handler = logging.FileHandler("logs/logging.log")
+        file_handler = logging.FileHandler("logs/components_logging.log")
         console_handler = logging.StreamHandler()
 
         file_formatter = logging.Formatter(

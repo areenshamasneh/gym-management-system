@@ -1,6 +1,6 @@
-from rest_framework.views import exception_handler
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.views import exception_handler # type: ignore
+from rest_framework.response import Response # type: ignore
+from rest_framework import status # type: ignore
 from django.http import Http404
 
 from gym_app.exceptions import (
