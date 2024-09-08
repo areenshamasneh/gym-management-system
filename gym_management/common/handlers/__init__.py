@@ -1,0 +1,1 @@
+from common.handlers.exception_handler import handle_exception
