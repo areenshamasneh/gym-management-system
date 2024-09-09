@@ -1,8 +1,8 @@
-from rest_framework import status, viewsets
-from rest_framework.response import Response
+from rest_framework import status, viewsets  # type: ignore
+from rest_framework.response import Response  # type: ignore
 
 from gym_app.components import EmployeeComponent
-from gym_app.serializers import EmployeeSerializer
+from gym_app.serializers import EmployeeSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -11,7 +11,7 @@ class EmployeeController(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.employee_component = EmployeeComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.employee_schemas')
-        self.schema = EmployeeSerializer()
+        self.schema = EmployeeSchema()
 
     def list(self, request, gym_pk=None):
         employees = self.employee_component.fetch_all_employees(gym_pk)

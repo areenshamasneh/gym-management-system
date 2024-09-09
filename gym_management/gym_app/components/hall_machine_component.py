@@ -1,3 +1,4 @@
+from gym_app.exceptions import ResourceNotFoundException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.hall_machine_repository import HallMachineRepository
 
@@ -10,8 +11,11 @@ class HallMachineComponent:
 
     def fetch_hall_machines_by_gym(self, gym_id):
         self.logger.log_info(f"Fetching hall machines for gym ID {gym_id}")
-        return self.repo.get_hall_machines_by_gym(gym_id)
+        gym = self.repo.get_gym(gym_id)
+        if not gym:
+            raise ResourceNotFoundException("Gym not found")
 
-    def fetch_hall_machines_by_hall(self, hall_id):
-        self.logger.log_info(f"Fetching hall machines for hall ID {hall_id}")
-        return self.repo.get_hall_machines_by_hall(hall_id)
+        hall_machine = self.repo.get_hall_machines_by_gym(gym)
+        if not hall_machine:
+            raise ResourceNotFoundException("No Hall Machines found for this gym")
+        return hall_machine

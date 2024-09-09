@@ -1,71 +1,45 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-from gym_app.components.hall_machine_component import HallMachineComponent
-from gym_app.exceptions import (
-    ResourceNotFoundException,
-    ValidationException,
-)
+from gym_app.components import HallMachineComponent
+from gym_app.exceptions import ResourceNotFoundException
 
 
 class TestHallMachineComponent(unittest.TestCase):
     def setUp(self):
         self.mock_repo = MagicMock()
-        self.mock_logger = MagicMock()
-        self.component = HallMachineComponent(
-            repo=self.mock_repo, logger=self.mock_logger
-        )
+        self.component = HallMachineComponent(repo=self.mock_repo)
 
-    @patch(
-        "gym_app.components.hall_machine_component.HallMachineRepository",
-        return_value=MagicMock(),
-    )
-    def test_fetch_hall_machines_by_gym_success(self, MockRepo):
+    def test_fetch_hall_machines_by_gym_success(self):
+        self.mock_repo.get_gym.return_value = "mock_gym"
         self.mock_repo.get_hall_machines_by_gym.return_value = ["machine1", "machine2"]
-        result = self.component.fetch_hall_machines_by_gym("gym_id")
+
+        result = self.component.fetch_hall_machines_by_gym(gym_id=1)
+
         self.assertEqual(result, ["machine1", "machine2"])
-        self.mock_logger.log_info.assert_called_with(
-            "Fetching hall machines for gym ID gym_id"
-        )
+        self.mock_repo.get_gym.assert_called_once_with(1)
+        self.mock_repo.get_hall_machines_by_gym.assert_called_once_with("mock_gym")
 
-    @patch(
-        "gym_app.components.hall_machine_component.HallMachineRepository",
-        return_value=MagicMock(),
-    )
-    def test_fetch_hall_machines_by_gym_validation_exception(self, MockRepo):
-        self.mock_repo.get_hall_machines_by_gym.side_effect = ValueError(
-            "Invalid input"
-        )
-        with self.assertRaises(ValidationException):
-            self.component.fetch_hall_machines_by_gym("gym_id")
-        self.mock_logger.log_error.assert_called_with(
-            "Error fetching hall machines: Invalid input"
-        )
+    def test_fetch_hall_machines_by_gym_gym_not_found(self):
+        self.mock_repo.get_gym.return_value = None
 
-    @patch(
-        "gym_app.components.hall_machine_component.HallMachineRepository",
-        return_value=MagicMock(),
-    )
-    def test_fetch_hall_machines_by_hall_success(self, MockRepo):
-        self.mock_repo.get_hall_machines_by_hall.return_value = ["machine1", "machine2"]
-        result = self.component.fetch_hall_machines_by_hall("hall_id")
-        self.assertEqual(result, ["machine1", "machine2"])
-        self.mock_logger.log_info.assert_called_with(
-            "Fetching hall machines for hall ID hall_id"
-        )
+        with self.assertRaises(ResourceNotFoundException) as context:
+            self.component.fetch_hall_machines_by_gym(gym_id=1)
 
-    @patch(
-        "gym_app.components.hall_machine_component.HallMachineRepository",
-        return_value=MagicMock(),
-    )
-    def test_fetch_hall_machines_by_hall_resource_not_found(self, MockRepo):
-        self.mock_repo.get_hall_machines_by_hall.return_value = None
-        with self.assertRaises(ResourceNotFoundException):
-            self.component.fetch_hall_machines_by_hall("hall_id")
-        self.mock_logger.log_error.assert_called_with(
-            "Error fetching hall machines: No hall machines found for hall ID hall_id."
-        )
+        self.assertEqual(str(context.exception), "Gym not found")
+        self.mock_repo.get_gym.assert_called_once_with(1)
+
+    def test_fetch_hall_machines_by_gym_no_machines_found(self):
+        self.mock_repo.get_gym.return_value = "mock_gym"
+        self.mock_repo.get_hall_machines_by_gym.return_value = None
+
+        with self.assertRaises(ResourceNotFoundException) as context:
+            self.component.fetch_hall_machines_by_gym(gym_id=1)
+
+        self.assertEqual(str(context.exception), "No Hall Machines found for this gym")
+        self.mock_repo.get_gym.assert_called_once_with(1)
+        self.mock_repo.get_hall_machines_by_gym.assert_called_once_with("mock_gym")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

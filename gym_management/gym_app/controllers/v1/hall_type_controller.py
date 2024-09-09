@@ -1,15 +1,15 @@
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from rest_framework import viewsets, status  # type: ignore
+from rest_framework.response import Response  # type: ignore
 
 from gym_app.components import HallTypeComponent
-from gym_app.serializers import HallTypeSerializer
+from gym_app.serializers import HallTypeSchema
 
 
 class HallTypeController(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.component = HallTypeComponent()
-        self.schema = HallTypeSerializer()
+        self.schema = HallTypeSchema()
 
     def list(self, request):
         hall_types = self.component.fetch_all_hall_types()
@@ -22,13 +22,21 @@ class HallTypeController(viewsets.ViewSet):
         return Response(serialized_data, status=status.HTTP_200_OK)
 
     def create(self, request):
-        data = self.schema.load(request.data)
+        data = request.data.copy()
+        if 'code' in data:
+            data['code'] = data['code'].upper()
+        if 'name' in data:
+            data['name'] = data['name'].capitalize()
         hall_type = self.component.add_hall_type(data)
         serialized_data = self.schema.dump(hall_type)
         return Response(serialized_data, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk=None):
-        data = self.schema.load(request.data)
+        data = request.data.copy()
+        if 'code' in data:
+            data['code'] = data['code'].upper()
+        if 'name' in data:
+            data['name'] = data['name'].capitalize()
         hall_type = self.component.modify_hall_type(pk, data)
         serialized_data = self.schema.dump(hall_type)
         return Response(serialized_data, status=status.HTTP_200_OK)

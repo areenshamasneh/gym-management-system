@@ -1,9 +1,9 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
+from rest_framework import viewsets, status  # type: ignore
+from rest_framework.decorators import action  # type: ignore
+from rest_framework.response import Response  # type: ignore
 
 from gym_app.components import HallComponent, HallMachineComponent
-from gym_app.serializers import HallSerializer, HallMachineSerializer
+from gym_app.serializers import HallSchema, HallMachineSchema
 from gym_app.validators import SchemaValidator
 
 
@@ -13,8 +13,8 @@ class HallController(viewsets.ViewSet):
         self.hall_component = HallComponent()
         self.hall_machine_component = HallMachineComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.hall_schemas')
-        self.hall_schema = HallSerializer()
-        self.hall_machine_schema = HallMachineSerializer()
+        self.hall_schema = HallSchema()
+        self.hall_machine_schema = HallMachineSchema()
 
     def list(self, request, gym_pk=None):
         if gym_pk is None:

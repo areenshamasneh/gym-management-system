@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from decouple import config  # type: ignore
+from decouple import config
 
 DATABASE_URL = config('DATABASE_URL')
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,7 +44,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "gym_app.middlewares.req_logging.RequestLogMiddleware",
+    "gym_app.middlewares.application_logger.ApplicationLogMiddleware",
     "gym_app.middlewares.local_thread.LocalThreadMiddleware",
     "gym_app.middlewares.session_management.SessionManagementMiddleware",
 ]
@@ -60,7 +60,7 @@ LOGGING = {
         "file_logging": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "logs", "logging.log"),
+            "filename": os.path.join(BASE_DIR, "logs", "components_logging.log"),
             "formatter": "default",
         },
         "console_logging": {
@@ -116,7 +116,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'EXCEPTION_HANDLER': 'gym_app.utils.exception_handler.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'common.handlers.exception_handler.handle_exception',
 }
 
 ROOT_URLCONF = "gym_management.urls"

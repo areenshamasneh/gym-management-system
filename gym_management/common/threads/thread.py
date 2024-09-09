@@ -14,3 +14,7 @@ def get_local(key, default=None):
 
 def clear_local():
     _local.__dict__.clear()
+
+
+def get_request_id():
+    return get_local('request_id')

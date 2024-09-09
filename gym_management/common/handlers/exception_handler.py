@@ -1,6 +1,8 @@
-from rest_framework.views import exception_handler as drf_exception_handler
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.views import exception_handler # type: ignore
+from rest_framework.response import Response # type: ignore
+from rest_framework import status # type: ignore
+from django.http import Http404
+
 from gym_app.exceptions import (
     ResourceNotFoundException,
     ValidationException,
@@ -24,18 +26,16 @@ EXCEPTION_HANDLERS = {
 }
 
 
-def custom_exception_handler(exc, context):
-    response = drf_exception_handler(exc, context)
+def handle_exception(exc, context):
+    if isinstance(exc, Http404):
+        return Response({'detail': 'Resource not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-    if response is None:
-        handler = EXCEPTION_HANDLERS.get(type(exc))
-        if handler:
-            status_code, detail = handler
-            response = Response({'detail': detail}, status=status_code)
-        else:
-            response = Response(
-                {'detail': 'An unexpected error occurred.'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+    if isinstance(exc, tuple(EXCEPTION_HANDLERS.keys())):
+        status_code, detail = EXCEPTION_HANDLERS[type(exc)]
+        return Response({'detail': detail}, status=status_code)
 
-    return response
+    response = exception_handler(exc, context)
+    if response is not None:
+        return response
+
+    return Response({'detail': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

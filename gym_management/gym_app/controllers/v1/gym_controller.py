@@ -1,8 +1,8 @@
-from rest_framework import status, viewsets
-from rest_framework.response import Response
+from rest_framework import status, viewsets  # type: ignore
+from rest_framework.response import Response  # type: ignore
 
 from gym_app.components import GymComponent
-from gym_app.serializers import GymSerializer
+from gym_app.serializers import GymSchema
 from gym_app.utils import PaginationResponse
 from gym_app.validators import SchemaValidator
 
@@ -12,7 +12,7 @@ class GymController(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.gym_component = GymComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.gym_schemas')
-        self.gym_schema = GymSerializer()
+        self.gym_schema = GymSchema()
 
     def list(self, request):
         page_number = int(request.GET.get('page_number', 1))
@@ -20,14 +20,10 @@ class GymController(viewsets.ViewSet):
         offset = (page_number - 1) * page_size
 
         gyms, total_gyms = self.gym_component.fetch_all_gyms(offset, page_size)
-        total_pages = (total_gyms + page_size - 1) // page_size
-
-        serialized_items = self.gym_schema.dump(gyms, many=True)
 
         pagination_response = PaginationResponse(
-            items=serialized_items,
+            items=self.gym_schema.dump(gyms, many=True),
             total_items=total_gyms,
-            total_pages=total_pages,
             current_page=page_number,
             page_size=page_size
         )
