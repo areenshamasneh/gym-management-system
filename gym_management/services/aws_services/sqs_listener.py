@@ -1,3 +1,4 @@
+import pprint
 from concurrent.futures import ThreadPoolExecutor
 import json
 import time
@@ -7,7 +8,7 @@ from services.aws_services.sqs_service import SQSService
 class SQSListener:
     def __init__(self, queue_url, max_workers=10):
         self.sqs_service = SQSService(queue_url)
-        self.executor = ThreadPoolExecutor(max_workers=max_workers)  # Initialize ThreadPoolExecutor
+        self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
     def process_message(self, message):
         try:
@@ -42,9 +43,7 @@ class SQSListener:
             messages = self.sqs_service.receive_messages()
 
             if messages:
-                # Submit each message to the executor for parallel processing
                 futures = [self.executor.submit(self.process_message, msg) for msg in messages]
-                # Wait for all futures to complete
                 for future in futures:
                     if not future.result():
                         print("Message not processed. Skipping deletion.")
