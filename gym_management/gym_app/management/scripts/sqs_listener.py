@@ -1,13 +1,17 @@
 import json
-import boto3 # type: ignore
 import time
+
+import boto3
+
 from gym_management.settings import LOCALSTACK_URL, AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION
 
+# Load configuration from a JSON file
 with open('config.json') as config_file:
     config = json.load(config_file)
 
 QUEUE_URL = config.get('QUEUE_URL')
 
+# Initialize SQS client
 sqs = boto3.client(
     'sqs',
     region_name=AWS_REGION,
@@ -25,9 +29,15 @@ def process_message(message_body):
         print(f"Failed to decode JSON: {e}")
         print(f"Message body: {message_body}")
 
-def listen_to_queue():
+
+def lambda_handler(event, context):
+    for record in event['Records']:
+        process_message(record['Body'])
+
+
+def listen_to_queue(max_iterations=1):
     print("Listening to SQS queue...")
-    while True:
+    for _ in range(max_iterations):
         response = sqs.receive_message(
             QueueUrl=QUEUE_URL,
             MaxNumberOfMessages=1,
@@ -48,6 +58,7 @@ def listen_to_queue():
             print("No messages available. Waiting...")
 
         time.sleep(5)
+
 
 if __name__ == "__main__":
     if not all([AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, LOCALSTACK_URL, QUEUE_URL]):
