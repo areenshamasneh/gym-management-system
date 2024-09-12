@@ -2,12 +2,13 @@ from common.db.database import Session
 from gym_app.exceptions import ResourceNotFoundException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.gym_repository import GymRepository
-
+from services.aws_services.sns_publisher import SNSPublisher
 
 class GymComponent:
-    def __init__(self, gym_repository=None, logger=None):
+    def __init__(self, gym_repository=None, logger=None, sns_publisher=None):
         self.gym_repository = gym_repository or GymRepository()
         self.logger = logger or SimpleLogger()
+        self.sns_publisher = sns_publisher or SNSPublisher()
         self.logger.log_info("GymComponent initialized")
 
     def fetch_all_gyms(self, page_number=1, page_size=10):
@@ -25,6 +26,7 @@ class GymComponent:
         self.logger.log_info("Adding new gym")
         gym = self.gym_repository.create_gym(data)
         Session.commit()
+        self.publish_event('entity_added', {'gym_id': gym.id, 'data': data})
         return gym
 
     def modify_gym(self, gym_id, data):
@@ -33,6 +35,7 @@ class GymComponent:
         if not gym:
             raise ResourceNotFoundException("Gym not found")
         Session.commit()
+        self.publish_event('entity_updated', {'gym_id': gym.id, 'data': data})
         return gym
 
     def remove_gym(self, gym_id):
@@ -42,3 +45,11 @@ class GymComponent:
             raise ResourceNotFoundException("Gym not found")
         Session.commit()
         return success
+
+    def publish_event(self, event_type, event_data):
+        if self.sns_publisher:
+            if 'entityType' not in event_data:
+                event_data['entityType'] = 'gym'
+            self.sns_publisher.publish_event(event_type, event_data)
+        else:
+            self.logger.log_error("SNSPublisher not initialized")
