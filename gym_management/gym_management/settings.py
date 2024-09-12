@@ -4,6 +4,11 @@ from pathlib import Path
 from decouple import config
 
 DATABASE_URL = config('DATABASE_URL')
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_REGION = config('AWS_REGION')
+LOCALSTACK_URL = config('LOCALSTACK_URL')
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 log_dir = os.path.join(BASE_DIR, "logs")
