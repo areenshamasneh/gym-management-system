@@ -1,27 +1,23 @@
 import json
 
-
 class BaseMessageHandler:
-    def handle_message(self, entity_type, data):
-        print(f"Handling event for entity: {entity_type}")
+    def handle_message(self, data):
+        print(f"Handling event:")
         print(json.dumps(data, indent=4))
-
 
 class EntityAddedHandler(BaseMessageHandler):
-    def handle_message(self, entity_type, data):
-        print(f"Handling {entity_type} added event:")
+    def handle_message(self, data):
+        print(f"Handling entity added event:")
         print(json.dumps(data, indent=4))
-
 
 class EntityUpdatedHandler(BaseMessageHandler):
-    def handle_message(self, entity_type, data):
-        print(f"Handling {entity_type} updated event:")
+    def handle_message(self, data):
+        print(f"Handling entity updated event:")
         print(json.dumps(data, indent=4))
 
-
-def get_handler_for_event(event_type):
+def get_handler_for_event(event_code):
     handlers = {
         'entity_added': EntityAddedHandler(),
         'entity_updated': EntityUpdatedHandler(),
     }
-    return handlers.get(event_type)
+    return handlers.get(event_code)

@@ -5,7 +5,7 @@ from gym_app.repositories.gym_repository import GymRepository
 from services.aws_services.sns_publisher import SNSPublisher
 
 class GymComponent:
-    def __init__(self, gym_repository=None, logger=None, sns_publisher=None):
+    def __init__(self, gym_repository=None, logger=None, sns_publisher=None, sns_topic_arn=None):
         self.gym_repository = gym_repository or GymRepository()
         self.logger = logger or SimpleLogger()
         self.sns_publisher = sns_publisher or SNSPublisher()
@@ -46,10 +46,9 @@ class GymComponent:
         Session.commit()
         return success
 
-    def publish_event(self, event_type, event_data):
+    def publish_event(self, event_code, event_data):
         if self.sns_publisher:
-            if 'entityType' not in event_data:
-                event_data['entityType'] = 'gym'
-            self.sns_publisher.publish_event(event_type, event_data)
+            topic_arn = "arn:aws:sns:us-east-1:000000000000:Topic"
+            self.sns_publisher.publish_event(topic_arn, event_code, event_data)
         else:
             self.logger.log_error("SNSPublisher not initialized")
