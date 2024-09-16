@@ -1,5 +1,7 @@
-import boto3
+import boto3 # type: ignore
+
 from gym_management.settings import LOCALSTACK_URL, AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION
+
 
 class SQSService:
     def __init__(self, queue_url):
@@ -16,9 +18,8 @@ class SQSService:
         response = self.sqs.receive_message(
             QueueUrl=self.queue_url,
             MaxNumberOfMessages=max_number_of_messages,
-            WaitTimeSeconds=20
+            WaitTimeSeconds=10
         )
-        print(f"Received messages: {response.get('Messages', [])}")  # Debug line
         return response.get('Messages', [])
 
     def delete_message(self, receipt_handle):
@@ -26,7 +27,7 @@ class SQSService:
             QueueUrl=self.queue_url,
             ReceiptHandle=receipt_handle
         )
-        print(f"Message deleted with receipt handle: {receipt_handle}")  # Debug line
+        print("Message deleted from the queue.")
 
     def purge_queue(self):
         self.sqs.purge_queue(QueueUrl=self.queue_url)

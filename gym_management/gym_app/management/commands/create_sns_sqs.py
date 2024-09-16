@@ -1,8 +1,8 @@
 import json
-from gym_management.settings import LOCALSTACK_URL, AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION
+import os
 from django.core.management.base import BaseCommand
 import boto3
-
+from gym_management.settings import LOCALSTACK_URL, AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION, TOPIC_ARN, QUEUE_URL
 
 class Command(BaseCommand):
     help = 'Create SNS topic and SQS queue in LocalStack and subscribe the SQS queue to the SNS topic.'
@@ -49,10 +49,3 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.SUCCESS('Subscription created between SNS and SQS'))
-
-        # Save ARN and URL to a JSON file
-        with open('config.json', 'w') as config_file:
-            json.dump({
-                'TOPIC_ARN': topic_arn,
-                'QUEUE_URL': queue_url
-            }, config_file)

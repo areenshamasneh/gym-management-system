@@ -1,5 +1,5 @@
 import json
-import boto3
+import boto3 # type: ignore
 from gym_management.settings import LOCALSTACK_URL, AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION
 
 class SNSPublisher:
