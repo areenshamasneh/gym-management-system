@@ -2,6 +2,7 @@ from common.db.database import Session
 from gym_app.exceptions import ResourceNotFoundException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.gym_repository import GymRepository
+from gym_management.settings import TOPIC_ARN
 from services.aws_services.sns_publisher import SNSPublisher
 
 class GymComponent:
@@ -48,7 +49,7 @@ class GymComponent:
 
     def publish_event(self, event_code, event_data):
         if self.sns_publisher:
-            topic_arn = "arn:aws:sns:us-east-1:000000000000:Topic"
+            topic_arn = TOPIC_ARN
             self.sns_publisher.publish_event(topic_arn, event_code, event_data)
         else:
             self.logger.log_error("SNSPublisher not initialized")

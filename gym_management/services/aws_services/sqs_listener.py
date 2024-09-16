@@ -7,6 +7,7 @@ from services.aws_services.sqs_service import SQSService
 
 class SQSListener:
     def __init__(self, queue_url, max_workers=10):
+        self.queue_url = queue_url
         self.sqs_service = SQSService(queue_url)
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
@@ -37,17 +38,13 @@ class SQSListener:
             print(f"Failed to process message: {e}")
             return False
 
-    def start_listening(self, max_iterations=1):
-        print("Listening to SQS queue...")
-        for _ in range(max_iterations):
+    def start_listening(self):
+        while True:
             messages = self.sqs_service.receive_messages()
-
-            if messages:
-                futures = [self.executor.submit(self.process_message, msg) for msg in messages]
-                for future in futures:
-                    if not future.result():
-                        print("Message not processed. Skipping deletion.")
+            if 'Messages' in messages:
+                print(f"Received messages: {messages}")
+                for message in messages['Messages']:
+                    print(f"Processing message: {message['Body']}")
+                    self.sqs_service.delete_message(message['ReceiptHandle'])
             else:
                 print("No messages available. Waiting...")
-
-            time.sleep(5)
