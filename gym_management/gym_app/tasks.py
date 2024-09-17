@@ -1,28 +1,39 @@
-import json
 from celery import shared_task
-from services.aws_services.handlers import get_handler_for_event
+
+from gym_management.settings import QUEUE_URL
 from services.aws_services.sqs_service import SQSService
+from services.aws_services.handlers import get_handler_for_event
 
 @shared_task
-def process_sqs_messages(queue_url):
-    sqs_service = SQSService(queue_url)
-    messages = sqs_service.receive_messages()
+def poll_sqs_queue():
+    sqs = SQSService(QUEUE_URL)
+    messages = sqs.receive_messages()
 
-    for message in messages:
-        message_body = json.loads(message['Body'])
-        sns_message = json.loads(message_body.get('Message', '{}'))
-        event_code = sns_message.get('code')
-        event_data = sns_message.get('data', {})
+    if messages:
+        print(f"Messages received: {messages}")
+        for message in messages:
+            process_sqs_message(message)
+    else:
+        print("No messages in the queue.")
+
+
+@shared_task
+def process_sqs_message(message):
+    import json
+    sqs = SQSService(QUEUE_URL)
+    try:
+        sns_message = json.loads(message.get('Body', '{}'))
+
+        sns_inner_message = json.loads(sns_message.get('Message', '{}'))
+
+        event_code = sns_inner_message.get('code')
+        event_data = sns_inner_message.get('data', {})
 
         handler = get_handler_for_event(event_code)
         if handler:
             handler.handle_message(event_data)
-            print(f"Attempting to delete message with ReceiptHandle: {message['ReceiptHandle']}")
-            try:
-                sqs_service.delete_message(message['ReceiptHandle'])
-                print(f"Message with code '{event_code}' processed and deleted.")
-            except Exception as e:
-                print(f"Failed to delete message: {e}")
+            sqs.delete_message(message['ReceiptHandle'])
         else:
             print(f"No handler found for event code: {event_code}")
-
+    except (json.JSONDecodeError, KeyError) as e:
+        print(f"Failed to process message: {e}")
