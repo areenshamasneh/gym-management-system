@@ -27,11 +27,11 @@ class Command(BaseCommand):
             endpoint_url=LOCALSTACK_URL
         )
 
-        sns_response = sns.create_topic(Name='TestTopic')
+        sns_response = sns.create_topic(Name='Topic')
         topic_arn = sns_response['TopicArn']
         self.stdout.write(self.style.SUCCESS(f'Topic ARN: {topic_arn}'))
 
-        sqs_response = sqs.create_queue(QueueName='TestQueue')
+        sqs_response = sqs.create_queue(QueueName='Queue')
         queue_url = sqs_response['QueueUrl']
         self.stdout.write(self.style.SUCCESS(f'Queue URL: {queue_url}'))
 

@@ -6,7 +6,7 @@ from gym_management.settings import TOPIC_ARN
 from services.aws_services.sns_publisher import SNSPublisher
 
 class GymComponent:
-    def __init__(self, gym_repository=None, logger=None, sns_publisher=None, sns_topic_arn=None):
+    def __init__(self, gym_repository=None, logger=None, sns_publisher=None):
         self.gym_repository = gym_repository or GymRepository()
         self.logger = logger or SimpleLogger()
         self.sns_publisher = sns_publisher or SNSPublisher()

@@ -1,7 +1,6 @@
-import pprint
-from concurrent.futures import ThreadPoolExecutor
 import json
 import time
+from concurrent.futures import ThreadPoolExecutor
 from services.aws_services.handlers import get_handler_for_event
 from services.aws_services.sqs_service import SQSService
 
@@ -9,42 +8,38 @@ class SQSListener:
     def __init__(self, queue_url, max_workers=10):
         self.queue_url = queue_url
         self.sqs_service = SQSService(queue_url)
-        self.executor = ThreadPoolExecutor(max_workers=max_workers)
+        self.max_workers = max_workers
 
     def process_message(self, message):
         try:
-            print("Received message:")
-            pprint.pprint(json.loads(message['Body']), indent=4)
             message_body = json.loads(message['Body'])
-            sns_message = json.loads(message_body['Message'])
-            event_type = sns_message.get('eventType')
-            entity_type = sns_message['data'].get('entityType')
+            sns_message = json.loads(message_body.get('Message', '{}'))
+            event_code = sns_message.get('code')
+            event_data = sns_message.get('data', {})
 
-            if not event_type or not entity_type:
-                print("No event_type or entity_type found in the message.")
-                return False
-
-            handler = get_handler_for_event(event_type)
+            handler = get_handler_for_event(event_code)
             if handler:
-                handler.handle_message(entity_type, sns_message['data'])
-                self.sqs_service.delete_message(message['ReceiptHandle'])
-                print(f"Message with event type '{event_type}' for entity '{entity_type}' processed and deleted.")
-                return True
+                handler.handle_message(event_data)
+                print(f"Attempting to delete message with ReceiptHandle: {message['ReceiptHandle']}")
+                try:
+                    self.sqs_service.delete_message(message['ReceiptHandle'])
+                    print(f"Message with code '{event_code}' processed and deleted.")
+                except Exception as e:
+                    print(f"Failed to delete message: {e}")
             else:
-                print(f"No handler found for event type: {event_type}")
-                return False
+                print(f"No handler found for event code: {event_code}")
 
         except (json.JSONDecodeError, KeyError) as e:
             print(f"Failed to process message: {e}")
-            return False
 
     def start_listening(self):
-        while True:
-            messages = self.sqs_service.receive_messages()
-            if 'Messages' in messages:
-                print(f"Received messages: {messages}")
-                for message in messages['Messages']:
-                    print(f"Processing message: {message['Body']}")
-                    self.sqs_service.delete_message(message['ReceiptHandle'])
-            else:
-                print("No messages available. Waiting...")
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            while True:
+                messages = self.sqs_service.receive_messages()
+                if messages:
+                    print(f"Received messages: {len(messages)}")
+                    for message in messages:
+                        executor.submit(self.process_message, message)
+                else:
+                    print("No messages available. Waiting...")
+                time.sleep(5)
