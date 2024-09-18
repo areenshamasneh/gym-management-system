@@ -1,12 +1,13 @@
 from celery import shared_task
 
 from gym_management.settings import QUEUE_URL
-from services.aws_services.sqs_service import SQSService
 from services.aws_services.handlers import get_handler_for_event
+from services.aws_services.service import ServiceFactory
+
 
 @shared_task
 def poll_sqs_queue():
-    sqs = SQSService(QUEUE_URL)
+    sqs = ServiceFactory.get_sqs_service(QUEUE_URL)
     messages = sqs.receive_messages()
 
     if messages:
@@ -19,7 +20,7 @@ def poll_sqs_queue():
 @shared_task
 def process_sqs_message(message):
     import json
-    sqs = SQSService(QUEUE_URL)
+    sqs = ServiceFactory.get_sqs_service(QUEUE_URL)
     try:
         sns_message = json.loads(message.get('Body', '{}'))
         sns_inner_message = json.loads(sns_message.get('Message', '{}'))
