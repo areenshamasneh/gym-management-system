@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand
 import boto3
-from gym_management.settings import LOCALSTACK_URL, AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION, TOPIC_ARN, QUEUE_URL
+from gym_management.settings import LOCALSTACK_URL, AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION, QUEUE_URL
 
 class Command(BaseCommand):
-    help = 'Create SNS topic and SQS queue in LocalStack and subscribe the SQS queue to the SNS topic.'
+    help = 'Create multiple SNS topics and SQS queue, and subscribe SQS to each topic.'
 
     def handle(self, *args, **kwargs):
         if not all([AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, LOCALSTACK_URL]):
@@ -25,9 +25,13 @@ class Command(BaseCommand):
             endpoint_url=LOCALSTACK_URL
         )
 
-        sns_response = sns.create_topic(Name='Topic')
-        topic_arn = sns_response['TopicArn']
-        self.stdout.write(self.style.SUCCESS(f'Topic ARN: {topic_arn}'))
+        topics = ['Topic1', 'Topic2']
+        topic_arns = []
+        for topic_name in topics:
+            sns_response = sns.create_topic(Name=topic_name)
+            topic_arn = sns_response['TopicArn']
+            topic_arns.append(topic_arn)
+            self.stdout.write(self.style.SUCCESS(f'Topic ARN created: {topic_arn}'))
 
         sqs_response = sqs.create_queue(QueueName='Queue')
         queue_url = sqs_response['QueueUrl']
@@ -40,10 +44,10 @@ class Command(BaseCommand):
         queue_arn = queue_attributes['Attributes']['QueueArn']
         self.stdout.write(self.style.SUCCESS(f'Queue ARN: {queue_arn}'))
 
-        sns.subscribe(
-            TopicArn=topic_arn,
-            Protocol='sqs',
-            Endpoint=queue_arn
-        )
-
-        self.stdout.write(self.style.SUCCESS('Subscription created between SNS and SQS'))
+        for topic_arn in topic_arns:
+            sns.subscribe(
+                TopicArn=topic_arn,
+                Protocol='sqs',
+                Endpoint=queue_arn
+            )
+            self.stdout.write(self.style.SUCCESS(f'Subscription created between {topic_arn} and {queue_arn}'))

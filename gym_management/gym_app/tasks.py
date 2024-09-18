@@ -16,14 +16,12 @@ def poll_sqs_queue():
     else:
         print("No messages in the queue.")
 
-
 @shared_task
 def process_sqs_message(message):
     import json
     sqs = SQSService(QUEUE_URL)
     try:
         sns_message = json.loads(message.get('Body', '{}'))
-
         sns_inner_message = json.loads(sns_message.get('Message', '{}'))
 
         event_code = sns_inner_message.get('code')
