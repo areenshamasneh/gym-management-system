@@ -2,13 +2,14 @@ from common.db.database import Session
 from gym_app.exceptions import ResourceNotFoundException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.gym_repository import GymRepository
-from services.aws_services.message_service import MessageService
+from services.aws_services.service import ServiceFactory
+
 
 class GymComponent:
     def __init__(self, gym_repository=None, logger=None):
         self.gym_repository = gym_repository or GymRepository()
         self.logger = logger or SimpleLogger()
-        self.message_service = MessageService()
+        self.message_service = ServiceFactory.get_msg_service()
         self.logger.log_info("GymComponent initialized")
 
     def fetch_all_gyms(self, page_number=1, page_size=10):
