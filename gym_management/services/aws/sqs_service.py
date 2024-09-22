@@ -9,9 +9,18 @@ class SQSService:
         response = self.sqs_client.receive_message(
             QueueUrl=self.queue_url,
             MaxNumberOfMessages=max_number,
-            WaitTimeSeconds=wait_time
+            WaitTimeSeconds=wait_time,
+            MessageAttributeNames=['All']
         )
-        return response.get('Messages', [])
+        messages = response.get('Messages', [])
+        return [
+            {
+                'Body': message['Body'],
+                'ReceiptHandle': message['ReceiptHandle'],
+                'MessageId': message['MessageId']
+            }
+            for message in messages
+        ]
 
     def send_message(self, message_body, message_attributes=None):
         self.sqs_client.send_message(

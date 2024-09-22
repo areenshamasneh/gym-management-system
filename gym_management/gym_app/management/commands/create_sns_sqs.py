@@ -11,7 +11,7 @@ class Command(BaseCommand):
         sqs_client = SessionManager.get_client('sqs')
 
         # Create SNS Topics
-        topics = ['Topic1', 'Topic2']
+        topics = ['Topic1', 'Topic2', 'Topic3']
         topic_arns = {}
         for topic in topics:
             response = sns_client.create_topic(Name=topic)
