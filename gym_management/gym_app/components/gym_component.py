@@ -2,6 +2,7 @@ from common.db.database import Session
 from gym_app.exceptions import ResourceNotFoundException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.gym_repository import GymRepository
+from gym_management.settings import AWS
 
 from services.aws.sns_service import SNSService
 
@@ -10,7 +11,7 @@ class GymComponent:
     def __init__(self, gym_repository=None, logger=None):
         self.gym_repository = gym_repository or GymRepository()
         self.logger = logger or SimpleLogger()
-        self.sns = SNSService()
+        self.sns = SNSService(AWS['sns']['gym'])
         self.logger.log_info("GymComponent initialized")
 
     def fetch_all_gyms(self, page_number=1, page_size=10):
