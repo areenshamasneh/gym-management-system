@@ -2,16 +2,13 @@ from common.db.database import Session
 from gym_app.exceptions import ResourceNotFoundException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.gym_repository import GymRepository
-from gym_management.settings import AWS
-
-from services.aws.sns_service import SNSService
-
+from services.notifications.notification_service import NotificationService
 
 class GymComponent:
-    def __init__(self, gym_repository=None, logger=None):
+    def __init__(self, gym_repository=None, logger=None, notification_service=None):
         self.gym_repository = gym_repository or GymRepository()
         self.logger = logger or SimpleLogger()
-        self.sns = SNSService(AWS['sns']['gym'])
+        self.notification_service = notification_service or NotificationService()
         self.logger.log_info("GymComponent initialized")
 
     def fetch_all_gyms(self, page_number=1, page_size=10):
@@ -29,7 +26,7 @@ class GymComponent:
         self.logger.log_info("Adding new gym")
         gym = self.gym_repository.create_gym(data)
         Session.commit()
-        self.sns.publish_event('entity_added', {'gym_id': gym.id, 'data': data})
+        self.notification_service.publish_event('entity_added', {'gym_id': gym.id, 'data': data})
         return gym
 
     def modify_gym(self, gym_id, data):
@@ -38,7 +35,7 @@ class GymComponent:
         if not gym:
             raise ResourceNotFoundException("Gym not found")
         Session.commit()
-        self.sns.publish_event('entity_updated', {'gym_id': gym.id, 'data': data})
+        self.notification_service.publish_event('entity_updated', {'gym_id': gym.id, 'data': data})
         return gym
 
     def remove_gym(self, gym_id):
@@ -47,6 +44,5 @@ class GymComponent:
         if not success:
             raise ResourceNotFoundException("Gym not found")
         Session.commit()
-        self.sns.publish_event('entity_removed', {'gym_id': gym_id})
+        self.notification_service.publish_event('entity_removed', {'gym_id': gym_id})
         return success
-
