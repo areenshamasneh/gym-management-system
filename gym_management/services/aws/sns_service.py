@@ -1,12 +1,12 @@
 import json
 
-from common.aws.boto_sessions.session_manager import SessionManager
+from common.aws.boto_sessions.session_manager import get_boto_client
 from gym_management.settings import AWS
 
 
 class SNSService:
     def __init__(self, topic_arn):
-        self.sns_client = SessionManager.get_client('sns')
+        self.sns_client = get_boto_client('sns')
         self.topic_arn = topic_arn
 
     def publish_event(self, event_code, message_body, message_attributes=None):

@@ -1,8 +1,9 @@
-from common.aws.boto_sessions.session_manager import SessionManager
+from common.aws.boto_sessions.session_manager import get_boto_client
+
 
 class SQSService:
     def __init__(self, queue_url):
-        self.sqs_client = SessionManager.get_client('sqs')
+        self.sqs_client = get_boto_client('sqs')
         self.queue_url = queue_url
 
     def receive_messages(self, max_number=10, wait_time=20):

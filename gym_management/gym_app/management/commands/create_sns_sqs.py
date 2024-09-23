@@ -1,14 +1,14 @@
 from django.core.management.base import BaseCommand
 
-from common.aws.boto_sessions.session_manager import SessionManager
+from common.aws.boto_sessions.session_manager import get_boto_client
 
 
 class Command(BaseCommand):
     help = 'Create multiple SNS topics and SQS queues, and subscribe SQS to each topic.'
 
     def handle(self, *args, **kwargs):
-        sns_client = SessionManager.get_client('sns')
-        sqs_client = SessionManager.get_client('sqs')
+        sns_client = get_boto_client('sns')
+        sqs_client = get_boto_client('sqs')
 
         # Create SNS Topics
         topics = ['Topic1', 'Topic2', 'Topic3']
