@@ -15,13 +15,11 @@ def poll_sqs_queues():
 
         if messages:
             for message in messages:
-                process_sqs_message.apply_async(
-                    args=(queue_name, message)
-                )
+                print(f"Processing message : {message}")
+                process_sqs_message(queue_name, message)
 
 
-@shared_task(bind=True, max_retries=3)
-def process_sqs_message(self, queue_name, sqs_message):
+def process_sqs_message(queue_name, sqs_message):
     try:
         print(f"Original SQS Message: {sqs_message}")
         if isinstance(sqs_message, str):
@@ -48,15 +46,5 @@ def process_sqs_message(self, queue_name, sqs_message):
         handler = HandlerFactory.get_handler(event_code, sqs_message, event_code, event_data)
         handler.handle(sqs_message['ReceiptHandle'], queue_name)
 
-    except json.JSONDecodeError as e:
-        self.retry(exc=e, countdown=60)
-        print(f"JSON parsing error: {e}, message body: {sqs_message}")
-    except KeyError as e:
-        self.retry(exc=e, countdown=60)
-        print(f"KeyError: {e}, queue_name: {queue_name}")
-    except TypeError as e:
-        self.retry(exc=e, countdown=60)
-        print(f"TypeError: {e}, message body: {sqs_message}")
     except Exception as exc:
-        self.retry(exc=exc, countdown=60)
         print(f"General error: {exc}, message body: {sqs_message}")

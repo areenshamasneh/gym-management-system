@@ -5,5 +5,5 @@ class EntityUpdatedHandler(SQSHandlerABC):
     _CODE = 'entity_updated'
 
     def _process_sqs_message(self):
-        gym_data = self.message_data
-        print(f"Gym updated with data: {gym_data}")
+        data = self.message_data
+        print(f"Entity updated with data: {data}")
