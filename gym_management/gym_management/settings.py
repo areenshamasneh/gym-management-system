@@ -19,9 +19,8 @@ CELERY_TIMEZONE = 'Asia/Gaza'
 
 AWS = {
     'sns': {
-        'entity_added': 'arn:aws:sns:us-east-1:000000000000:Topic1',
-        'entity_updated': 'arn:aws:sns:us-east-1:000000000000:Topic1',
-        'entity_removed': 'arn:aws:sns:us-east-1:000000000000:Topic2'
+        'GYM_NOTIFICATIONS': 'arn:aws:sns:us-east-1:000000000000:Topic1',
+        'ADMIN_NOTIFICATIONS': 'arn:aws:sns:us-east-1:000000000000:Topic1',
     },
     'sqs': {
         'queue1': 'http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/Queue1',
