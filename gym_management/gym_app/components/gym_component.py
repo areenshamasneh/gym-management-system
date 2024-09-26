@@ -11,6 +11,8 @@ class GymComponent:
         self.logger = logger or SimpleLogger()
         self.sns_component = sns_component or GymSNSComponent()
         self.cache_component = cache_component or GymCacheComponent()
+        self.logger.log_info("GymComponent initialized")
+
 
     def fetch_all_gyms(self, page_number=1, page_size=10):
         self.logger.log_info("Fetching all gyms")
