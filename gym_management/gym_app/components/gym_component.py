@@ -15,16 +15,17 @@ class GymComponent:
 
     def fetch_all_gyms(self, page_number=1, page_size=10):
         self.logger.log_info("Fetching all gyms")
-        cached_gyms = self.cache_component.get_all_items(page_number, page_size)
+        cached_response = self.cache_component.get_all_items(page_number, page_size)
 
-        if cached_gyms:
-            self.logger.log_info(f"Returning cached gyms for page {page_number}")
-            return cached_gyms
+        if cached_response:
+            self.logger.log_info(f"Returning cached gyms for page {page_number} = {cached_response['items']}")
+            return cached_response['items'], cached_response['total_items']
 
-        gyms = self.gym_repository.get_all_gyms(page_number, page_size)
+        gyms, total_gyms = self.gym_repository.get_all_gyms(page_number, page_size)
         if gyms:
-            self.cache_component.cache_all_items(gyms, page_number, page_size)
-        return gyms
+            self.cache_component.cache_all_items(gyms, total_gyms, page_number, page_size)
+
+        return gyms, total_gyms
 
     def fetch_gym_by_id(self, gym_id):
         self.logger.log_info(f"Fetching gym with ID: {gym_id}")
