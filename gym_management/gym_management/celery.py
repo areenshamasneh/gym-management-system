@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gym_management.settings')
 app = Celery('gym_management')
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks()
+app.autodiscover_tasks(['gym_app.tasks'])
 
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):

@@ -1,6 +1,8 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow_sqlalchemy.fields import Nested
+
 from gym_app.models.models_sqlalchemy import Gym, Admin, Machine, Hall, HallType, Member, HallMachine, Employee
+
 
 class GymSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -38,7 +40,7 @@ class HallSchema(SQLAlchemyAutoSchema):
         load_instance = True
 
 class MemberSchema(SQLAlchemyAutoSchema):
-    gym = Nested(GymSchema) 
+    gym = Nested(GymSchema)
 
     class Meta:
         model = Member
@@ -46,7 +48,7 @@ class MemberSchema(SQLAlchemyAutoSchema):
         load_instance = True
 
 class HallMachineSchema(SQLAlchemyAutoSchema):
-    hall = Nested(HallSchema) 
+    hall = Nested(HallSchema)
     machine = Nested(MachineSchema)
 
     class Meta:
