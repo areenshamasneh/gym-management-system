@@ -45,9 +45,6 @@ class GymCacheComponent:
         cached_data = json.dumps({
             'items': serialized_gyms,
             'total_items': total_gyms,
-            'total_pages': (total_gyms + page_size - 1) // page_size,
-            'current_page': page_number,
-            'page_size': page_size,
         })
 
         self.cache_manager.set(cached_key, cached_data)
