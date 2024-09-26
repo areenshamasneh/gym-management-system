@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from common.redis.cache_manager import CacheManager
 from common.redis.redis import redis_client
@@ -11,34 +12,36 @@ class GymCacheComponent:
         self.gym_schema = GymSchema()
         self.version_key = "gyms_cache_version"
 
-    def get_version(self):
+    def _get_current_version(self):
+        """Helper to fetch or initialize the cache version timestamp."""
         version = self.cache_manager.get(self.version_key)
         if not version:
-            version = 1
+            version = datetime.utcnow().isoformat()
             self.cache_manager.set(self.version_key, version)
         return version
 
-    def increment_version(self):
-        version = self.get_version()
-        new_version = int(version) + 1
+    def _update_version(self):
+        new_version = datetime.utcnow().isoformat()
         self.cache_manager.set(self.version_key, new_version)
+        return new_version
 
-    def get_all_items(self, page_number, page_size, cache_version):
+    def get_all_items(self, page_number, page_size):
+        cache_version = self._get_current_version()
         cached_key = f"gyms_page_{cache_version}_{page_number}_size_{page_size}"
         cached_data = self.cache_manager.get(cached_key)
 
         if cached_data:
             try:
                 cached_response = json.loads(cached_data)
-                if isinstance(cached_response,
-                              dict) and 'items' in cached_response and 'total_items' in cached_response:
+                if isinstance(cached_response, dict) and 'items' in cached_response:
                     return cached_response
             except json.JSONDecodeError:
-                return {}
+                pass
 
-        return {}
+        return None
 
-    def cache_all_items(self, gyms, total_gyms, page_number, page_size, cache_version):
+    def cache_all_items(self, gyms, total_gyms, page_number, page_size):
+        cache_version = self._get_current_version()
         cached_key = f"gyms_page_{cache_version}_{page_number}_size_{page_size}"
         serialized_gyms = [self.gym_schema.serialize_gym(gym) for gym in gyms]
 
@@ -68,3 +71,6 @@ class GymCacheComponent:
 
     def clear_all_cache(self):
         self.cache_manager.clear_all_cache()
+
+    def increment_version(self):
+        self._update_version()

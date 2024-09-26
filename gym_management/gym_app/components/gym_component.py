@@ -5,7 +5,6 @@ from gym_app.exceptions import ResourceNotFoundException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.gym_repository import GymRepository
 
-
 class GymComponent:
     def __init__(self, gym_repository=None, logger=None, sns_component=None, cache_component=None):
         self.gym_repository = gym_repository or GymRepository()
@@ -15,16 +14,14 @@ class GymComponent:
 
     def fetch_all_gyms(self, page_number=1, page_size=10):
         self.logger.log_info("Fetching all gyms")
-        cache_version = self.cache_component.get_version()
-        cached_response = self.cache_component.get_all_items(page_number, page_size, cache_version)
+        cached_response = self.cache_component.get_all_items(page_number, page_size)
 
         if cached_response:
-            self.logger.log_info(f"Returning cached gyms for page {page_number} = {cached_response['items']}")
             return cached_response['items'], cached_response['total_items']
 
         gyms, total_gyms = self.gym_repository.get_all_gyms(page_number, page_size)
         if gyms:
-            self.cache_component.cache_all_items(gyms, total_gyms, page_number, page_size, cache_version)
+            self.cache_component.cache_all_items(gyms, total_gyms, page_number, page_size)
 
         return gyms, total_gyms
 
