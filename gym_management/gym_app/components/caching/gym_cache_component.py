@@ -43,7 +43,7 @@ class GymCacheComponent:
     def cache_all_items(self, gyms, total_gyms, page_number, page_size):
         cache_version = self._get_current_version()
         cached_key = f"gyms_page_{cache_version}_{page_number}_size_{page_size}"
-        serialized_gyms = [self.gym_schema.serialize_gym(gym) for gym in gyms]
+        serialized_gyms = [self.gym_schema.dump(gym) for gym in gyms]
 
         cached_data = json.dumps({
             'items': serialized_gyms,

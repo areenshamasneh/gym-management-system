@@ -10,16 +10,6 @@ class GymSchema(SQLAlchemyAutoSchema):
         include_relationships = False
         load_instance = True
 
-    def serialize_gym(self, gym):
-        return {
-            'id': gym.id,
-            'name': gym.name,
-            'type': gym.type,
-            'description': gym.description,
-            'address_city': gym.address_city,
-            'address_street': gym.address_street,
-        }
-
 class AdminSchema(SQLAlchemyAutoSchema):
     gym = Nested(GymSchema)
 
