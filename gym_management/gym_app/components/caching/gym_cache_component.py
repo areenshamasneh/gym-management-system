@@ -9,9 +9,22 @@ class GymCacheComponent:
     def __init__(self):
         self.cache_manager = CacheManager(prefix="gyms", redis_client=redis_client)
         self.gym_schema = GymSchema()
+        self.version_key = "gyms_cache_version"
 
-    def get_all_items(self, page_number, page_size):
-        cached_key = f"gyms_page_{page_number}_size_{page_size}"
+    def get_version(self):
+        version = self.cache_manager.get(self.version_key)
+        if not version:
+            version = 1
+            self.cache_manager.set(self.version_key, version)
+        return version
+
+    def increment_version(self):
+        version = self.get_version()
+        new_version = int(version) + 1
+        self.cache_manager.set(self.version_key, new_version)
+
+    def get_all_items(self, page_number, page_size, cache_version):
+        cached_key = f"gyms_page_{cache_version}_{page_number}_size_{page_size}"
         cached_data = self.cache_manager.get(cached_key)
 
         if cached_data:
@@ -25,8 +38,8 @@ class GymCacheComponent:
 
         return {}
 
-    def cache_all_items(self, gyms, total_gyms, page_number, page_size):
-        cached_key = f"gyms_page_{page_number}_size_{page_size}"
+    def cache_all_items(self, gyms, total_gyms, page_number, page_size, cache_version):
+        cached_key = f"gyms_page_{cache_version}_{page_number}_size_{page_size}"
         serialized_gyms = [self.gym_schema.serialize_gym(gym) for gym in gyms]
 
         cached_data = json.dumps({

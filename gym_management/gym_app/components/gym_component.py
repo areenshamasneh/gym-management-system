@@ -15,7 +15,8 @@ class GymComponent:
 
     def fetch_all_gyms(self, page_number=1, page_size=10):
         self.logger.log_info("Fetching all gyms")
-        cached_response = self.cache_component.get_all_items(page_number, page_size)
+        cache_version = self.cache_component.get_version()
+        cached_response = self.cache_component.get_all_items(page_number, page_size, cache_version)
 
         if cached_response:
             self.logger.log_info(f"Returning cached gyms for page {page_number} = {cached_response['items']}")
@@ -23,7 +24,7 @@ class GymComponent:
 
         gyms, total_gyms = self.gym_repository.get_all_gyms(page_number, page_size)
         if gyms:
-            self.cache_component.cache_all_items(gyms, total_gyms, page_number, page_size)
+            self.cache_component.cache_all_items(gyms, total_gyms, page_number, page_size, cache_version)
 
         return gyms, total_gyms
 
@@ -46,6 +47,7 @@ class GymComponent:
         Session.commit()
         self.sns_component.notify_gym_created(gym.id, data)
         self.cache_component.cache_item(gym.id, gym)
+        self.cache_component.increment_version()
         return gym
 
     def modify_gym(self, gym_id, data):
@@ -69,4 +71,5 @@ class GymComponent:
         Session.commit()
         self.cache_component.delete_item_cache(gym_id)
         self.sns_component.notify_gym_deleted(gym_id)
+        self.cache_component.increment_version()
         return success
