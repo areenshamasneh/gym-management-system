@@ -27,7 +27,7 @@ class GymComponent:
         self.logger.log_info("Adding new gym")
         gym = self.gym_repository.create_gym(data)
         Session.commit()
-        self.sns_component.notify_gym_created(gym.id, data)
+        self.sns_component.notify_gym_created(gym.id, gym.name, gym.type)
         return gym
 
     def modify_gym(self, gym_id, data):
@@ -36,7 +36,7 @@ class GymComponent:
         if not gym:
             raise ResourceNotFoundException("Gym not found")
         Session.commit()
-        self.sns_component.notify_gym_updated(gym.id, data)
+        self.sns_component.notify_gym_updated(gym.id, gym.name, gym.type)
         return gym
 
     def remove_gym(self, gym_id):
