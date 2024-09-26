@@ -14,16 +14,7 @@ class GymComponent:
 
     def fetch_all_gyms(self, page_number=1, page_size=10):
         self.logger.log_info("Fetching all gyms")
-        cached_response = self.cache_component.get_all_items(page_number, page_size)
-
-        if cached_response:
-            return cached_response['items'], cached_response['total_items']
-
-        gyms, total_gyms = self.gym_repository.get_all_gyms(page_number, page_size)
-        if gyms:
-            self.cache_component.cache_all_items(gyms, total_gyms, page_number, page_size)
-
-        return gyms, total_gyms
+        return self.gym_repository.get_all_gyms(page_number, page_size)
 
     def fetch_gym_by_id(self, gym_id):
         self.logger.log_info(f"Fetching gym with ID: {gym_id}")
@@ -44,7 +35,6 @@ class GymComponent:
         Session.commit()
         self.sns_component.notify_gym_created(gym.id, gym.name, gym.type)
         self.cache_component.cache_item(gym.id, gym)
-        self.cache_component.increment_version()
         return gym
 
     def modify_gym(self, gym_id, data):
@@ -54,7 +44,6 @@ class GymComponent:
             raise ResourceNotFoundException("Gym not found")
 
         Session.commit()
-        self.cache_component.delete_item_cache(gym_id)
         self.cache_component.cache_item(gym_id, gym)
         self.sns_component.notify_gym_updated(gym.id, gym.name, gym.type)
         return gym
@@ -68,5 +57,4 @@ class GymComponent:
         Session.commit()
         self.cache_component.delete_item_cache(gym_id)
         self.sns_component.notify_gym_deleted(gym_id)
-        self.cache_component.increment_version()
         return success
