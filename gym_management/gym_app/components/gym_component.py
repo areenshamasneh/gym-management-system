@@ -42,7 +42,7 @@ class GymComponent:
         self.logger.log_info("Adding new gym")
         gym = self.gym_repository.create_gym(data)
         Session.commit()
-        self.sns_component.notify_gym_created(gym.id, data)
+        self.sns_component.notify_gym_created(gym.id, gym.name, gym.type)
         self.cache_component.cache_item(gym.id, gym)
         self.cache_component.increment_version()
         return gym
@@ -56,7 +56,7 @@ class GymComponent:
         Session.commit()
         self.cache_component.delete_item_cache(gym_id)
         self.cache_component.cache_item(gym_id, gym)
-        self.sns_component.notify_gym_updated(gym.id, data)
+        self.sns_component.notify_gym_updated(gym.id, gym.name, gym.type)
         return gym
 
     def remove_gym(self, gym_id):
