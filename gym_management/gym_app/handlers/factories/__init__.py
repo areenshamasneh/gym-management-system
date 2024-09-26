@@ -1,0 +1,1 @@
+from gym_app.handlers.factories.handler_factory import HandlerFactory

@@ -1,13 +1,15 @@
 from common.db.database import Session
+from gym_app.components.sns import GymSNSComponent
 from gym_app.exceptions import ResourceNotFoundException
 from gym_app.logging import SimpleLogger
 from gym_app.repositories.gym_repository import GymRepository
 
 
 class GymComponent:
-    def __init__(self, gym_repository=None, logger=None):
+    def __init__(self, gym_repository=None, logger=None, sns_component=None):
         self.gym_repository = gym_repository or GymRepository()
         self.logger = logger or SimpleLogger()
+        self.sns_component = sns_component or GymSNSComponent()
         self.logger.log_info("GymComponent initialized")
 
     def fetch_all_gyms(self, page_number=1, page_size=10):
@@ -25,6 +27,7 @@ class GymComponent:
         self.logger.log_info("Adding new gym")
         gym = self.gym_repository.create_gym(data)
         Session.commit()
+        self.sns_component.notify_gym_created(gym.id, gym.name, gym.type)
         return gym
 
     def modify_gym(self, gym_id, data):
@@ -33,6 +36,7 @@ class GymComponent:
         if not gym:
             raise ResourceNotFoundException("Gym not found")
         Session.commit()
+        self.sns_component.notify_gym_updated(gym.id, gym.name, gym.type)
         return gym
 
     def remove_gym(self, gym_id):
@@ -41,4 +45,5 @@ class GymComponent:
         if not success:
             raise ResourceNotFoundException("Gym not found")
         Session.commit()
+        self.sns_component.notify_gym_deleted(gym_id)
         return success

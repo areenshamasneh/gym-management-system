@@ -2,6 +2,7 @@ import json
 import logging
 import socket
 import time
+
 from django.utils.deprecation import MiddlewareMixin
 
 request_logger = logging.getLogger("custom.request")
@@ -12,15 +13,24 @@ class ApplicationLogMiddleware(MiddlewareMixin):
         super().__init__(*args, **kwargs)
 
     def __call__(self, request):
+        body_cached = None
+        if request.method in ["POST", "PUT", "PATCH"]:
+            try:
+                body_cached = request.body.decode("utf-8")
+            except UnicodeDecodeError:
+                body_cached = request.body
+
         response = self.get_response(request)
-        log_data = self.extract_log_info(request=request, response=response)
+
+        log_data = self.extract_log_info(request=request, response=response, body_cached=body_cached)
         request_logger.info(json.dumps(log_data, indent=4))
+
         return response
 
     def process_request(self, request):
         request.start_time = time.time()
 
-    def extract_log_info(self, request, response=None, exception=None):
+    def extract_log_info(self, request, response=None, body_cached=None, exception=None):
         log_data = {
             "remote_address": request.META.get("REMOTE_ADDR"),
             "server_hostname": socket.gethostname(),
@@ -33,9 +43,9 @@ class ApplicationLogMiddleware(MiddlewareMixin):
 
         if request.method in ["PUT", "POST", "PATCH"]:
             try:
-                log_data["request_body"] = json.loads(request.body.decode("utf-8"))
-            except (json.JSONDecodeError, UnicodeDecodeError):
-                log_data["request_body"] = request.body.decode("utf-8", errors='ignore')
+                log_data["request_body"] = json.loads(body_cached)
+            except (json.JSONDecodeError, TypeError):
+                log_data["request_body"] = body_cached
 
         if response:
             log_data["response_status"] = response.status_code

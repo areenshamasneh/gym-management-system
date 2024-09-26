@@ -1,9 +1,33 @@
 import os
 from pathlib import Path
 
-from decouple import config
+from decouple import config  # type: ignore
 
 DATABASE_URL = config('DATABASE_URL')
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_REGION = config('AWS_REGION')
+ENDPOINT_URL = config('ENDPOINT_URL')
+QUEUE_URL = config('QUEUE_URL')
+CELERY_BROKER_URL = config('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Gaza'
+
+AWS = {
+    'sns': {
+        'GYM_NOTIFICATIONS': 'arn:aws:sns:us-east-1:000000000000:Topic1',
+        'ADMIN_NOTIFICATIONS': 'arn:aws:sns:us-east-1:000000000000:Topic1',
+    },
+    'sqs': {
+        'queue1': 'http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/Queue1',
+        'queue2': 'http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/Queue2',
+    }
+}
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 log_dir = os.path.join(BASE_DIR, "logs")
