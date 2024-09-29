@@ -19,18 +19,15 @@ class UserController(viewsets.ViewSet):
         return Response(serialized_user)
 
     def create(self, request):
-        try:
-            data = request.data.copy()
+        data = request.data.copy()
 
-            validation_error = self.validator.validate_data('CREATE_SCHEMA', data)
-            if validation_error:
-                return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
+        validation_error = self.validator.validate_data('CREATE_SCHEMA', data)
+        if validation_error:
+            return Response({"error": validation_error}, status=status.HTTP_400_BAD_REQUEST)
 
-            user = self.user_component.add_user(data)
-            serialized_user = self.schema.dump(user)
-            return Response(serialized_user, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            print(f"{str(e)}")
+        user = self.user_component.add_user(data)
+        serialized_user = self.schema.dump(user)
+        return Response(serialized_user, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk=None):
         data = request.data.copy()

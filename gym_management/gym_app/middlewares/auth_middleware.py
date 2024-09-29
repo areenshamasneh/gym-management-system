@@ -1,11 +1,10 @@
 import base64
-import logging
-
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework.exceptions import AuthenticationFailed
-
-from common.threads.thread import set_local, clear_local
 from gym_app.authentication import CustomAuthBackend
+from common.threads.thread import set_local, clear_local
+
+import logging
 
 logger = logging.getLogger('gym_app.components')
 

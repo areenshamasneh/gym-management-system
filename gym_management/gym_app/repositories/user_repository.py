@@ -14,11 +14,10 @@ class UserRepository:
 
     @staticmethod
     def create_user(data):
-        hashed_password = generate_password_hash(data.get("password"))
         user = User(
             username=data.get("username"),
-            hashed_password=hashed_password,
         )
+        user.set_password(data.get("password"))
         Session.add(user)
         return user
 

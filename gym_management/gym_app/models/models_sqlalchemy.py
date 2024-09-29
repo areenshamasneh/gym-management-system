@@ -1,7 +1,7 @@
 import sqlalchemy # type: ignore
 from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint, Text, Date # type: ignore
 from sqlalchemy.orm import relationship # type: ignore
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 Base = sqlalchemy.orm.declarative_base()
 
@@ -17,7 +17,7 @@ class User(Base):
         self.hashed_password = generate_password_hash(password)
 
     def check_password(self, password: str):
-        return self.hashed_password == generate_password_hash(password)
+        return self.hashed_password ==  generate_password_hash(password)
 
 class Gym(Base):
     __tablename__ = 'gym_app_gym'

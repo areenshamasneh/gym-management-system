@@ -42,3 +42,4 @@ class UserComponent:
     def authenticate_user(self, username, password):
         self.logger.log_info(f"Authenticating User :{username}")
         return self.repo.authenticate_user(username, password)
+
