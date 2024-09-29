@@ -11,7 +11,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, nullable=False)
-    hashed_password = Column(String(100), nullable=False)
+    hashed_password = Column(String(250), nullable=False)
 
     def set_password(self, password: str):
         self.hashed_password = generate_password_hash(password)
