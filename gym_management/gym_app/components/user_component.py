@@ -10,6 +10,13 @@ class UserComponent:
         self.logger = logger or SimpleLogger()
         self.logger.log_info("UserComponent initialized")
 
+    def fetch_all_users(self):
+        self.logger.log_info("Fetching all users")
+        users = self.repo.get_all_users()
+        if not users:
+            raise ResourceNotFoundException("No users found")
+        return users
+
     def fetch_user_by_id(self, user_id):
         self.logger.log_info(f"Fetching user with id: {user_id}")
         user = self.repo.get_user(user_id)
@@ -38,8 +45,3 @@ class UserComponent:
             raise ResourceNotFoundException("User not found")
         Session.commit()
         return success
-
-    def authenticate_user(self, username, password):
-        self.logger.log_info(f"Authenticating User :{username}")
-        return self.repo.authenticate_user(username, password)
-

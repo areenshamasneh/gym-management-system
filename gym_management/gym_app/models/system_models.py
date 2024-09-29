@@ -11,6 +11,12 @@ class Gym(models.Model):
     def __str__(self):
         return self.name
 
+class User(models.Model):
+    username = models.CharField(max_length=255)
+    hashed_password = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.username
 
 class Machine(models.Model):
     STATUS_CHOICES = [
@@ -70,6 +76,7 @@ class Admin(models.Model):
     gym = models.ForeignKey(Gym, on_delete=models.CASCADE)
     address_city = models.CharField(max_length=255)
     address_street = models.CharField(max_length=255)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admins')
 
     def __str__(self):
         return self.name
@@ -84,14 +91,13 @@ class Employee(models.Model):
 
     name = models.CharField(max_length=255)
     gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="employees")
-    manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True,
-                                blank=True)
-
+    manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
     address_city = models.CharField(max_length=255)
     address_street = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(unique=True)
     positions = models.TextField(blank=True, default="")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='employees')
 
     def __str__(self):
         return self.name
@@ -108,18 +114,10 @@ class Member(models.Model):
     name = models.CharField(max_length=255)
     birth_date = models.DateField()
     phone_number = models.CharField(max_length=20, blank=True, null=True, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='members')
 
     def __str__(self):
         return self.name
-
-
-class User(models.Model):
-    username = models.CharField(max_length=255)
-    hashed_password = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.username
-
 
 class HallMachine(models.Model):
     hall = models.ForeignKey(

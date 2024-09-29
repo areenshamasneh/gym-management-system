@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "rest_framework"
+    "rest_framework",
 ]
 
 MIDDLEWARE = [
@@ -70,9 +70,7 @@ MIDDLEWARE = [
     "gym_app.middlewares.application_logger.ApplicationLogMiddleware",
     "gym_app.middlewares.local_thread.LocalThreadMiddleware",
     "gym_app.middlewares.session_management.SessionManagementMiddleware",
-    'gym_app.middlewares.auth_middleware.AuthMiddleware',
 ]
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -131,9 +129,6 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
     ],
     'EXCEPTION_HANDLER': 'common.handlers.exception_handler.handle_exception',
 }

@@ -1,22 +1,38 @@
-from rest_framework import status, viewsets  # type: ignore
-from rest_framework.response import Response  # type: ignore
-
+from rest_framework import status, viewsets
+from rest_framework.response import Response
 from gym_app.components import UserComponent
 from gym_app.serializers import UserSchema
 from gym_app.validators import SchemaValidator
-
+from gym_app.permissions import BasicAuthPermission
 
 class UserController(viewsets.ViewSet):
+    permission_classes = [BasicAuthPermission]
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.user_component = UserComponent()
         self.validator = SchemaValidator(schemas_module_name='gym_app.json_schemas.user_schemas')
         self.schema = UserSchema()
 
+    def list(self, request, *args, **kwargs):
+        try:
+            users = self.user_component.fetch_all_users()
+            serialized_users = self.schema.dump(users, many=True)
+            return Response(serialized_users)
+        except Exception as e:
+            print(f"Error in listing users: {e}")
+            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def retrieve(self, request, pk=None):
-        user = self.user_component.fetch_user_by_id(pk)
-        serialized_user = self.schema.dump(user)
-        return Response(serialized_user)
+        try:
+            user = self.user_component.fetch_user_by_id(pk)
+            if user is None:
+                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            serialized_user = self.schema.dump(user)
+            return Response(serialized_user)
+        except Exception as e:
+            print(f"Error in retrieving user: {e}")
+            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request):
         data = request.data.copy()
@@ -43,12 +59,3 @@ class UserController(viewsets.ViewSet):
     def destroy(self, request, pk=None):
         self.user_component.remove_user(pk)
         return Response({"message": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-
-    def login(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        user = self.user_component.authenticate_user(username, password)
-        if user:
-            return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)

@@ -17,7 +17,7 @@ class User(Base):
         self.hashed_password = generate_password_hash(password)
 
     def check_password(self, password: str):
-        return self.hashed_password ==  generate_password_hash(password)
+        return check_password_hash(self.hashed_password, password)
 
 class Gym(Base):
     __tablename__ = 'gym_app_gym'

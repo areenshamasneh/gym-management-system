@@ -7,6 +7,11 @@ from gym_app.models.models_sqlalchemy import User
 
 class UserRepository:
     @staticmethod
+    def get_all_users():
+        query = select(User)
+        result = Session.execute(query).scalars().all()
+        return result
+    @staticmethod
     def get_user(user_id):
         query = select(User).filter(User.id == user_id)
         result = Session.execute(query)
@@ -40,9 +45,3 @@ class UserRepository:
         query = delete(User).where(User.id == user_id)
         Session.execute(query)
         return True
-
-    def authenticate_user(self, username: str, password: str):
-        user = Session.query(User).filter(User.username == username).first()
-        if user and user.check_password(password):
-            return user
-        return None
