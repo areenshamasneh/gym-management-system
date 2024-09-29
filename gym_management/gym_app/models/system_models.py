@@ -113,6 +113,14 @@ class Member(models.Model):
         return self.name
 
 
+class User(models.Model):
+    username = models.CharField(max_length=255)
+    hashed_password = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.username
+
+
 class HallMachine(models.Model):
     hall = models.ForeignKey(
         Hall, on_delete=models.CASCADE, related_name="hall_machines"

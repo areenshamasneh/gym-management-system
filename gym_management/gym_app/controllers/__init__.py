@@ -7,3 +7,4 @@ from gym_app.controllers.v1.hall_controller import HallController
 from gym_app.controllers.v1.hall_type_controller import HallTypeController
 from gym_app.controllers.v1.machine_controller import MachineController
 from gym_app.controllers.v1.member_controller import MemberController
+from gym_app.controllers.v1.user_controller import UserController

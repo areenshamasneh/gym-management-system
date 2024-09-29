@@ -60,6 +60,10 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -71,7 +75,9 @@ MIDDLEWARE = [
     "gym_app.middlewares.application_logger.ApplicationLogMiddleware",
     "gym_app.middlewares.local_thread.LocalThreadMiddleware",
     "gym_app.middlewares.session_management.SessionManagementMiddleware",
+    'gym_app.middlewares.auth_middleware.AuthMiddleware',
 ]
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

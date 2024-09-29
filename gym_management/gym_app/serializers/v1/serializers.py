@@ -1,8 +1,14 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow_sqlalchemy.fields import Nested
 
-from gym_app.models.models_sqlalchemy import Gym, Admin, Machine, Hall, HallType, Member, HallMachine, Employee
+from gym_app.models.models_sqlalchemy import Gym, Admin, Machine, Hall, HallType, Member, HallMachine, Employee, User
 
+
+class UserSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        load_instance = True
+        exclude = ('hashed_password',)
 
 class GymSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -12,6 +18,7 @@ class GymSchema(SQLAlchemyAutoSchema):
 
 class AdminSchema(SQLAlchemyAutoSchema):
     gym = Nested(GymSchema)
+    user = Nested(UserSchema)
 
     class Meta:
         model = Admin
@@ -41,6 +48,7 @@ class HallSchema(SQLAlchemyAutoSchema):
 
 class MemberSchema(SQLAlchemyAutoSchema):
     gym = Nested(GymSchema)
+    user = Nested(UserSchema)
 
     class Meta:
         model = Member
@@ -59,6 +67,7 @@ class HallMachineSchema(SQLAlchemyAutoSchema):
 class EmployeeSchema(SQLAlchemyAutoSchema):
     gym = Nested(GymSchema)
     manager = Nested('EmployeeSchema', exclude=('manager',))
+    user = Nested(UserSchema)
 
     class Meta:
         model = Employee

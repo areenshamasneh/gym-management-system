@@ -8,7 +8,8 @@ from gym_app.controllers import (
     HallController,
     MachineController,
     MemberController,
-    GymMachineController
+    GymMachineController,
+    UserController
 )
 
 router = routers.SimpleRouter()
@@ -20,6 +21,7 @@ gyms_router.register(r'employees', EmployeeController, basename='gym-employees')
 gyms_router.register(r'halls', HallController, basename='gym-halls')
 gyms_router.register(r'members', MemberController, basename='gym-members')
 gyms_router.register(r'machines', GymMachineController, basename='gym-machines')
+gyms_router.register(r'users', UserController, basename='gym-users')
 
 halls_router = routers.NestedSimpleRouter(gyms_router, r'halls', lookup='hall')
 halls_router.register(r'machines', MachineController, basename='hall-machines')
