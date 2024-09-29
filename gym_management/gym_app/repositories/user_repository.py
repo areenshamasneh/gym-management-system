@@ -14,19 +14,18 @@ class UserRepository:
 
     @staticmethod
     def create_user(data):
-        hashed_password = generate_password_hash(data.get("password"))  # Hash the password here
+        hashed_password = generate_password_hash(data.get("password"))
         user = User(
             username=data.get("username"),
-            hashed_password=hashed_password,  # Store the hashed password
+            hashed_password=hashed_password,
         )
         Session.add(user)
         return user
 
     @staticmethod
     def update_user(user_id, data):
-        # Check if the password needs to be updated
         if 'password' in data:
-            data['hashed_password'] = generate_password_hash(data.pop('password'))  # Hash and replace
+            data['hashed_password'] = generate_password_hash(data.pop('password'))
 
         query = (
             update(User)
@@ -42,3 +41,9 @@ class UserRepository:
         query = delete(User).where(User.id == user_id)
         Session.execute(query)
         return True
+
+    def authenticate_user(self, username: str, password: str):
+        user = Session.query(User).filter(User.username == username).first()
+        if user and user.check_password(password):
+            return user
+        return None
