@@ -3,10 +3,9 @@ from base64 import b64decode
 
 from rest_framework import permissions, exceptions
 from rest_framework.authentication import get_authorization_header
-
+from gym_app.models.models_sqlalchemy import User
 from common.db.database import Session
 from common.threads.thread import set_local
-from gym_app.models.models_sqlalchemy import User
 
 
 class BasicAuthPermission(permissions.BasePermission):
@@ -20,17 +19,19 @@ class BasicAuthPermission(permissions.BasePermission):
             username, password = auth_decoded.split(':')
 
             user = Session.query(User).filter(User.username == username).first()
-            if not user or not user.check_password(password):
+            if not user:
+                raise exceptions.AuthenticationFailed('Invalid credentials')
+
+            if not user.check_password(password):
                 raise exceptions.AuthenticationFailed('Invalid credentials')
 
             request.user = user
             set_local(user_id=user.id)
+
             return True
         except (ValueError, binascii.Error):
+            print("Error decoding credentials")
             raise exceptions.AuthenticationFailed('Invalid credentials')
         except Exception as e:
             print(f"Authentication error: {e}")
             raise exceptions.AuthenticationFailed('An unexpected error occurred.')
-
-    def get_authenticate_header(self, request):
-        return 'Basic realm="api"'

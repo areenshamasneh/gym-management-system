@@ -1,9 +1,11 @@
 from rest_framework import status, viewsets
 from rest_framework.response import Response
+
 from gym_app.components import UserComponent
+from gym_app.permissions import BasicAuthPermission
 from gym_app.serializers import UserSchema
 from gym_app.validators import SchemaValidator
-from gym_app.permissions import BasicAuthPermission
+
 
 class UserController(viewsets.ViewSet):
     permission_classes = [BasicAuthPermission]
