@@ -9,6 +9,7 @@ from gym_app.models.system_models import (
     Employee,
     Member,
     HallType,
+    User
 )
 
 admin.site.register(Gym)
@@ -19,3 +20,4 @@ admin.site.register(Admin)
 admin.site.register(Employee)
 admin.site.register(Member)
 admin.site.register(HallType)
+admin.site.register(User)

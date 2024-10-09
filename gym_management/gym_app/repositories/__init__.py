@@ -6,3 +6,4 @@ from gym_app.repositories.hall_repository import HallRepository
 from gym_app.repositories.hall_type_repository import HallTypeRepository
 from gym_app.repositories.machine_repository import MachineRepository
 from gym_app.repositories.member_repository import MemberRepository
+from gym_app.repositories.user_repository import UserRepository

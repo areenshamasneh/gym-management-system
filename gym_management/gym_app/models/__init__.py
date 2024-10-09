@@ -7,6 +7,7 @@ from gym_app.models.models_sqlalchemy import (
     HallMachine,
     HallType,
     Admin,
+    User
 )
 
 from gym_app.models.system_models import (
@@ -18,4 +19,5 @@ from gym_app.models.system_models import (
     HallMachine,
     HallType,
     Admin,
+    User
 )

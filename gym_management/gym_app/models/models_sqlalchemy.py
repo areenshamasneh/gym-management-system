@@ -1,9 +1,23 @@
 import sqlalchemy # type: ignore
 from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint, Text, Date # type: ignore
 from sqlalchemy.orm import relationship # type: ignore
+from werkzeug.security import generate_password_hash, check_password_hash
 
 Base = sqlalchemy.orm.declarative_base()
 
+
+class User(Base):
+    __tablename__ = 'gym_app_user'
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, nullable=False)
+    hashed_password = Column(String(250), nullable=False)
+
+    def set_password(self, password: str):
+        self.hashed_password = generate_password_hash(password)
+
+    def check_password(self, password: str):
+        return check_password_hash(self.hashed_password, password)
 
 class Gym(Base):
     __tablename__ = 'gym_app_gym'
@@ -70,8 +84,10 @@ class Admin(Base):
     gym_id = Column(Integer, ForeignKey('gym_app_gym.id'), nullable=False)
     address_city = Column(String(255), nullable=False)
     address_street = Column(String(255), nullable=False)
+    user_id = Column(Integer, ForeignKey('gym_app_user.id'), nullable=False)
 
     gym = relationship("Gym", back_populates="admins")
+    user = relationship("User")
 
 
 class Employee(Base):
@@ -86,9 +102,11 @@ class Employee(Base):
     positions = Column(String, nullable=False)
     gym_id = Column(Integer, ForeignKey('gym_app_gym.id'), nullable=False)
     manager_id = Column(Integer, ForeignKey('gym_app_employee.id'), nullable=True)
+    user_id = Column(Integer, ForeignKey('gym_app_user.id'), nullable=False)
 
     gym = relationship("Gym", back_populates="employees")
     manager = relationship('Employee', remote_side=[id])
+    user = relationship("User")
 
 
 class Member(Base):
@@ -99,9 +117,10 @@ class Member(Base):
     name = Column(String(255), nullable=False)
     birth_date = Column(Date, nullable=False)
     phone_number = Column(String(20), unique=True, nullable=True)
+    user_id = Column(Integer, ForeignKey('gym_app_user.id'), nullable=False)
 
     gym = relationship("Gym", back_populates="members")
-
+    user = relationship("User")
 
 class HallMachine(Base):
     __tablename__ = 'gym_app_hallmachine'

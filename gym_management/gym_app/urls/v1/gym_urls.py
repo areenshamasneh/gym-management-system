@@ -8,7 +8,7 @@ from gym_app.controllers import (
     HallController,
     MachineController,
     MemberController,
-    GymMachineController
+    GymMachineController,
 )
 
 router = routers.SimpleRouter()
